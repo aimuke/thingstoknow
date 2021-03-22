@@ -1,2 +1,2 @@
-# thingstoknow
-things i should know
+# Initial page
+
