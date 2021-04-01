@@ -2,7 +2,7 @@
 
 ## 1. 简介
 
-K8s具有标准的C\S结构，API Server 作为唯一与内部存储ETCD进行通信的组件，充当了集群中唯一一个服务端的角色；其他组件，例如kubelet、Kube-Proxy、Kubectl、Kube-Schedule以及各种资源的controller，都可以看作是某种客户端，承担自身职责的同时，需要同API Server保持通信，以实现K8s整体的功能。
+K8s具有标准的C\S结构，API Server 作为唯一与内部存储ETCD进行通信的组件，充当了集群中唯一一个服务端的角色；其他组件，例如 `kubelet` 、`Kube-Proxy` 、`Kubectl` 、`Kube-Schedule` 以及各种资源的`controller`，都可以看作是某种客户端，承担自身职责的同时，需要同API Server保持通信，以实现K8s整体的功能。
 
 Client-go就是所有广义K8s客户端的基础库，一方面，K8s各个组件或多或少都用到它的功能，另一方面，它的代码逻辑和组件自身的逻辑深度解耦，如果想要阅读、学习K8s的源码，client go很适合作为入门组件。
 
@@ -16,32 +16,41 @@ github地址： [https://github.com/kubernetes/client-go](https://github.com/kub
 
 ![](../.gitbook/assets/image%20%2820%29.png)
 
-RESTClient是所有客户端的父类，底层调用了Go语言net\http库，访问API Server的RESTful接口。
+### RESTClient
 
-RESTClient的操作相对原始，使用样例如下：
+`RESTClient` 是所有客户端的父类，底层调用了Go语言 `net\http` 库，访问API Server的RESTful接口。`RESTClient` 的操作相对原始，使用样例如下：
 
 ```go
 // 构建config对象，通常会存放在~/.kube/config的路径；如果运行在集群中，会有所不同
 config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 // 封装error判断
 mustSuccess(err)
+
 config.APIPath = "api"
 config.GroupVersion = &corev1.SchemeGroupVersion
 config.NegotiatedSerializer = scheme.Codecs
+
 restClient, err := rest.RESTClientFor(config)
 mustSuccess(err)
+
 result := &corev1.PodList{}
 // 实际是在Do方法里调用了底层的net/http库向api-server发送request，最后将结果解析出放入result中
-err = restClient.Get().Namespace("sandbox").Resource("pods").
-VersionedParams(&metav1.ListOptions{Limit: 40}, scheme.ParameterCodec).
-Do(context.TODO()).Into(result)
+err = restClient.Get()
+    .Namespace("sandbox")
+    .Resource("pods")
+    .VersionedParams(&metav1.ListOptions{Limit: 40}, scheme.ParameterCodec)
+    .Do(context.TODO())
+    .Into(result)
 mustSuccess(err)
+
 for _, d := range result.Items {
     fmt.Printf("NameSpace: %v \t Name: %v \t Status: %+v \n", d.Namespace, d.Name, d.Status.Phase)
 }
 ```
 
-ClientSet是使用最多的客户端，它继承自RESTClient，使用K8s的代码生成机制\(client-gen机制\)，在编译过程中，会根据目前K8s内置的资源信息，自动生成他们的客户端代码\(前提是需要添加适当的注解\)，使用者可以通过builder pattern进行初始化，得到自己在意的目标资源类型的客户端。ClientSet如同它的名字一样，代表的是一组内置资源的客户端。例如：
+### ClientSet
+
+`ClientSet` 是使用最多的客户端，它继承自 `RESTClient`，使用K8s的代码生成机制\(client-gen机制\)，在编译过程中，会根据目前K8s内置的资源信息，自动生成他们的客户端代码\(前提是需要添加适当的注解\)，使用者可以通过builder pattern进行初始化，得到自己在意的目标资源类型的客户端。`ClientSet` 如同它的名字一样，代表的是一组内置资源的客户端。例如：
 
 ```go
 clientset, err := kubernetes.NewForConfig(config) // 根据config对象创建clientSet对象
@@ -53,27 +62,35 @@ podClient := clientset.CoreV1().Pods("development")
 
 ```
 
-DynamiClient动态客户端，可以根据传入的GVR\(group version resource\)生成一个可以操作特定资源的客户端。但是不是内存安全的客户端，返回的结果通常是非结构化的。需要额外经过一次类型转换才能变为目标资源类型的对象，这一步存在内存安全的风险。相比ClientSet,动态客户端不局限于K8s的内置资源，可以用于处理CRD\(custome resource define\)自定义资源，但是缺点在于安全性不高。DynamicClient使用的样例代码如下：
+### DynamiClient
 
-> 结构化的类型通常属于k8s runtime object的子类型；非结构化的对象通常是map\[string\]interface{}的形式，通过一个字典存储对象的属性；K8s所有的内置资源都可以通过代码生成机制，拥有默认的资源转换方法
+`DynamiClient` 动态客户端，可以根据传入的 `GVR(group version resource)`生成一个可以操作特定资源的客户端。但是不是内存安全的客户端，返回的结果通常是非结构化的。需要额外经过一次类型转换才能变为目标资源类型的对象，这一步存在内存安全的风险。相比 `ClientSet` 动态客户端不局限于K8s的内置资源，可以用于处理 `CRD(custome resource define)` 自定义资源，但是缺点在于安全性不高。`DynamicClient` 使用的样例代码如下：
+
+> 结构化的类型通常属于 `k8s runtime object` 的子类型；非结构化的对象通常是 `map[string]interface{}`的形式，通过一个字典存储对象的属性；K8s所有的内置资源都可以通过代码生成机制，拥有默认的资源转换方法
 
 ```go
 dynamicClient, err := dynamic.NewForConfig(config)
 mustSuccess(err)
+
 gvr := schema.GroupVersionResource{Version: "v1", Resource: "pods"}
+
 // 返回非结构化的对象
 unstructObj, err := dynamicClient.Resource(gvr).Namespace("sandbox").List(context.TODO(), metav1.ListOptions{Limit: 40})
 mustSuccess(err)
+
 podList := &corev1.PodList{}
 // 额外做一次类型转换,如果这里传错类型，就会有类型安全的风险
 err = runtime.DefaultUnstructuredConverter.FromUnstructured(unstructObj.UnstructuredContent(), podList)
 mustSuccess(err)
+
 for _, po := range podList.Items {
 	fmt.Printf("NAMESPACE: %v \t NAME: %v \t STATUS: %v \n", po.Namespace, po.Name, po.Status)
 }
 ```
 
-DiscoveryClient发现客户端，主要用于处理向服务端请求当前集群支持的资源信息，例如命令kubectl api-resources使用的就是发现客户端，由于发现客户端获取的数据量比较大，并且集群的资源信息变更并不频繁，因此发现客户端会在本地建立文件缓存，默认十分钟之内的请求，使用本地缓存，超过十分钟之后则重新请求服务端。DiscoveryClient的使用样例代码如下：
+### DiscoveryClient
+
+`DiscoveryClient` 发现客户端，主要用于处理向服务端请求当前集群支持的资源信息，例如命令 `kubectl api-resources` 使用的就是发现客户端，由于发现客户端获取的数据量比较大，并且集群的资源信息变更并不频繁，因此发现客户端会在本地建立文件缓存，默认十分钟之内的请求，使用本地缓存，超过十分钟之后则重新请求服务端。`DiscoveryClient` 的使用样例代码如下：
 
 ```go
 discoveryClient, err := discovery.NewDiscoveryClientForConfig(config)
@@ -98,11 +115,11 @@ for _, list := range APIResourceList {
 
 ![](../.gitbook/assets/image%20%2812%29.png)
 
-本地存储了serverresources.json文件，感兴趣的可以打开看下，是json格式化后的资源信息。
+本地存储了 `serverresources.json` 文件，感兴趣的可以打开看下，是json格式化后的资源信息。
 
-参考代码文件pkg/kubectl/cmd/apiresources/apiresources.go，可以看到kubectl api-resources命令里确实使用了discoveryClient:
+参考代码文件 `pkg/kubectl/cmd/apiresources/apiresources.go`，可以看到 `kubectl api-resources` 命令里确实使用了 `discoveryClient` :
 
-```text
+```go
 func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Factory) error {
  ...
     // discoveryCilent
@@ -129,25 +146,25 @@ func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Facto
 | 客户端名称 | 源码目录 | 简单描述 |
 | :--- | :--- | :--- |
 | RESTClient | client-go/rest/ | 基础客户端，对HTTP Request封装 |
-| ClientSet | client-go/kubernetes/ | 在RESTClient基础上封装了对Resource和Version，也就是说我们使用ClientSet的话是必须要知道Resource和Version， 例如AppsV1\(\).Deployments或者CoreV1.Pods，缺点是不能访问CRD自定义资源 |
+| ClientSet | client-go/kubernetes/ | 在 `RESTClient` 基础上封装了对Resource和Version，也就是说我们使用 `ClientSet` 的话是必须要知道 `Resource` 和 `Version`， 例如`AppsV1().Deployments` 或者 `CoreV1.Pods`，缺点是不能访问`CRD` 自定义资源 |
 | DynamicClient | client-go/dynamic/ | 包含一组动态的客户端，可以对任意的K8S API对象执行通用操作，包括CRD自定义资源   |
-| DiscoveryClient  | client-go/discovery/ | ClientSet必须要知道Resource和Version, 但使用者通常很难记住所有的GVR信息，这个DiscoveryClient是提供一个发现客户端，发现API Server支持的资源组，资源版本和资源信息 |
+| DiscoveryClient  | client-go/discovery/ | ClientSet必须要知道Resource和Version, 但使用者通常很难记住所有的 `GVR` 信息，这个 `DiscoveryClient` 是提供一个发现客户端，发现API Server支持的资源组，资源版本和资源信息 |
 
 ## 3. Client-go 内部原理
 
-官方的client-go架构图如下，可以看到Informer机制是里面的核心模块。Informer顾名思义就是消息通知器。是连接本地客户端与API Server的关键。
+官方的client-go架构图如下，可以看到 `Informer` 机制是里面的核心模块。`Informer` 顾名思义就是消息通知器。是连接本地客户端与API Server的关键。
 
 ![](../.gitbook/assets/image%20%2815%29.png)
 
-针对Informer中的组件，我们自下而上的分析。
+针对 `Informer` 中的组件，我们自下而上的分析。
 
 ### 3.1 Indexer
 
- 在Informer的结构图中，Local Storage就是Indexer,Indexer字面意思就是索引器，索引器+存储，有经验的开发，大概已经能理解这两者之间的关联了。Indexer通过某种方式构建资源对象的索引，来存储资源对象。相应的，使用者可以依据这种索引，快速检索到自己关注的资源对象。
+ 在Informer的结构图中，`Local Storage` 就是 `Indexer` , `Indexer` 字面意思就是索引器，索引器+存储，有经验的开发，大概已经能理解这两者之间的关联了。`Indexer` 通过某种方式构建资源对象的索引，来存储资源对象。相应的，使用者可以依据这种索引，快速检索到自己关注的资源对象。
 
-Indexer是一个继承自Store的接口，Delta\_FIFO也同样继承自Store，一个Indexer对象中，可以存在多种不同的索引。
+`Indexer` 是一个继承自 `Store` 的接口，`Delta_FIFO`也同样继承自 `Store`，一个 `Indexer` 对象中，可以存在多种不同的索引。
 
-首先看看indexer和Store的声明：
+首先看看 `indexer` 和 `Store` 的声明：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/index.go
@@ -182,9 +199,9 @@ type Store interface {
 
 ```
 
-可以看到indexer里面，索引的概念很关键，那么indexer是怎么实现索引的呢？
+可以看到 `indexer` 里面，索引的概念很关键，那么 `indexer` 是怎么实现索引的呢？
 
-client-go/tools/cache/index.go内还定义了以下的内容
+`client-go/tools/cache/index.go` 内还定义了以下的内容
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/index.go
@@ -204,9 +221,9 @@ type Index map[string]sets.String
 
 ![](../.gitbook/assets/image%20%287%29.png)
 
-不难发现，其实可以类比MySql里面索引的实现，Items里面存储的是聚簇索引，Index里面存储的是没有数据信息的二级索引，即使在二级索引里找到了对象键，要想找到原始的object，还需要回Items里面查找。
+不难发现，其实可以类比MySql里面索引的实现， `Items` 里面存储的是聚簇索引， `Index` 里面存储的是没有数据信息的二级索引，即使在二级索引里找到了对象键，要想找到原始的 `object`，还需要回 `Items` 里面查找。
 
-Indexer的结构大致如上所述，但是细心的同学应该发现了，Indexers仅仅是一个接口，不是具体的实现，因为Informer中实际使用的，是类型cache，cache的声明及代码分析如下：
+`Indexer` 的结构大致如上所述，但是细心的同学应该发现了，`Indexers` 仅仅是一个接口，不是具体的实现，因为 `Informer` 中实际使用的，是类型 `cache`，`cache` 的声明及代码分析如下：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/store.go
@@ -260,9 +277,9 @@ type ThreadSafeStore interface {
 
 总结一下：
 
-Indexer是Informer实现本地缓存的关键模块。作为Indexer的主要实现，cache是一个存储在内存中的缓存器，初始化时，会指定keyFunc，通常会根据对象的资源名与对象名组合成一个唯一的字符串作为对象键。此外，cache将缓存的维护工作委托给threadSafeMap来完成，threadSafeMap内部实现了一套类似MySql覆盖索引、二级索引的存储机制，用户可以自行添加具有特定索引生成方法的二级索引，方便自己的数据存取。
+`Indexer` 是 `Informer` 实现本地缓存的关键模块。作为 `Indexer` 的主要实现， `cache` 是一个存储在内存中的缓存器，初始化时，会指定 `keyFunc`，通常会根据对象的资源名与对象名组合成一个唯一的字符串作为对象键。此外，`cache` 将缓存的维护工作委托给 `threadSafeMap` 来完成，`threadSafeMap` 内部实现了一套类似MySql覆盖索引、二级索引的存储机制，用户可以自行添加具有特定索引生成方法的二级索引，方便自己的数据存取。
 
-另外：K8s内部，目前使用的默认对象键计算方法\(也就是cache里面的keyfunc\)是MetaNamespaceKeyFunc：
+另外：K8s内部，目前使用的默认对象键计算方法\(也就是 `cache` 里面的 `keyfunc` \)是`MetaNamespaceKeyFunc`：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/store.go
@@ -287,7 +304,7 @@ func MetaNamespaceKeyFunc(obj interface{}) (string, error) {
 }
 ```
 
-k8s内部目前使用的自定义的indexFunc有PodPVCIndexFunc、indexByPodNodeName、MetaNamespaceIndexFunc,选取indexByPodNodeName看一下：
+k8s内部目前使用的自定义的 `indexFunc` 有 `PodPVCIndexFunc`、`indexByPodNodeName`、`MetaNamespaceIndexFunc`,选取`indexByPodNodeName`看一下：
 
 ```go
 // 文件路径： pkg/controller/daemon/daemon_controller.go 
@@ -309,11 +326,11 @@ func indexByPodNodeName(obj interface{}) ([]string, error) {
 
 ### 3.2 DeltaFIFO
 
-DeltaFIFO其实是两个词：Delta + FIFO，Delta代表变化，FIFO则是先入先出的队列。
+`DeltaFIFO` 其实是两个词：`Delta + FIFO`，`Delta` 代表变化，`FIFO` 则是先入先出的队列。
 
 ![](../.gitbook/assets/image%20%2819%29.png)
 
-DeltaFIFO将接受来的资源event,转化为特定的变化类型，存储在队列中，周期性的POP出去，分发到事件处理器，并更新Indexer中的本地缓存。
+`DeltaFIFO` 将接受来的资源 `event`,转化为特定的变化类型，存储在队列中，周期性的 `POP` 出去，分发到事件处理器，并更新 `Indexer` 中的本地缓存。
 
 Client-go定义了以下几种变化类型：
 
@@ -340,7 +357,7 @@ type Delta struct {
 type Deltas []Delta
 ```
 
-然后我们看一下Delta\_FIFO的实现
+然后我们看一下 `Delta_FIFO` 的实现
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/delta_fifo.go
@@ -373,13 +390,13 @@ type DeltaFIFO struct {
 }
 ```
 
-可以用一张图简单描述下Delta\_FIFO里面items和queue的关系：
+可以用一张图简单描述下 `Delta_FIFO` 里面 `items` 和 `queue` 的关系：
 
 ![](../.gitbook/assets/image%20%289%29.png)
 
 采用这样的结构把对象与事件的存储分离，好处就是不会因为某个对象的事件太多，而导致其他对象的事件一直得不到消费。
 
-Delta\_FIFO的核心操作有两个：往队列里面添加元素、从队列中POP元素，可以看一下这两个方法的实现：
+`Delta_FIFO` 的核心操作有两个：往队列里面添加元素、从队列中 `POP` 元素，可以看一下这两个方法的实现：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/delta_fifo.go
@@ -454,17 +471,17 @@ func (f *DeltaFIFO) Pop(process PopProcessFunc) (interface{}, error) {
 
 ### 3.3 Reflector
 
- 自下而上，到Reflector了。不记得Reflector是什么的，可以回到3.1前面看一下结构图。
+ 自下而上，到 `Reflector` 了。不记得 `Reflector` 是什么的，可以回到 3.1 前面看一下结构图。
 
 K8s的设计是事件驱动的、充分微服务化的，我们可以从事件传递的角度重新理解一下K8s:
 
-组件之间互相看作是事件的生产者、消费者，API Server看作是一个只用内存存储事件的Broker,我们可以从消息队列的角度取理解一下，如下图展示的：
+组件之间互相看作是事件的生产者、消费者，API Server看作是一个只用内存存储事件的 `Broker` ,我们可以从消息队列的角度取理解一下，如下图展示的：
 
 ![](../.gitbook/assets/image%20%2818%29.png)
 
-k8s服务端通过读取etcd的资源变更信息，向所有客户端发布资源变更事件。k8s中，组件之间通过HTTP协议进行通信，在不额外引入其他中间件的情况下，保证消息传递的实时性、可靠性、顺序性不是一个容易的事情。K8s内部所有的组件都是通过Informer机制实现与API Server的通信的。Informer直译就是消息通知者的意思。
+k8s服务端通过读取 `etcd` 的资源变更信息，向所有客户端发布资源变更事件。k8s中，组件之间通过HTTP协议进行通信，在不额外引入其他中间件的情况下，保证消息传递的实时性、可靠性、顺序性不是一个容易的事情。K8s内部所有的组件都是通过 `Informer` 机制实现与API Server的通信的。`Informer` 直译就是消息通知者的意思。
 
-通常一个Informer只会关注一种特定的资源，Reflector负责从API Server拉取&同步该资源类型下所有对象的event。例如，如果当前informer关注Pod资源，那么Reflector会首先list集群中所有的Pod的信息，同步本地的ResourceVersion，之后基于当前的ResourceVerison，使用一个Http长连接Watch集群中Pod资源的事件，并传递到Delta\_FIFO模块。
+通常一个 `Informer` 只会关注一种特定的资源，Reflector负责从API Server拉取&同步该资源类型下所有对象的event。例如，如果当前informer关注Pod资源，那么Reflector会首先list集群中所有的Pod的信息，同步本地的ResourceVersion，之后基于当前的ResourceVerison，使用一个Http长连接Watch集群中Pod资源的事件，并传递到Delta\_FIFO模块。
 
 Reflector字面意思就是反射器，我们可以看下Reflector的struct声明
 
