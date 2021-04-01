@@ -9,4 +9,6 @@
 * [k8s](k8s/README.md)
   * [K8s client-go 源码阅读笔记](k8s/k8s-clientgo-yuan-ma-yue-du-bi-ji.md)
   * [Deployment.spec.selector.matchLables 实验解释](k8s/deployment.spec.selector.matchlables-shi-yan-jie-shi.md)
+* [linux](linux/README.md)
+  * [Linux中的文件描述符与打开文件之间的关系](linux/linux-zhong-de-wen-jian-miao-shu-fu-yu-da-kai-wen-jian-zhi-jian-de-guan-xi.md)
 
