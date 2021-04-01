@@ -126,8 +126,6 @@ func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Facto
 
 总结一下：
 
-
-
 | 客户端名称 | 源码目录 | 简单描述 |
 | :--- | :--- | :--- |
 | RESTClient | client-go/rest/ | 基础客户端，对HTTP Request封装 |
@@ -210,7 +208,7 @@ type Index map[string]sets.String
 
 Indexer的结构大致如上所述，但是细心的同学应该发现了，Indexers仅仅是一个接口，不是具体的实现，因为Informer中实际使用的，是类型cache，cache的声明及代码分析如下：
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/store.go
 
 // `*cache` implements Indexer in terms of a ThreadSafeStore and an
@@ -264,11 +262,9 @@ type ThreadSafeStore interface {
 
 Indexer是Informer实现本地缓存的关键模块。作为Indexer的主要实现，cache是一个存储在内存中的缓存器，初始化时，会指定keyFunc，通常会根据对象的资源名与对象名组合成一个唯一的字符串作为对象键。此外，cache将缓存的维护工作委托给threadSafeMap来完成，threadSafeMap内部实现了一套类似MySql覆盖索引、二级索引的存储机制，用户可以自行添加具有特定索引生成方法的二级索引，方便自己的数据存取。
 
-另外：
+另外：K8s内部，目前使用的默认对象键计算方法\(也就是cache里面的keyfunc\)是MetaNamespaceKeyFunc：
 
-K8s内部，目前使用的默认对象键计算方法\(也就是cache里面的keyfunc\)是MetaNamespaceKeyFunc：
-
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/store.go
 
 // 不解释，看注释就能懂
@@ -293,7 +289,7 @@ func MetaNamespaceKeyFunc(obj interface{}) (string, error) {
 
 k8s内部目前使用的自定义的indexFunc有PodPVCIndexFunc、indexByPodNodeName、MetaNamespaceIndexFunc,选取indexByPodNodeName看一下：
 
-```text
+```go
 // 文件路径： pkg/controller/daemon/daemon_controller.go 
 // daemon controller需要监控pod所在的node name,这个需求也非常合理
 
@@ -321,7 +317,7 @@ DeltaFIFO将接受来的资源event,转化为特定的变化类型，存储在�
 
 Client-go定义了以下几种变化类型：
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/delta_fifo.go
 // DeltaType 其实是字符串类型的别名，代表一种变化
 type DeltaType string
@@ -346,7 +342,7 @@ type Deltas []Delta
 
 然后我们看一下Delta\_FIFO的实现
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/delta_fifo.go
 
 type DeltaFIFO struct {
@@ -385,7 +381,7 @@ type DeltaFIFO struct {
 
 Delta\_FIFO的核心操作有两个：往队列里面添加元素、从队列中POP元素，可以看一下这两个方法的实现：
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/delta_fifo.go
 
 // queueActionLocked 用于向队列中添加delta,调用前必须加写锁	
@@ -472,7 +468,7 @@ k8s服务端通过读取etcd的资源变更信息，向所有客户端发布资�
 
 Reflector字面意思就是反射器，我们可以看下Reflector的struct声明
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/reflector.go
 
 // Reflector监控某一种资源的变化，并将这些变化传递到存储中
@@ -495,7 +491,7 @@ ResourceVersion是ETCD生成的全局唯一且递增的序号，通过此序号�
 
 可以关注到Reflector三个比较关键的方法：
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/reflector.go 
 
 // 反射器的入口方法，wait.Backoffutil会周期性的执行传入的匿名函数，直到接收到stopCh传来的终止信号
@@ -607,7 +603,7 @@ Contoller是一个很暧昧的词，乍一听就知道这个是控制器，仔�
 
 上代码：
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/controller.go
 type controller struct {
     // 所有的配置信息、组件
@@ -647,7 +643,7 @@ type Config struct {
 
 所以核心方法就是Run：
 
-```text
+```go
 // 文件路径： k8s.io/client-go/tools/cache/controller.go
 func (c *controller) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
@@ -685,7 +681,7 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 
 可以看到，除了reflector.Run,剩下的逻辑，都在processLoop方法中,reflector的run方法前面已经分析过了，不赘叙。看processLoop
 
-```text
+```go
 func (c *controller) processLoop() {
 	for {
 		obj, err := c.config.Queue.Pop(PopProcessFunc(c.config.Process))
@@ -712,7 +708,7 @@ func (c *controller) processLoop() {
 
 我们可以看看SharedIndexInformr类型相关的声明：
 
-```text
+```go
 type SharedInformer interface {
 	// 添加事件处理回调
 	AddEventHandler(handler ResourceEventHandler)
@@ -760,7 +756,7 @@ type sharedIndexInformer struct {
 
 sharedIndexInformer的核心逻辑在Run方法中：
 
-```text
+```go
 // 文件路径 k8s.io/client-go/tools/cache/shared_informer.go
 func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
@@ -815,7 +811,7 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 
 目前为止，我们还没有发现Delta\_FIFO的事件都被谁消费了，HandleDeltas方法看起来大概率可以帮我们揭开谜底了：
 
-```text
+```go
 // 文件路径 k8s.io/client-go/tools/cache/shared_informer.go
 func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
 	s.blockDeltas.Lock()
@@ -870,7 +866,7 @@ func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
 
 最后看一下sharedProcesser的distribute和processorListenor的run方法：
 
-```text
+```go
 // 文件路径 k8s.io/client-go/tools/cache/shared_informer.go
 
 // 分发事件
@@ -923,7 +919,7 @@ func (p *processorListener) run() {
 
 由于每个Informer内，都需要对API Server进行大量网络通信，对此，k8s采用单例模式来尽可能降低开销。如下的代码片段展示了sharedInformerFactory的结构，内置一个map变量，通过资源的类型来组织informers,保证每个二进制文件中，同一资源类型的informer，只能存在一个。
 
-```text
+```go
 // 文件路径： k8s.io/client-go/informers/factory.go
 type sharedInformerFactory struct {
 	client           kubernetes.Interface
@@ -944,7 +940,7 @@ type sharedInformerFactory struct {
 
 使用informer的样例代码如下：
 
-```text
+```go
 config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 mustSuccess(err)
 
@@ -992,7 +988,7 @@ client-go中提供了多种队列以供选择，可以胜任更多的场景。
 
 通用队列的定义如下：
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/queue.go
 type Interface interface {
 	Add(item interface{})
@@ -1035,7 +1031,7 @@ type Type struct {
 
 我们可以看一下它核心的Add、Get、Done方法：
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/queue.go
 // Add marks item as needing processing.
 func (q *Type) Add(item interface{}) {
@@ -1110,7 +1106,7 @@ func (q *Type) Done(item interface{}) {
 
 延迟相比普通队列，多了一个等待循环和AddAfter方法，通过goLang的select+channel非常巧妙的实现了延迟添加的功能：
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/delaying_queue.go
 func (q *delayingType) AddAfter(item interface{}, duration time.Duration) {
 	// don't add if we're already shutting down
@@ -1249,7 +1245,7 @@ func (q *delayingType) waitingLoop() {
 
 首先看下限速队列的通用类型
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/rate_limiting_queue.go
 
 // RateLimitingInterface 接口
@@ -1290,7 +1286,7 @@ func (q *rateLimitingType) Forget(item interface{}) {
 
 那么限速器的实现呢？
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/default_rate_limiters.go
 // 限速器的通用接口
 type RateLimiter interface {
@@ -1336,7 +1332,7 @@ type RateLimiter interface {
 
 计算延迟时间的方法如下：
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/default_rate_limiters.go
 
 func (r *ItemExponentialFailureRateLimiter) When(item interface{}) time.Duration {
@@ -1367,7 +1363,7 @@ func (r *ItemExponentialFailureRateLimiter) When(item interface{}) time.Duration
 
 计数器算法是限速算法中最简单的一种，其原理是：限制一段时间内允许通过的元素数量，例如在1分钟内只允许通过100个元素，每插入一个元素，计数器自增1，当计数器数到100的阈值且还在限速周期内时，则不允许元素再通过。但WorkQueue在此基础上扩展了fast和slow速率。计数器算法提供了4个主要字段：failures、fastDelay、slowDelay及maxFastAttempts。其中，failures字段用于统计元素排队数，每当AddRateLimited方法插入新元素时，会为该字段加1；而fastDelay和slowDelay字段是用于定义fast、slow速率的；另外，maxFastAttempts字段用于控制从fast速率转换到slow速率。
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/default_rate_limiters.go
 func (r *ItemFastSlowRateLimiter) When(item interface{}) time.Duration {
 	r.failuresLock.Lock()
@@ -1389,7 +1385,7 @@ func (r *ItemFastSlowRateLimiter) When(item interface{}) time.Duration {
 
 K8s默认的限速器采用的混合模式，混合模式的限速器里面包含了多个限速器，计算延迟时间时，遍历所有的限速器，以最大的限速时间作为当前的延迟时间，从而实现最严格的限速。
 
-```text
+```go
 // 文件路径 k8s.io/client-go/util/workqueue/default_rate_limiters.go
 
 // 默认的限速器就是采用混合模式
@@ -1426,7 +1422,7 @@ Event是k8s内置的一种对象资源，记录了集群中发生的各种事情
 
 这里我直接在client-go代码库的根目录下新建一个main/main.go，具体实现如下：
 
-```text
+```go
 package main
 
 import (
@@ -1534,7 +1530,7 @@ go run main.go，提取的Event信息：
 
 假定我们需要观测某个node上面pod数量,结合之前的部分，我们可以通过自定义indexer,快速方便的获取到相关的数量，同时不需要额外的网络开销：
 
-```text
+```go
 func podNumOfSpecifyNode() {
 	indexByPodNodeName := func(obj interface{}) ([]string, error) {
 		pod, ok := obj.(*apiCoreV1.Pod)
