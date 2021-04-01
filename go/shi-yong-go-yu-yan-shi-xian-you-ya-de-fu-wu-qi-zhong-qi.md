@@ -1,14 +1,12 @@
 # 使用 Go 语言实现优雅的服务器重启
 
-使用 Go 语言实现优雅的服务器重启 Go被设计为一种后台语言，它通常也被用于后端程序中。服务端程序是GO语言最常见的软件产品。在这我要解决的问题是：如何干净利落地升级正在运行的服务端程序。
-
-
+Go被设计为一种后台语言，它通常也被用于后端程序中。服务端程序是GO语言最常见的软件产品。在这我要解决的问题是：如何干净利落地升级正在运行的服务端程序。
 
 ## 目标
 
-* 不关闭现有连接：例如我们不希望关掉已部署的运行中的程序。但又想不受限制地随时升级服务。
-* socket连接要随时响应用户请求：任何时刻socket的关闭可能使用户返回'连接被拒绝'的消息，而这是不可取的。
-* 新的进程要能够启动并替换掉旧的。
+* **不关闭现有连接**：例如我们不希望关掉已部署的运行中的程序。但又想不受限制地随时升级服务。
+* **socket连接要随时响应用户请求**：任何时刻socket的关闭可能使用户返回'连接被拒绝'的消息，而这是不可取的。
+* **新的进程要能够启动并替换掉旧的**。
 
 ## 原理
 
@@ -35,7 +33,7 @@ for {
 } 
 ```
 
-跳出这个循环的最简单方式是在socket监听器上设置一个超时，当调用 `listener.SetTimeout(time.Now())` 后， `listener.Accept()` 会立即返回一个 `timeout err`，你可以捕获并处理：
+跳出这个循环的最简单方式是在 `socket` 监听器上设置一个超时，当调用 `listener.SetTimeout(time.Now())` 后， `listener.Accept()` 会立即返回一个 `timeout err`，你可以捕获并处理：
 
 ```go
 for {
@@ -67,12 +65,13 @@ err := syscall.ForkExec(os.Args[0], os.Args, execSpec)[…]
 
 ## 发送socket到子进程并恢复它
 
-正如你先前看到的，你可以将文件描述符传递到新进程，这需要一些UNIX魔法（一切都是文件），我们可以把socket发送到新进程中，这样新进程就能够使用它并接收及等待新的连接。
+正如你先前看到的，你可以将文件描述符传递到新进程，这需要一些UNIX魔法（一切都是文件），我们可以把 `socket` 发送到新进程中，这样新进程就能够使用它并接收及等待新的连接。
 
 但 `fork-execed` 进程需要知道它必须从文件中得到socket而不是新建一个（有些兴许已经在使用了，因为我们还没断开已有的监听）。你可以按任何你希望的方法来，最常见的是通过环境变量或命令行标志。
 
 ```go
-listenerFile, err := listener.File()if err != nil {
+listenerFile, err := listener.File()
+if err != nil {
   log.Fatalln("Fail to get socket file descriptor:", err)
 }
 
@@ -92,22 +91,27 @@ err := syscall.ForkExec(os.Args[0], os.Args, execSpec)
 然后在程序的开始处：
 
 ```go
-var listener *net.TCPListenerif os.Getenv("_GRACEFUL_RESTART") == "true" {
+var listener *net.TCPListener
+
+if os.Getenv("_GRACEFUL_RESTART") == "true" {
   file := os.NewFile(3, "/tmp/sock-go-graceful-restart")
   listener, err := net.FileListener(file)
   if err != nil {
     // handle
   }
+  
   var bool ok
   listener, ok = listener.(*net.TCPListener)
   if !ok {
     // handle
-  }} else {
+  }
+  
+} else {
   listener, err = newListenerWithPort(12345)
 }
 ```
 
-文件描述没有被随机的选择为 `3`，这是因为 `uintptr` 的切片已经发送了 `fork`，监听获取了索引 `3`。留意隐式声明问题。
+文件描述没有被随机的选择为 `3`，这是因为 `uintptr` 的切片已经发送了 `fork`，监听获取了索引 `3`。留意  [隐式声明问题](http://www.qureet.com/blog/golang-beartrap/)。
 
 ## 最后一步，等待旧服务连接停止
 
