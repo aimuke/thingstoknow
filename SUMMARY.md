@@ -13,4 +13,6 @@
   * [Programing In K8s 1：Client-go 实现分析与二次开发](k8s/programing-in-k8s-1clientgo-shi-xian-fen-xi-yu-er-ci-kai-fa.md)
 * [linux](linux/README.md)
   * [Linux中的文件描述符与打开文件之间的关系](linux/linux-zhong-de-wen-jian-miao-shu-fu-yu-da-kai-wen-jian-zhi-jian-de-guan-xi.md)
+* [others](others/README.md)
+  * [YAML 语言教程](others/yaml-yu-yan-jiao-cheng.md)
 
