@@ -141,7 +141,7 @@ func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Facto
 }
 ```
 
-总结一下：
+### 小结
 
 | 客户端名称 | 源码目录 | 简单描述 |
 | :--- | :--- | :--- |
@@ -183,7 +183,10 @@ type Indexer interface {
 	// 添加索引分类
 	AddIndexers(newIndexers Indexers) error
 }
-// Store声明 ， 文件路径：k8s.io/client-go/tools/cache/store.go
+```
+
+```go
+/ Store声明 ， 文件路径：k8s.io/client-go/tools/cache/store.go
 // 接口含义类似一般的KV存储，不做额外解释
 type Store interface {
 	Add(obj interface{}) error
@@ -196,7 +199,6 @@ type Store interface {
 	Replace([]interface{}, string) error
 	Resync() error
 }
-
 ```
 
 可以看到 `indexer` 里面，索引的概念很关键，那么 `indexer` 是怎么实现索引的呢？
@@ -236,7 +238,9 @@ type cache struct {
 	// keyFunc 是用来计算对象键的
 	keyFunc KeyFunc
 }
+```
 
+```go
 // 文件路径： k8s.io/client-go/tools/cache/thread_safe_store.go
 
 // threadSafeMap implements ThreadSafeStore
@@ -481,9 +485,9 @@ K8s的设计是事件驱动的、充分微服务化的，我们可以从事件�
 
 k8s服务端通过读取 `etcd` 的资源变更信息，向所有客户端发布资源变更事件。k8s中，组件之间通过HTTP协议进行通信，在不额外引入其他中间件的情况下，保证消息传递的实时性、可靠性、顺序性不是一个容易的事情。K8s内部所有的组件都是通过 `Informer` 机制实现与API Server的通信的。`Informer` 直译就是消息通知者的意思。
 
-通常一个 `Informer` 只会关注一种特定的资源，Reflector负责从API Server拉取&同步该资源类型下所有对象的event。例如，如果当前informer关注Pod资源，那么Reflector会首先list集群中所有的Pod的信息，同步本地的ResourceVersion，之后基于当前的ResourceVerison，使用一个Http长连接Watch集群中Pod资源的事件，并传递到Delta\_FIFO模块。
+通常一个 `Informer` 只会关注一种特定的资源，`Reflector`负责从API Server拉取&同步该资源类型下所有对象的`event`。例如，如果当前`informer`关注Pod资源，那么`Reflector`会首先`list`集群中所有的Pod的信息，同步本地的`ResourceVersion`，之后基于当前的`ResourceVerison`，使用一个Http长连接`Watch`集群中Pod资源的事件，并传递到`Delta_FIFO`模块。
 
-Reflector字面意思就是反射器，我们可以看下Reflector的struct声明
+`Reflector`字面意思就是反射器，我们可以看下`Reflector`的struct声明
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/reflector.go
@@ -504,9 +508,9 @@ type Reflector struct {
 }
 ```
 
-ResourceVersion是ETCD生成的全局唯一且递增的序号，通过此序号，客户端可以知道目前与服务端信息同步的状态，每次只取大于等于本地ResourceVersion的事件，好处是可以实现事件的全局唯一，实现“断点续传”功能，不用担心本地客户端偶尔出现的网络异常。
+`ResourceVersion`是`ETCD`生成的全局唯一且递增的序号，通过此序号，客户端可以知道目前与服务端信息同步的状态，每次只取大于等于本地`ResourceVersion`的事件，好处是可以实现事件的全局唯一，实现“断点续传”功能，不用担心本地客户端偶尔出现的网络异常。
 
-可以关注到Reflector三个比较关键的方法：
+可以关注到`Reflector`三个比较关键的方法：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/reflector.go 
@@ -602,23 +606,19 @@ loop:
 }
 ```
 
+可以总结一下`Reflector`：
 
-
-可以总结一下Reflector：
-
-1. Reflector利用apiserver的client列举全量对象\(版本为0以后的对象全部列举出来\) 
-2. 将全量对象同步到DeltaFIFO中，并且更新资源的版本号，后续watch会依赖此版本号； 
-3. 在后台启动一个定时resync的协程，把全量对象以Update事件的方式通知出去\(如果没有设置同步周期，这一步可以不执行\)； 
-4. 基于当前资源版本号watch资源; 
-5. 一旦有对象发生变化，那么就会根据变化的类型\(新增、更新、删除\)调用DeltaFIFO的相应接口，同时更新当前资源的版本号 
+1. `Reflector`利用apiserver的client列举全量对象\(版本为0以后的对象全部列举出来\) 
+2. 将全量对象同步到`DeltaFIFO`中，并且更新资源的版本号，后续`watch`会依赖此版本号； 
+3. 在后台启动一个定时`resync`的协程，把全量对象以`Update`事件的方式通知出去\(如果没有设置同步周期，这一步可以不执行\)； 
+4. 基于当前资源版本号`watch`资源; 
+5. 一旦有对象发生变化，那么就会根据变化的类型\(新增、更新、删除\)调用`DeltaFIFO`的相应接口，同时更新当前资源的版本号 
 
 ### 3.4 Controller
 
-Contoller是一个很暧昧的词，乍一听就知道这个是控制器，仔细一想又不知道它能控制什么玩意儿。K8s里面本身有各种资源Controller，和这里的含义不同。
+`Contoller`是一个很暧昧的词，乍一听就知道这个是控制器，仔细一想又不知道它能控制什么玩意儿。K8s里面本身有各种资源`Controller`，和这里的含义不同。
 
-如果认真看了前面的文档，会注意到，上面的结构图里，其实没有Controller这个组件，这个类更像是一个wrapper,将前面提到的Indexer、Delta\_FIFO、Reflector组合在一起，Controller驱动所有环节一起运转起来。
-
-上代码：
+如果认真看了前面的文档，会注意到，上面的结构图里，其实没有`Controller`这个组件，这个类更像是一个`wrapper`,将前面提到的`Indexer`、`Delta_FIFO`、`Reflector`组合在一起，`Controller`驱动所有环节一起运转起来。上代码：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/controller.go
@@ -658,7 +658,7 @@ type Config struct {
 }
 ```
 
-所以核心方法就是Run：
+所以核心方法就是`Run`：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/controller.go
@@ -696,7 +696,7 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 
 
 
-可以看到，除了reflector.Run,剩下的逻辑，都在processLoop方法中,reflector的run方法前面已经分析过了，不赘叙。看processLoop
+可以看到，除了`reflector.Run`,剩下的逻辑，都在`processLoop`方法中,`reflector`的`run`方法前面已经分析过了，不赘叙。看`processLoop`
 
 ```go
 func (c *controller) processLoop() {
@@ -715,15 +715,15 @@ func (c *controller) processLoop() {
 }
 ```
 
-这里看下来，可以发现其实也没有什么独特的逻辑，controller做的，就是把各个模块粘合起来。
+这里看下来，可以发现其实也没有什么独特的逻辑，`controller`做的，就是把各个模块粘合起来。
 
 ### 3.5 SharedInformer
 
- 结构图上，Indexer等几个组件都被框在Informer里，对应的类型就是SharedInformer。
+ 结构图上，`Indexer`等几个组件都被框在`Informer`里，对应的类型就是`SharedInformer`。
 
-一路分析下来，其实直到Contorller组件，都没有用到Indexer组件。SharedInformer是所有组件最终汇聚的地方。
+一路分析下来，其实直到`Contorller`组件，都没有用到`Indexer`组件。`SharedInformer`是所有组件最终汇聚的地方。
 
-我们可以看看SharedIndexInformr类型相关的声明：
+我们可以看看`SharedIndexInformr`类型相关的声明：
 
 ```go
 type SharedInformer interface {
@@ -771,7 +771,7 @@ type sharedIndexInformer struct {
 }
 ```
 
-sharedIndexInformer的核心逻辑在Run方法中：
+`sharedIndexInformer`的核心逻辑在`Run`方法中：
 
 ```go
 // 文件路径 k8s.io/client-go/tools/cache/shared_informer.go
@@ -824,9 +824,7 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 }
 ```
 
-
-
-目前为止，我们还没有发现Delta\_FIFO的事件都被谁消费了，HandleDeltas方法看起来大概率可以帮我们揭开谜底了：
+目前为止，我们还没有发现`Delta_FIFO`的事件都被谁消费了，`HandleDeltas`方法看起来大概率可以帮我们揭开谜底了：
 
 ```go
 // 文件路径 k8s.io/client-go/tools/cache/shared_informer.go
@@ -877,11 +875,9 @@ func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
 }
 ```
 
+比较直观的看到，这个方法还是挺重要的，一方面这个方法衔接了`controller`里面的`delta_fifo`与`sharedProcesser`的事件分发`distribute`，另一方面，这个方法也衔接了`delta_fifo`与`Indexer`，在这里更新了本地缓存。
 
-
-比较直观的看到，这个方法还是挺重要的，一方面这个方法衔接了controller里面的delta\_fifo与sharedProcesser的事件分发distribute，另一方面，这个方法也衔接了delta\_fifo与Indexer，在这里更新了本地缓存。
-
-最后看一下sharedProcesser的distribute和processorListenor的run方法：
+最后看一下`sharedProcesser`的`distribute`和`processorListenor`的`run`方法：
 
 ```go
 // 文件路径 k8s.io/client-go/tools/cache/shared_informer.go
@@ -925,16 +921,16 @@ func (p *processorListener) run() {
 }
 ```
 
-到此为止，Informer机制下，服务端与客户端的交互分层逻辑比较清晰了：
+到此为止，`Informer`机制下，服务端与客户端的交互分层逻辑比较清晰了：
 
-1. Reflector通过List&watch机制与API Server拉取信息 
-2. 一级缓存+消息队列 Delta\_FIFO缓存事件，分发到下游的事件处理器+二级缓存Indexer 
+1. `Reflector`通过`List&watch`机制与API Server拉取信息 
+2. 一级缓存+消息队列 `Delta_FIFO`缓存事件，分发到下游的事件处理器+二级缓存`Indexer` 
 3. 二级缓存作为只读缓存，给客户端提供快速读取资源信息的能力 
 4. 客户端处理事件回调、可以从二级缓存读取感兴趣的信息、可以向API Server发送资源对象的变更请求 
 
-以上是单个Informer的工作过程。
+以上是单个`Informer`的工作过程。
 
-由于每个Informer内，都需要对API Server进行大量网络通信，对此，k8s采用单例模式来尽可能降低开销。如下的代码片段展示了sharedInformerFactory的结构，内置一个map变量，通过资源的类型来组织informers,保证每个二进制文件中，同一资源类型的informer，只能存在一个。
+由于每个`Informer`内，都需要对API Server进行大量网络通信，对此，k8s采用单例模式来尽可能降低开销。如下的代码片段展示了`sharedInformerFactory`的结构，内置一个`map`变量，通过资源的类型来组织`informers`,保证每个二进制文件中，同一资源类型的`informer`，只能存在一个。
 
 ```go
 // 文件路径： k8s.io/client-go/informers/factory.go
@@ -953,9 +949,7 @@ type sharedInformerFactory struct {
 }
 ```
 
-
-
-使用informer的样例代码如下：
+使用`informer`的样例代码如下：
 
 ```go
 config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
@@ -991,13 +985,11 @@ informer.AddEventHandlerWithResyncPeriod(cache.ResourceEventHandlerFuncs{
 informer.Run(stopChan)
 ```
 
-
-
 ### 3.6 Work Queue
 
-一开始的框架图中，其实还有一个部分没有提到，就是WorkQueue。
+一开始的框架图中，其实还有一个部分没有提到，就是`WorkQueue`。
 
-work queue并不完全是informer机制的一部分。相对Informer来说，是Client-go代码库中比较独立的一个组件。在开发并行程序时，需要频繁的进行数据同步，本身goLang拥有channel机制，但是不能满足一些复杂场景的需求。例如：延时队列、限速队列。
+`work queue`并不完全是`informer`机制的一部分。相对`Informer`来说，是Client-go代码库中比较独立的一个组件。在开发并行程序时，需要频繁的进行数据同步，本身goLang拥有`channel`机制，但是不能满足一些复杂场景的需求。例如：延时队列、限速队列。
 
 client-go中提供了多种队列以供选择，可以胜任更多的场景。
 
@@ -1042,11 +1034,9 @@ type Type struct {
 }
 ```
 
+这个队列里面绝大多数内容挺好理解的，`dirty`这个`set`是一个特殊的设置。
 
-
-这个队列里面绝大多数内容挺好理解的，dirty这个set是一个特殊的设置。
-
-我们可以看一下它核心的Add、Get、Done方法：
+我们可以看一下它核心的`Add`、`Get`、`Done`方法：
 
 ```go
 // 文件路径 k8s.io/client-go/util/workqueue/queue.go
@@ -1112,16 +1102,16 @@ func (q *Type) Done(item interface{}) {
 }
 ```
 
-所以dirty的作用是？
+所以`dirty`的作用是？
 
-* 快速去重，避免遍历queue 
-* queue的辅助结构 
+* 快速去重，避免遍历`queue` 
+* `queue`的辅助结构 
 
-其他的功能就类似正常的队列。不赘叙。这里的逻辑有点绕，但是最终的效果是： 在等待处理的数据中，每一个对象只能存在一份，不能重复添加。 不过这里为什么这么设计，具体的场景，需要进一步的查看别的controller组件了。
+其他的功能就类似正常的队列。不赘叙。这里的逻辑有点绕，但是最终的效果是： 在等待处理的数据中，每一个对象只能存在一份，不能重复添加。 不过这里为什么这么设计，具体的场景，需要进一步的查看别的`controller`组件了。
 
 #### 3.6.2 延迟队列
 
-延迟相比普通队列，多了一个等待循环和AddAfter方法，通过goLang的select+channel非常巧妙的实现了延迟添加的功能：
+延迟相比普通队列，多了一个等待循环和`AddAfter`方法，通过goLang的`select+channel`非常巧妙的实现了延迟添加的功能：
 
 ```go
 // 文件路径 k8s.io/client-go/util/workqueue/delaying_queue.go
@@ -1238,17 +1228,17 @@ func (q *delayingType) waitingLoop() {
 }
 ```
 
-延迟队列的添加过程如下所示，通过AddAfter方法，将对象数据与期望添加的时间包装成WaitFor对象传递到waitingForAddCh这个channel中，然后另一个协程中运行的waitingLoop中会捕获该数据，放入优先队列：
+延迟队列的添加过程如下所示，通过`AddAfter`方法，将对象数据与期望添加的时间包装成`WaitFor`对象传递到`waitingForAddCh`这个`channel`中，然后另一个协程中运行的`waitingLoop`中会捕获该数据，放入优先队列：
 
 ![](../.gitbook/assets/image%20%2816%29.png)
 
-然后同样在waitingLoop中，会轮询的检测优先队列的top元素是否到达既定的时间，如果到了，则pop元素并添加到FIFO中：
+然后同样在`waitingLoop`中，会轮询的检测优先队列的`top`元素是否到达既定的时间，如果到了，则`pop`元素并添加到`FIFO`中：
 
 ![](../.gitbook/assets/image%20%2810%29.png)
 
 所以可以看出来延迟队列的关键在于：
 
-* 时间优先队列（heap结构的，篇幅有限，不赘叙） 
+* 时间优先队列（`heap`结构的，篇幅有限，不赘叙） 
 * 等待循环 
 
 #### 3.6.3 限速队列
@@ -1297,8 +1287,6 @@ func (q *rateLimitingType) Forget(item interface{}) {
 
 ```
 
-
-
 可以看到这里限速队列的操作和延迟队列类似，通过限速器获取当前元素需要排队的时间，然后转化为延迟队列来处理。
 
 那么限速器的实现呢？
@@ -1316,8 +1304,6 @@ type RateLimiter interface {
 }
 ```
 
-
-
 限速器具体的实现有四种：
 
 **1、令牌桶算法 BucketRateLimiter**
@@ -1326,7 +1312,7 @@ type RateLimiter interface {
 
 这里提一下，最基础的限流算法是漏桶算法，也是nginx默认使用的限流算法，漏桶算法的原理是，假设流量源源不断的往一个桶里面流入，并且以一定的速度流出桶，桶的容量有限。漏桶算法的原理很简单，达到的效果就是，流量进入系统的平均速度永远不会超过桶漏水的速度。超过桶容量的流量会被丢弃。漏桶算法的缺点没有考虑流量的“峰谷”效应。\(nginx使用的是改进版的漏桶算法，这里不赘叙\)。
 
-令牌桶算法则允许流量一定程度的爆发\(burst\)，令牌桶算法的原理：
+令牌桶算法则允许流量一定程度的爆发\(`burst`\)，令牌桶算法的原理：
 
 1. 以固定的速率发放令牌 
 2. 流量想要进入系统，必须获得一个令牌，否则无法进入 
@@ -1335,7 +1321,7 @@ type RateLimiter interface {
 
 令牌桶算法的效果：在整个时间线上，流量的平均流入速度不会超过令牌的发放速度，但是系统允许短时间的流量爆发，此时，系统处理的流量会大于令牌的发放速度。
 
-假设，r参数表示每秒往“桶”里填充的token数量，b参数表示令牌桶的大小（即令牌桶最多存放的token数量）。我们假定r为10，b为100。在一个限速周期内插入了1000个元素，那么前b（即100）个元素会被立刻处理，而后面元素的延迟时间分别为100/100ms、101/200ms、102/300ms、103/400ms，以此类推。
+假设，r参数表示每秒往“桶”里填充的`token`数量，`b`参数表示令牌桶的大小（即令牌桶最多存放的`token`数量）。我们假定`r`为`10`，`b`为`100`。在一个限速周期内插入了1000个元素，那么前`b`（即100）个元素会被立刻处理，而后面元素的延迟时间分别为100/100ms、101/200ms、102/300ms、103/400ms，以此类推。
 
 这也就是方法when返回预期时间的原理。
 
@@ -1345,7 +1331,7 @@ type RateLimiter interface {
 
 **2、排队指数算法 ItemExponentialFailureRateLimiter**
 
-排队指数算法将相同元素的排队数作为指数，排队数增大，速率限制呈指数级增长，但其最大值不会超过maxDelay。元素的排队数统计是有限速周期的，一个限速周期是指从执行AddRateLimited方法到执行完Forget方法之间的时间。如果该元素被Forget方法处理完，则清空排队数。
+排队指数算法将相同元素的排队数作为指数，排队数增大，速率限制呈指数级增长，但其最大值不会超过`maxDelay`。元素的排队数统计是有限速周期的，一个限速周期是指从执行`AddRateLimited`方法到执行完`Forget`方法之间的时间。如果该元素被`Forget`方法处理完，则清空排队数。
 
 计算延迟时间的方法如下：
 
@@ -1378,7 +1364,7 @@ func (r *ItemExponentialFailureRateLimiter) When(item interface{}) time.Duration
 
 **3. 计数器算法（ItemFastSlowRateLimiter）** 
 
-计数器算法是限速算法中最简单的一种，其原理是：限制一段时间内允许通过的元素数量，例如在1分钟内只允许通过100个元素，每插入一个元素，计数器自增1，当计数器数到100的阈值且还在限速周期内时，则不允许元素再通过。但WorkQueue在此基础上扩展了fast和slow速率。计数器算法提供了4个主要字段：failures、fastDelay、slowDelay及maxFastAttempts。其中，failures字段用于统计元素排队数，每当AddRateLimited方法插入新元素时，会为该字段加1；而fastDelay和slowDelay字段是用于定义fast、slow速率的；另外，maxFastAttempts字段用于控制从fast速率转换到slow速率。
+计数器算法是限速算法中最简单的一种，其原理是：限制一段时间内允许通过的元素数量，例如在1分钟内只允许通过100个元素，每插入一个元素，计数器自增1，当计数器数到100的阈值且还在限速周期内时，则不允许元素再通过。但`WorkQueue`在此基础上扩展了`fast`和`slow`速率。计数器算法提供了4个主要字段：`failures`、`fastDelay`、`slowDelay`及`maxFastAttempts`。其中，`failures`字段用于统计元素排队数，每当`AddRateLimited`方法插入新元素时，会为该字段加1；而`fastDelay`和`slowDelay`字段是用于定义`fast`、`slow`速率的；另外，`maxFastAttempts`字段用于控制从`fast`速率转换到`slow`速率。
 
 ```go
 // 文件路径 k8s.io/client-go/util/workqueue/default_rate_limiters.go
@@ -1395,8 +1381,6 @@ func (r *ItemFastSlowRateLimiter) When(item interface{}) time.Duration {
 	return r.slowDelay
 }
 ```
-
-
 
 **4. 混合模式（MaxOfRateLimiter）** 
 
@@ -1435,9 +1419,9 @@ func (r *MaxOfRateLimiter) When(item interface{}) time.Duration {
 
 ### 4.1 解决第一个小问题 Event收集：
 
-Event是k8s内置的一种对象资源，记录了集群中发生的各种事情，是重要的排错依据，但是因为集群中Event的量很大，如果全部存进ETCD里，会带来很大的性能和容量压力，所以ETCD默认只会存1个小时的Event。我们通过上面的学习，其实可以自己写一个小程序，来读取集群中的Event资源，写入到ES里，以实现比较灵活的监控。
+`Event`是k8s内置的一种对象资源，记录了集群中发生的各种事情，是重要的排错依据，但是因为集群中`Event`的量很大，如果全部存进`ETCD`里，会带来很大的性能和容量压力，所以`ETCD`默认只会存1个小时的`Event`。我们通过上面的学习，其实可以自己写一个小程序，来读取集群中的`Event`资源，写入到`ES`里，以实现比较灵活的监控。
 
-这里我直接在client-go代码库的根目录下新建一个main/main.go，具体实现如下：
+这里我直接在client-go代码库的根目录下新建一个`main/main.go`，具体实现如下：
 
 ```go
 package main
@@ -1539,13 +1523,13 @@ func main() {
 }
 ```
 
-go run main.go，提取的Event信息：
+`go run main.go`，提取的Event信息：
 
 ![](../.gitbook/assets/image%20%288%29.png)
 
 ### 4.2 解决第二个小问题 指定node上的pod数监控 
 
-假定我们需要观测某个node上面pod数量,结合之前的部分，我们可以通过自定义indexer,快速方便的获取到相关的数量，同时不需要额外的网络开销：
+假定我们需要观测某个node上面pod数量,结合之前的部分，我们可以通过自定义`indexer`,快速方便的获取到相关的数量，同时不需要额外的网络开销：
 
 ```go
 func podNumOfSpecifyNode() {
@@ -1588,9 +1572,7 @@ func main() {
 }
 ```
 
-运行效果：
-
-每隔一秒会周期性的打印出目前10.157.6.25上面的pod数量
+运行效果：每隔一秒会周期性的打印出目前10.157.6.25上面的pod数量
 
 ![](../.gitbook/assets/image%20%2817%29.png)
 
