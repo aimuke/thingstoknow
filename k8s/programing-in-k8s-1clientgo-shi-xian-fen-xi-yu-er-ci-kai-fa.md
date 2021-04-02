@@ -1581,4 +1581,5 @@ func main() {
 ## References
 
 * [Programing In K8s 1：Client-go 实现分析与二次开发](https://blog.csdn.net/King_DJF/article/details/108307735)
+* [英文 Programing In K8s 1: Client-go implementation analysis and secondary development](https://www.programmersought.com/article/48907085150/) 
 
