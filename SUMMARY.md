@@ -11,6 +11,7 @@
   * [Deployment.spec.selector.matchLables 实验解释](k8s/deployment.spec.selector.matchlables-shi-yan-jie-shi.md)
   * [Client-go 结构](k8s/clientgo-jie-gou.md)
   * [Programing In K8s 1：Client-go 实现分析与二次开发](k8s/programing-in-k8s-1clientgo-shi-xian-fen-xi-yu-er-ci-kai-fa.md)
+  * [Kubernetes pod里一个特殊的容器：pause-amd64](k8s/kubernetes-pod-li-yi-ge-te-shu-de-rong-qi-pauseamd64.md)
 * [linux](linux/README.md)
   * [Linux中的文件描述符与打开文件之间的关系](linux/linux-zhong-de-wen-jian-miao-shu-fu-yu-da-kai-wen-jian-zhi-jian-de-guan-xi.md)
 * [others](others/README.md)
