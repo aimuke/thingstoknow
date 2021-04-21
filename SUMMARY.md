@@ -6,6 +6,7 @@
   * [如何在golang中发送中断信号？](go/how-to-send-signal-by-go.md)
   * [Golang 优雅的终止一个服务](go/golang-how-to-stop-a-server-gracely.md)
   * [使用 Go 语言实现优雅的服务器重启](go/shi-yong-go-yu-yan-shi-xian-you-ya-de-fu-wu-qi-zhong-qi.md)
+  * [Golang 启动引导](go/golang-qi-dong-yin-dao.md)
 * [k8s](k8s/README.md)
   * [K8s client-go 源码阅读笔记](k8s/k8s-clientgo-yuan-ma-yue-du-bi-ji.md)
   * [Deployment.spec.selector.matchLables 实验解释](k8s/deployment.spec.selector.matchlables-shi-yan-jie-shi.md)
