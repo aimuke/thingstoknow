@@ -207,17 +207,21 @@ Transfer/sec:      2.46MB (平均每秒流量2.46MB)
 
 > **标准差**啥意思？标准差如果太大说明样本本身离散程度比较高，有可能系统性能波动较大。
 
-### 4.4 使用 Lua 脚本进行复杂测试
+## 五 使用 Lua 脚本进行复杂测试
 
 您可能有疑问了，你这种进行 GET 请求还凑合，我想进行 POST 请求咋办？而且我想每次的请求参数都不一样，用来模拟用户使用的实际场景，又要怎么弄呢？
 
 对于这种需求，我们可以通过编写 Lua 脚本的方式，在运行压测命令时，通过参数 `--script` 来指定 Lua 脚本，来满足个性化需求。
 
-#### **4.4.1 wrk 对 Lua 脚本的支持**
+```text
+/wrk -t1 -c10 -d20s -s post.lua --latency http://www.douban.com
+```
+
+### **5.1 wrk 对 Lua 脚本的支持**
 
 wrk 支持在三个阶段对压测进行个性化，分别是启动阶段、运行阶段和结束阶段。每个测试线程，都拥有独立的Lua 运行环境。
 
-**启动阶段:**
+#### **启动阶段:**
 
 ```lua
 function setup(thread)
@@ -232,7 +236,7 @@ thread:set(name, value) - set the value of a global in the thread's env
 thread:stop()           - stop the thread
 ```
 
-**运行阶段：**
+#### **运行阶段：**
 
 ```lua
 function init(args)
@@ -246,7 +250,7 @@ function response(status, headers, body)
 * `request()`: 用来生成请求, 每一次请求都会调用该方法，所以注意不要在该方法中做耗时的操作；
 * `response(status, headers, body)`: 在每次收到一个响应时被调用，为提升性能，如果没有定义该方法，那么wrk不会解析 `headers` 和 `body`；
 
-**结束阶段：**
+#### **结束阶段：**
 
 ```text
 function done(summary, latency, requests)
@@ -301,19 +305,25 @@ function wrk.connect(addr)
     # 测试给定的服务器地址信息是否可以成功创建连接
 ```
 
-#### **4.4.2 通过 Lua 脚本压测示例**
+### **5.2 调用 POST 接口**
 
-**调用 POST 接口：**
-
+{% code title="post.lua" %}
 ```lua
 wrk.method = "POST"
 wrk.body   = "foo=bar&baz=quux"
 wrk.headers["Content-Type"] = "application/x-www-form-urlencoded"
 ```
+{% endcode %}
 
 注意: wrk 是个全局变量，这里对其做了修改，使得所有请求都使用 POST 的方式，并指定了 body 和 Content-Type头。
 
-**自定义每次请求的参数：**
+调用
+
+```bash
+./wrk -t4 -c100 -d30s -T30s --script=post.lua --latency http://www.douban.com
+```
+
+### **5.3 自定义每次请求的参数**
 
 ```lua
 request = function()
@@ -325,13 +335,15 @@ end
 
 在 request 方法中，随机生成 1~10000000 之间的 uid，并动态生成请求 URL.
 
-**每次请求前，延迟 10ms:**
+### **5.4 每次请求前，延迟 10ms**
 
 ```lua
 function delay()
    return 10
 end
 ```
+
+### **5.5 认证**
 
 **请求的接口需要先进行认证，获取 token 后，才能发起请求，咋办？**
 
@@ -354,7 +366,7 @@ end
 
 上面的脚本表示，在 token 为空的情况下，先请求 `/auth` 接口来认证，获取 token, 拿到 token 以后，将 token 放置到请求头中，再请求真正需要压测的 `/test` 接口。
 
-**压测支持 HTTP pipeline 的服务：**
+### **5.6 压测支持 HTTP pipeline 的服务**
 
 ```lua
 init = function(args)
@@ -373,13 +385,30 @@ end
 
 通过在 init 方法中将三个 HTTP请求拼接在一起，实现每次发送三个请求，以使用 HTTP pipeline。
 
-## 五、总结
+### 5.7 使用lua实现文件上传
 
-本文中，我们学习了轻量级性能测试工具 wrk, 如何安装，以及具体的使用方法，包括通过 Lua 脚本来个性化定制请求等。希望读完本文，能对您有所帮助哦！
+```lua
+# 实现上传文件测试与json类似
+# 同样是设置wrk.body和wrk.headers的值, 只是body较麻烦一些
+wrk.method = "POST"
+wrk.headers["Content-Type"] = "multipart/form-data;boundary=------WebKitFormBoundaryX3bY6PBMcxB1vCan"
 
-## 六、参考文档
+file = io.open("path/to/fake.jpg", "rb")
+
+-- 拼装form-data
+form = "------WebKitFormBoundaryX3bY6PBMcxB1vCan\r\n"
+form = form .. "Content-Disposition: form-data; name="file"; filename="fake.jpg"\r\n"
+form = form .. "Content-Type: image/jpeg\r\n\r\n"
+form = form .. file:read("*a")
+form = form .. "\r\n------WebKitFormBoundaryX3bY6PBMcxB1vCan--"
+
+wrk.body  = form
+```
+
+## References
 
 * 原文 [性能测试工具 wrk 使用教程](https://www.cnblogs.com/quanxiaoha/p/10661650.html)
+* [小巧而强大的wrk压测工具](https://www.escapelife.site/posts/4b014d0b.html)
 * [https://github.com/wg/wrk](https://github.com/wg/wrk)
 * [https://zjumty.iteye.com/blog/2221040](https://zjumty.iteye.com/blog/2221040)
 * [http://www.cnblogs.com/xinzhao/p/6233009.html](http://www.cnblogs.com/xinzhao/p/6233009.html)
