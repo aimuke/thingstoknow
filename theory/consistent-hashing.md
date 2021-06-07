@@ -14,40 +14,9 @@ node_number = hash(key) % N # 其中 N 为节点数。
 
 ## 一、传统哈希取模算法的局限性
 
-下面我们来分析一下传统的哈希及其在大规模分布式系统中的局限性。这里我们直接使用我之前所写文章 [布隆过滤器你值得拥有的开发利器](https://segmentfault.com/a/1190000021136424) 中定义的 SimpleHash 类，然后分别对 **semlinker、kakuqo 和 test** 3 个键进行哈希运算并取余，具体代码如下：
+下面我们来分析一下传统的哈希及其在大规模分布式系统中的局限性。
 
-```java
-public class SimpleHash {
-    private int cap;
-    private int seed;
-
-    public SimpleHash(int cap, int seed) {
-        this.cap = cap;
-        this.seed = seed;
-    }
-
-    public int hash(String value) {
-        int result = 0;
-        int len = value.length();
-        for (int i = 0; i < len; i++) {
-            result = seed * result + value.charAt(i);
-        }
-        return (cap - 1) & result;
-    }
-
-    public static void main(String[] args) {
-        SimpleHash simpleHash = new SimpleHash(2 << 12, 8);
-        System.out.println("node_number=hash(\"semlinker\") % 3 -> " + 
-          simpleHash.hash("semlinker") % 3);
-        System.out.println("node_number=hash(\"kakuqo\") % 3 -> " + 
-          simpleHash.hash("kakuqo") % 3);
-        System.out.println("node_number=hash(\"test\") % 3 -> " + 
-          simpleHash.hash("test") % 3);
-    }
-}
-```
-
-以上代码成功运行后，在控制台会输出以下结果：
+这里我们分别对 **semlinker、kakuqo 和 test** 3 个键进行哈希运算并取余，获得以下结果：
 
 ```bash
 node_number=hash("semlinker") % 3 -> 1
@@ -61,7 +30,9 @@ node_number=hash("test") % 3 -> 0
 
 ### **1.1 节点减少的场景**
 
-**在分布式多节点系统中，出现故障很常见。任何节点都可能在没有任何事先通知的情况下挂掉，针对这种情况我们期望系统只是出现性能降低，正常的功能不会受到影响。** 对于原始示例，当节点出现故障时会发生什么？原始示例中有的 3 个节点，假设其中 1 个节点出现故障，这时节点数发生了变化，节点个数从 3 减少为 2，此时表格的状态发生了变化：
+**在分布式多节点系统中，出现故障很常见。任何节点都可能在没有任何事先通知的情况下挂掉，针对这种情况我们期望系统只是出现性能降低，正常的功能不会受到影响。** 
+
+对于原始示例，当节点出现故障时会发生什么？原始示例中有的 3 个节点，假设其中 1 个节点出现故障，这时节点数发生了变化，节点个数从 3 减少为 2，此时表格的状态发生了变化：
 
 ![](../.gitbook/assets/image%20%2838%29.png)
 
@@ -244,10 +215,6 @@ public class ConsistentHashingWithoutVirtualNode {
 ```
 
 上面我们只介绍了不带虚拟节点的一致性哈希算法实现，如果有的小伙伴对带虚拟节点的一致性哈希算法感兴趣，可以参考 [一致性Hash\(Consistent Hashing\)原理剖析及Java实现](https://blog.csdn.net/suifeng629/article/details/81567777) 这篇文章。
-
-## 五、总结
-
-本文通过示例介绍了传统的哈希取模算法在分布式系统中的局限性，进而在针对该问题的解决方案中引出了一致性哈希算法。一致性哈希算法在 1997 年由麻省理工学院提出，是一种特殊的哈希算法，在移除或者添加一个服务器时，能够尽可能小地改变已存在的服务请求与处理请求服务器之间的映射关系。在介绍完一致性哈希算法的作用和优点等相关知识后，我们以图解的形式生动介绍了一致性哈希算法的原理，最后给出了不带虚拟节点的一致性哈希算法的 Java 实现。
 
 ## References
 
