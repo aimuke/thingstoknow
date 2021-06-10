@@ -138,6 +138,8 @@ M想要执行、放回G都必须访问全局G队列，并且M有多个，即多�
 
 在新调度器中，出列M\(thread\)和G\(goroutine\)，又引进了P\(Processor\)。
 
+GPM代表了三个角色，分别是Goroutine、Processor、Machine。
+
 ![](https://pic4.zhimg.com/80/v2-3355f21b27cc4c58ad9474c24c66e54f_720w.jpg)
 
 **Processor，它包含了运行goroutine的资源**，如果线程想运行goroutine，必须先获取P，P中还包含了可运行的G队列。
@@ -408,7 +410,24 @@ Hello World
 
 下一篇，我们来继续详细的分析GMP调度原理的一些场景问题。
 
-### 三、Go调度器调度场景过程全解析
+## 三、阻塞
+
+Go runtime 会在下面的 goroutine 被阻塞的情况下运行另外一个 goroutine：
+
+* blocking syscall \(for example opening a file\)
+* network input
+* channel operations
+* primitives in the sync package
+
+### 用户态阻塞/唤醒
+
+当 goroutine 因为 channel 操作阻塞时，对应的 G 会被放置到某个 wait 队列\(如 channel 的 waitq\)，该 G 的状态由`_Gruning` 变为 `_Gwaitting` ，而 M 会跳过该 G 尝试获取并执行下一个 G，如果此时没有 runnable 的 G 供 M 运行，那么 M 将解绑 P，并进入 sleep 状态；当阻塞的 G 被另一端的 G2 唤醒时（比如 channel 的可读/写通知），G 被标记为 runnable，尝试加入 G2 所在 P 的 runnext，然后再是 P 的 Local 队列和 Global 队列。
+
+### 系统调用阻塞
+
+当 G 被阻塞在某个系统调用上时，此时 G 会阻塞在 `_Gsyscall` 状态，M 也处于 block on syscall 状态，此时的 M 可被抢占调度：执行该 G 的 M 会与 P 解绑，而 P 则尝试与其它空闲的 M 绑定，继续执行其它 G。如果没有其它空闲的 M，但 P 的 Local 队列中仍然有 G 需要执行，则创建一个新的 M；当系统调用完成后，G 会重新尝试获取一个空闲的 P 进入它的 Local 队列恢复执行，如果没有空闲的 P，G 会被标记为 runnable 加入到 Global 队列。
+
+## 四、Go调度器调度场景过程全解析
 
 ### \(1\)场景1
 
@@ -492,7 +511,7 @@ G8创建了G9，假如G8进行了**非阻塞系统调用**。![](https://pic1.zh
 
 M2和P2会解绑，但M2会记住P2，然后G8和M2进入\*\*系统调用\*\*状态。当G8和M2退出系统调用时，会尝试获取P2，如果无法获取，则获取空闲的P，如果依然没有，G8会被记为可运行状态，并加入到全局队列,M2因为没有P的绑定而变成休眠状态\(长时间休眠等待GC回收销毁\)。
 
-## 四、小结
+## 五、小结
 
 总结，Go调度器很轻量也很简单，足以撑起goroutine的调度工作，并且让Go具有了原生（强大）并发的能力。**Go调度本质是把大量的goroutine分配到少量线程上去执行，并利用多核并行，实现更强大的并发。**
 
@@ -510,5 +529,8 @@ github: [https://github.com/aceld](https://link.zhihu.com/?target=https%3A//gith
 
 ## References
 
-[原文 \[典藏版\]Golang调度器GPM原理与调度全分析](https://zhuanlan.zhihu.com/p/323271088),  [刘丹冰Aceld](https://www.zhihu.com/people/hou-ri-tan-4)
+* [原文 \[典藏版\]Golang调度器GPM原理与调度全分析](https://zhuanlan.zhihu.com/p/323271088),  [刘丹冰Aceld](https://www.zhihu.com/people/hou-ri-tan-4)
+* [Golang GPM 模型](https://www.jianshu.com/p/105719434c29)
+
+
 
