@@ -18,7 +18,7 @@ neutron.conf中的service\_plugins表示了lbaasv2的plugin：
 
 neutron\_lbaas.services.loadbalancer.plugin.py
 
-```text
+```python
 class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
     def __init__(self):
         """Initialization for the loadbalancer service plugin."""
@@ -29,7 +29,7 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
 
 neutron\_lbaas.drivers.haproxy.plugin\_driver.py
 
-```text
+```python
 class HaproxyOnHostPluginDriver(agent_driver_base.AgentDriverBase):
     device_driver = namespace_driver.DRIVER_NAME
 
