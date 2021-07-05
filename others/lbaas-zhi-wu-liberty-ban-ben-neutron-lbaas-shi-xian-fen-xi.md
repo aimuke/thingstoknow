@@ -79,8 +79,7 @@ class HaproxyOnHostPluginDriver(agent_driver_base.AgentDriverBase):
 
 ### **plugin入口**
 
-neutron\_lbaas.services.loadbalancer.plugin.py
-
+{% code title="neutron\_lbaas.services.loadbalancer.plugin.py" %}
 ```python
 class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
  
@@ -102,11 +101,11 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
         # 同步返回了pool的数据库信息
         return self.db.get_pool(context, db_pool.id).to_api_dict()
 ```
+{% endcode %}
 
 ### **plugin的api及rpc处理**
 
-neutron\_lbaas.drivers.common.agent\_driver\_base.py
-
+{% code title="neutron\_lbaas.drivers.common.agent\_driver\_base.py" %}
 ```python
 class AgentDriverBase(driver_base.LoadBalancerBaseDriver):
  
@@ -157,6 +156,7 @@ class LoadBalancerAgentApi(object):
             # 向agent发送create_pool的消息
             cctxt.cast(context, 'create_pool', pool=pool)
 ```
+{% endcode %}
 
 ## agent（driver）部分
 
@@ -164,8 +164,7 @@ class LoadBalancerAgentApi(object):
 
 ### **agent的入口**
 
-neutron\_lbaas.agent.agent.py - main
-
+{% code title="neutron\_lbaas.agent.agent.py - main" %}
 ```python
 def main():
     # mgr指向LbaasAgentManager
@@ -178,11 +177,11 @@ def main():
     )
     service.launch(cfg.CONF, svc).wait()
 ```
+{% endcode %}
 
 ### **agent处理plugin下发的消息**
 
-neutron\_lbaas.agent.agent\_manager.py
-
+{% code title="neutron\_lbaas.agent.agent\_manager.py" %}
 ```python
 class LbaasAgentManager(periodic_task.PeriodicTasks):
  
@@ -203,12 +202,12 @@ class LbaasAgentManager(periodic_task.PeriodicTasks):
             # 回报状态
             self._update_statuses(pool)
 ```
+{% endcode %}
 
 ### **agent将任务下发给driver**
 
-neutron\_lbaas.drivers.haproxy.namespace\_driver.py
-
-```text
+{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
+```python
 NS_PREFIX = 'qlbaas-'
  
 def get_ns_name(namespace_id):
@@ -235,9 +234,9 @@ class HaproxyNSDriver(agent_device_driver.AgentDeviceDriver):
     def pool(self):
         return self._pool
 ```
+{% endcode %}
 
-neutron\_lbaas.drivers.haproxy.namespace\_driver.py
-
+{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
 ```python
 class PoolManager(agent_device_driver.BasePoolManager):
     def create(self, pool):
@@ -258,11 +257,13 @@ class LoadBalancerManager(agent_device_driver.BaseLoadBalancerManager):
                 self.driver.exists(loadbalancer.id)):
             self.driver.undeploy_instance(loadbalancer
 ```
+{% endcode %}
 
 ### **driver通过rpc访问plugin侧的db**
 
-neutron\_lbaas.agent.agent\_api.py
 
+
+{% code title="neutron\_lbaas.agent.agent\_api.py" %}
 ```python
 class LbaasAgentApi(object):
     def get_loadbalancer(self, loadbalancer_id):
@@ -273,9 +274,11 @@ class LbaasAgentApi(object):
         return cctxt.call(self.context, 'get_loadbalancer',
                           loadbalancer_id=loadbalancer_id)
 ```
+{% endcode %}
 
-neutron\_lbaas.drivers.common.agent\_callbacks.py
 
+
+{% code title="neutron\_lbaas.drivers.common.agent\_callbacks.py" %}
 ```python
 class LoadBalancerCallbacks(object):
     def get_loadbalancer(self, context, loadbalancer_id=None):
@@ -299,9 +302,9 @@ class LoadBalancerCallbacks(object):
         # 回到LbaasAgentApi的get_loadbalancer函数
         return lb_dict
 ```
+{% endcode %}
 
-neutron\_lbaas.db.loadbalancer.loadbalancer\_dbv2.py
-
+{% code title="neutron\_lbaas.db.loadbalancer.loadbalancer\_dbv2.py" %}
 ```python
 class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
                              agent_scheduler.LbaasAgentSchedulerDbMixin):
@@ -311,11 +314,11 @@ class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
         # 回到LoadBalancerCallbacks的get_loadbalancer函数
         return data_models.LoadBalancer.from_sqlalchemy_model(lb_db)
 ```
+{% endcode %}
 
 ### **driver开始执行实际操作**
 
-neutron\_lbaas.drivers.haproxy.namespace\_driver.py
-
+{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
 ```python
 class HaproxyNSDriver(agent_device_driver.AgentDeviceDriver):
  
@@ -439,6 +442,7 @@ class HaproxyNSDriver(agent_device_driver.AgentDeviceDriver):
         # remember deployed loadbalancer id
         self.deployed_loadbalancers[loadbalancer.id] = load
 ```
+{% endcode %}
 
 ## 操作步骤（未实践）
 
