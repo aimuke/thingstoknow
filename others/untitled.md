@@ -18,7 +18,7 @@
 
 ### 2.1 架构
 
-![](../.gitbook/assets/image%20%2842%29.png)
+![](../.gitbook/assets/image%20%2843%29.png)
 
 ### 2.2 LBaaS V1和V2区别
 
