@@ -177,9 +177,9 @@ def plug(self, network_id, port_id, device_name, mac_address,
             LOG.info(_("Device %s already exists"), device_name)
 ```
 
-这里的plug操作可以这样理解： LB的这些设备需要连接到交换机（指ovs虚拟交换机：br-int）上才能与网络相通，并正常工作。而要与网络想通，我们需要为设备添加一张网卡，并且把网卡attach到交换机上，然后配置正确，这些设备才能正常工作。
+这里的plug操作可以这样理解： LB的这些设备需要连接到交换机（指ovs虚拟交换机：br-int）上才能与网络相通，并正常工作。而要与网络相通，我们需要为设备添加一张网卡，并且把网卡attach到交换机上，然后配置正确，这些设备才能正常工作。
 
-在代码中还可以看到将网卡放在namespace这个东西中，namespace又是用来做什么的？感兴趣的可以看下：http://blog.csdn.net/preterhuman\_peak/article/details/40857117，简而言之：namespace提供了一个容器，它为多个进程提供了一个完全独立的网络协议栈的视图。包括网络设备接口，IPv4和IPv6协议栈，IP路由表，防火墙规则，sockets等。所以网卡放入到namespace中，这个网络设备接口就被进程所感知并可被使用。
+在代码中还可以看到将网卡放在namespace这个东西中，namespace又是用来做什么的？感兴趣的可以看下：[Linux Namespaces机制](http://blog.csdn.net/preterhuman_peak/article/details/40857117) ，简而言之：namespace提供了一个容器，它为多个进程提供了一个完全独立的网络协议栈的视图。包括网络设备接口，IPv4和IPv6协议栈，IP路由表，防火墙规则，sockets等。所以网卡放入到namespace中，这个网络设备接口就被进程所感知并可被使用。
 
 进行plug操作之后，还需要为网卡进行l3的初始化，并设置默认网关IP，这里我们很多人就有疑问：为什么要进行这些设置呢？这边就涉及到Neutron中实现L4/L7层服务的框架Service Insertion。
 
