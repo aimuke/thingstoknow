@@ -2,6 +2,7 @@
 
 * [Initial page](README.md)
 * [go](go/README.md)
+  * [Go 运行程序中的线程数](go/go-yun-hang-cheng-xu-zhong-de-xian-cheng-shu.md)
   * [\[典藏版\]Golang调度器GPM原理与调度全分析](go/go-gpm.md)
   * [\[译\] 使用 go/analysis 包实现自定义的 linter](go/using-go-analysis-to-write-a-custom-linter-zh.md)
   * [Go Module详细使用教程](go/go-module-introduce.md)
