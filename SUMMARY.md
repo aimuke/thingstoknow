@@ -12,6 +12,7 @@
   * [使用 Go 语言实现优雅的服务器重启](go/shi-yong-go-yu-yan-shi-xian-you-ya-de-fu-wu-qi-zhong-qi.md)
   * [Golang 启动引导](go/golang-qi-dong-yin-dao.md)
 * [k8s](k8s/README.md)
+  * [【k8s】leaderelection选举策略实现组件高可用](k8s/k8sleaderelection-xuan-ju-ce-lve-shi-xian-zu-jian-gao-ke-yong.md)
   * [K8s client-go 源码阅读笔记](k8s/k8s-clientgo-yuan-ma-yue-du-bi-ji.md)
   * [Deployment.spec.selector.matchLables 实验解释](k8s/deployment.spec.selector.matchlables-shi-yan-jie-shi.md)
   * [Client-go 结构](k8s/clientgo-jie-gou.md)
