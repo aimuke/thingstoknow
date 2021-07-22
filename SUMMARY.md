@@ -30,5 +30,6 @@
   * [YAML 语言教程](others/yaml-yu-yan-jiao-cheng.md)
 * [theory](theory/README.md)
   * [图解一致性哈希算法](theory/consistent-hashing.md)
-* [service mesh](service-mesh.md)
+* [service mesh](service-mesh/README.md)
+  * [Pilot MCP协议介绍](service-mesh/pilot-mcp-xie-yi-jie-shao.md)
 
