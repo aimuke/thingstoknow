@@ -32,4 +32,5 @@
   * [图解一致性哈希算法](theory/consistent-hashing.md)
 * [service mesh](service-mesh/README.md)
   * [Pilot MCP协议介绍](service-mesh/pilot-mcp-xie-yi-jie-shao.md)
+  * [istio mcp-over-xds 原理及实现](service-mesh/istio-mcpoverxds-yuan-li-ji-shi-xian.md)
 
