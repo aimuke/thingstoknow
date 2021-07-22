@@ -21,16 +21,28 @@ Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架�
   
 
 
-![](../.gitbook/assets/image%20%2858%29.png)
+![](../.gitbook/assets/image%20%2859%29.png)
 
 这样的设计比较好的定义了Pilot的职责，就是整个Service Mesh的控制面，但是不感知任何Istio以外的组件，即使是K8S也是如此。所有与外部组件包括注册中心和配置中心的交互逻辑，都移到了Pilot进程以外，通过运行特定的MCP Server来与Pilot进行通讯。Galley的职责，我认为是Pilot中默认的配置来源的MCP Server，目前是实现了与K8S数据的对接。这个文档中还定义了Pilot与Pilot之间的数据访问也是通过MCA（基于MCP协议定义的API），但是文档里没有提供更多的细节，会不会是Pilot未来会支持数据的分片以提高Pilot整体的数据容量？
 
 ## 协议定义
 
-看完了Pilot的整体演进架构，我们来看一下MCP协议的设计\[2\]，MCP协议在设计上参考了与Envoy的交互协议xDS。  
+看完了Pilot的整体演进架构，我们来看一下MCP协议的设计\[2\]，MCP协议在设计上参考了与Envoy的交互协议xDS。
+
+### 建立连接
+
+客户端发起连接  
 
 
-![](../.gitbook/assets/image%20%2860%29.png)
+![](../.gitbook/assets/image%20%2864%29.png)
+
+服务端发起连接
+
+![](../.gitbook/assets/image%20%2861%29.png)
+
+### 数据更新
+
+![](../.gitbook/assets/image%20%2866%29.png)
 
 在MCP协议中，定义了两个身份：Sink和Source。Sink指代的是数据的接收端，Source指代的是数据的发送端即数据源。MCP协议基于gRPC双向流协议进行定义，Sink端和Source端都可以随时往对端发送数据，相互不会阻塞。从上图的协议交互也可以看出，Sink端可以主动发送RequestResources请求来向Source端要求数据，同时Source端也可以主动将Resources数据发送给Sink端。Sink端在收到数据后会返回一个ACK确认。在RequestResources请求和ACK响应中，主要有两个字段：
 
@@ -41,7 +53,15 @@ Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架�
 
 同时MCP协议还定义了增量推送的能力，如下图所示。可以在RequestResouces请求中增加incremental=true字段，这样Sink在收到数据后，会根据增量的形式进行数据的更新。协议的文档中还指出，必须在RequestResouces请求中包含incremental=true的情况下，才能返回给Sink增量的数据，否则Sink端对于该数据的处理将是未知的。目前社区的Pilot还没有支持增量的MCP数据推送，从下一节的源码分析中可以看到，Pilot对于每一个Source（Pilot可以配置多个Source，每个Source之间的数据是隔离的）发送的数据，都是整体替换更新的。目前社区的一个进展是正在进行serviceentries类型数据的增量更新的支持，而且是endpoints粒度的增量更新\[3\]。
 
-![](../.gitbook/assets/image%20%2861%29.png)
+![](../.gitbook/assets/image%20%2867%29.png)
+
+### 数据更新错误流程
+
+![](../.gitbook/assets/image%20%2865%29.png)
+
+ The sink should only NACK in _exceptional_ cases. For example, if a set of resources was invalid, malformed, or could not be decoded. NACK'd updates should raise an alarm for subsequent investigation by a human. The source should not resend the same set of resources that were previously NACK'd. Canary pushes to dedicated sinks may also be used to verify correctness \(non-NACK\) before pushing to a larger fleet of resource sinks
+
+只有在异常的情况下，才应该返回NACK。比如资源不合法，格式不正确，或不能被解码等。一个返回NACK的更新应该抛出一个用于后续人为检查的告警。相关的资源也不应该在次被推送。对于大量数据的更新，可以先推送一小部分数据进行金丝雀测试，成功后在推送大量数据。
 
 ## Pilot Sink端启动流程
 
@@ -57,7 +77,7 @@ Sink端的run方法主要是调用EstablishResouceStream方法来建立双向流
 
 下面介绍的是Pilot的Sink端在接收到数据的处理逻辑。从下图中可以看出，在接收到数据后，会先判断是否返回了错误，如果返回错误则直接结束数据的更新。如果没有错误，则进入Apply\(change\)方法。在这个方法中，会先新建一个innerStore的Map来保存更新到的数据。然后会将原来的configStore里对应collection类型的数据直接由这个innerStore进行替换。因此可以看出Pilot目前还不支持增量的MCP数据推送。在更新完数据后，则调用serviceEntryEvents或者ClearDiscoveryServerCache来通知Envoy等组件进行数据的更新。
 
-![](../.gitbook/assets/image%20%2859%29.png)
+![](../.gitbook/assets/image%20%2860%29.png)
 
 ## 总结与展望
 
