@@ -34,7 +34,7 @@
   * [Pilot MCP协议介绍](service-mesh/pilot-mcp-xie-yi-jie-shao.md)
   * [istio mcp-over-xds 原理及实现](service-mesh/istio-mcpoverxds-yuan-li-ji-shi-xian.md)
   * [Istio 1.9 如何对接第三方注册中心](service-mesh/istio-1.9-ru-he-dui-jie-di-san-fang-zhu-ce-zhong-xin.md)
-  * [升级istio 1.10.2](service-mesh/sheng-ji-istio-1.10.2/README.md)
+  * [升级istio 1.10.3](service-mesh/sheng-ji-istio-1.10.2/README.md)
     * [istiod](service-mesh/sheng-ji-istio-1.10.2/istiod.md)
     * [istio 安装脚本](service-mesh/sheng-ji-istio-1.10.2/istio-an-zhuang-jiao-ben.md)
 
