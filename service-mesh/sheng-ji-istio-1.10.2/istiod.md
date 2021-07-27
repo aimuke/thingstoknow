@@ -1,5 +1,90 @@
 # istiod
 
+## configmap istio
+
+```bash
+$ kubectl get cm -n istio-system istio - yaml
+NAME    DATA   AGE
+istio   2      11m
+Error from server (NotFound): configmaps "-" not found
+Error from server (NotFound): configmaps "yaml" not found
+controlplane $ kubectl get cm -n istio-system istio -o yaml
+apiVersion: v1
+data:
+  mesh: |-
+    accessLogFile: /dev/stdout
+    defaultConfig:
+      discoveryAddress: istiod.istio-system.svc:15012
+      proxyMetadata: {}
+      tracing:
+        zipkin:
+          address: zipkin.istio-system:9411
+    enablePrometheusMerge: true
+    rootNamespace: istio-system
+    trustDomain: cluster.local
+  meshNetworks: 'networks: {}'
+kind: ConfigMap
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"mesh":"accessLogFile: /dev/stdout\ndefaultConfig:\n  discoveryAddress: istiod.istio-system.svc:15012\n  proxyMetadata: {}\n  tracing:\n    zipkin:\n      address: zipkin.istio-system:9411\nenablePrometheusMerge: true\nrootNamespace: istio-system\ntrustDomain: cluster.local","meshNetworks":"networks: {}"},"kind":"ConfigMap","metadata":{"annotations":{},"labels":{"install.operator.istio.io/owning-resource":"unknown","install.operator.istio.io/owning-resource-namespace":"istio-system","istio.io/rev":"default","operator.istio.io/component":"Pilot","operator.istio.io/managed":"Reconcile","operator.istio.io/version":"1.10.3","release":"istio"},"name":"istio","namespace":"istio-system"}}
+  creationTimestamp: "2021-07-27T03:10:36Z"
+  labels:
+    install.operator.istio.io/owning-resource: unknown
+    install.operator.istio.io/owning-resource-namespace: istio-system
+    istio.io/rev: default
+    operator.istio.io/component: Pilot
+    operator.istio.io/managed: Reconcile
+    operator.istio.io/version: 1.10.3
+    release: istio
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:data:
+        f:mesh: {}
+        f:meshNetworks: {}
+      f:metadata:
+        f:annotations:
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+        f:labels:
+          f:install.operator.istio.io/owning-resource: {}
+          f:install.operator.istio.io/owning-resource-namespace: {}
+          f:istio.io/rev: {}
+          f:operator.istio.io/component: {}
+          f:operator.istio.io/managed: {}
+          f:operator.istio.io/version: {}
+          f:release: {}
+    manager: istio-operator
+    operation: Apply
+    time: "2021-07-27T03:10:36Z"
+  name: istio
+  namespace: istio-system
+  resourceVersion: "742"
+  selfLink: /api/v1/namespaces/istio-system/configmaps/istio
+  uid: bae18212-ffb0-49e2-ab16-e10e2831a62d
+```
+
+## CRDS
+
+```bash
+controlplane $ kubectl get crd -A 
+NAME                                       CREATED AT
+authorizationpolicies.security.istio.io    2021-07-27T03:10:33Z
+destinationrules.networking.istio.io       2021-07-27T03:10:34Z
+envoyfilters.networking.istio.io           2021-07-27T03:10:34Z
+gateways.networking.istio.io               2021-07-27T03:10:34Z
+istiooperators.install.istio.io            2021-07-27T03:10:34Z
+peerauthentications.security.istio.io      2021-07-27T03:10:34Z
+requestauthentications.security.istio.io   2021-07-27T03:10:34Z
+serviceentries.networking.istio.io         2021-07-27T03:10:34Z
+sidecars.networking.istio.io               2021-07-27T03:10:34Z
+telemetries.telemetry.istio.io             2021-07-27T03:10:34Z
+virtualservices.networking.istio.io        2021-07-27T03:10:34Z
+workloadentries.networking.istio.io        2021-07-27T03:10:34Z
+workloadgroups.networking.istio.io         2021-07-27T03:10:34Z
+```
+
 ## Env
 
 ```bash
