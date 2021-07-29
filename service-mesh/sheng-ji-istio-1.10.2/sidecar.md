@@ -40,6 +40,371 @@ unix  3      [ ]         STREAM     CONNECTED     77361    1/pilot-agent        
 node01 $ 
 ```
 
+## docker inspect
+
+```text
+node01 $ docker inspect  acc387522665 
+[
+    {
+        "Id": "acc3875226653de409b03962002c409068a605266d13c50a96e33af792e98b39",
+        "Created": "2021-07-29T09:08:17.50977529Z",
+        "Path": "/usr/local/bin/pilot-agent",
+        "Args": [
+            "proxy",
+            "sidecar",
+            "--domain",
+            "default.svc.cluster.local",
+            "--serviceCluster",
+            "productpage.default",
+            "--proxyLogLevel=warning",
+            "--proxyComponentLogLevel=misc:error",
+            "--log_output_level=default:info",
+            "--concurrency",
+            "2"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 10081,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2021-07-29T09:08:18.61387811Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:37f4e188f5b6f2e1455c0469e89c178c6e10a99e6310c9406fd5b00ea532c6d5",
+        "ResolvConfPath": "/var/lib/docker/containers/6f7ed04d7db823421475c4364d020d892d8d72398c10ead9ef2eb36aefdc9cb0/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/6f7ed04d7db823421475c4364d020d892d8d72398c10ead9ef2eb36aefdc9cb0/hostname",
+        "HostsPath": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/etc-hosts",
+        "LogPath": "/var/lib/docker/containers/acc3875226653de409b03962002c409068a605266d13c50a96e33af792e98b39/acc3875226653de409b03962002c409068a605266d13c50a96e33af792e98b39-json.log",
+        "Name": "/k8s_istio-proxy_productpage-v1-5d9b4c9849-c6rbk_default_548c4779-f884-40a1-afd7-3cb7ef4ca620_0",
+        "RestartCount": 0,
+        "Driver": "overlay",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~configmap/istiod-ca-cert:/var/run/secrets/istio:ro",
+                "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~empty-dir/istio-data:/var/lib/istio/data",
+                "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~empty-dir/istio-envoy:/etc/istio/proxy",
+                "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~downward-api/istio-podinfo:/etc/istio/pod:ro",
+                "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~secret/bookinfo-productpage-token-hwwqm:/var/run/secrets/kubernetes.io/serviceaccount:ro",
+                "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/etc-hosts:/etc/hosts",
+                "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/containers/istio-proxy/fd0ac660:/dev/termination-log"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {
+                    "max-size": "100m"
+                }
+            },
+            "NetworkMode": "container:6f7ed04d7db823421475c4364d020d892d8d72398c10ead9ef2eb36aefdc9cb0",
+            "PortBindings": null,
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": null,
+            "CapDrop": [
+                "ALL"
+            ],
+            "Capabilities": null,
+            "Dns": null,
+            "DnsOptions": null,
+            "DnsSearch": null,
+            "ExtraHosts": null,
+            "GroupAdd": [
+                "1337"
+            ],
+            "IpcMode": "container:6f7ed04d7db823421475c4364d020d892d8d72398c10ead9ef2eb36aefdc9cb0",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 990,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": true,
+            "SecurityOpt": [
+                "no-new-privileges",
+                "seccomp=unconfined"
+            ],
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 10,
+            "Memory": 1073741824,
+            "NanoCpus": 0,
+            "CgroupParent": "kubepods-burstable-pod548c4779_f884_40a1_afd7_3cb7ef4ca620.slice",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 100000,
+            "CpuQuota": 200000,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "KernelMemory": 0,
+            "KernelMemoryTCP": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": -1,
+            "MemorySwappiness": null,
+            "OomKillDisable": false,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/asound",
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay/8fab3ab014ac77e9bb61fff43282e966589b202f5f344bc5376c3ae76c423d47/root",
+                "MergedDir": "/var/lib/docker/overlay/21b399bc888bb5f051e35aa929ad63a04a77873107093de7c1ca5915560b8813/merged",
+                "UpperDir": "/var/lib/docker/overlay/21b399bc888bb5f051e35aa929ad63a04a77873107093de7c1ca5915560b8813/upper",
+                "WorkDir": "/var/lib/docker/overlay/21b399bc888bb5f051e35aa929ad63a04a77873107093de7c1ca5915560b8813/work"
+            },
+            "Name": "overlay"
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~configmap/istiod-ca-cert",
+                "Destination": "/var/run/secrets/istio",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~empty-dir/istio-data",
+                "Destination": "/var/lib/istio/data",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~empty-dir/istio-envoy",
+                "Destination": "/etc/istio/proxy",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~downward-api/istio-podinfo",
+                "Destination": "/etc/istio/pod",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/volumes/kubernetes.io~secret/bookinfo-productpage-token-hwwqm",
+                "Destination": "/var/run/secrets/kubernetes.io/serviceaccount",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/etc-hosts",
+                "Destination": "/etc/hosts",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/lib/kubelet/pods/548c4779-f884-40a1-afd7-3cb7ef4ca620/containers/istio-proxy/fd0ac660",
+                "Destination": "/dev/termination-log",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "productpage-v1-5d9b4c9849-c6rbk",
+            "Domainname": "",
+            "User": "1337:1337",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "HOST_IP=172.17.0.13",
+                "CANONICAL_REVISION=v1",
+                "ISTIO_META_INTERCEPTION_MODE=REDIRECT",
+                "INSTANCE_IP=10.244.1.10",
+                "ISTIO_META_APP_CONTAINERS=productpage",
+                "ISTIO_META_WORKLOAD_NAME=productpage-v1",
+                "TRUST_DOMAIN=cluster.local",
+                "POD_NAME=productpage-v1-5d9b4c9849-c6rbk",
+                "ISTIO_META_OWNER=kubernetes://apis/apps/v1/namespaces/default/deployments/productpage-v1",
+                "ISTIO_META_MESH_ID=cluster.local",
+                "ISTIO_META_POD_PORTS=[\n    {\"containerPort\":9080,\"protocol\":\"TCP\"}\n]",
+                "JWT_POLICY=first-party-jwt",
+                "PILOT_CERT_PROVIDER=istiod",
+                "CA_ADDR=istiod.istio-system.svc:15012",
+                "POD_NAMESPACE=default",
+                "SERVICE_ACCOUNT=bookinfo-productpage",
+                "CANONICAL_SERVICE=productpage",
+                "PROXY_CONFIG={}\n",
+                "ISTIO_META_CLUSTER_ID=Kubernetes",
+                "REVIEWS_SERVICE_HOST=10.108.108.18",
+                "REVIEWS_PORT=tcp://10.108.108.18:9080",
+                "KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1",
+                "PRODUCTPAGE_PORT_9080_TCP_ADDR=10.107.11.142",
+                "DETAILS_SERVICE_HOST=10.103.196.48",
+                "DETAILS_PORT_9080_TCP=tcp://10.103.196.48:9080",
+                "RATINGS_PORT_9080_TCP_PORT=9080",
+                "REVIEWS_SERVICE_PORT_HTTP=9080",
+                "KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443",
+                "PRODUCTPAGE_SERVICE_HOST=10.107.11.142",
+                "DETAILS_PORT_9080_TCP_ADDR=10.103.196.48",
+                "RATINGS_PORT_9080_TCP=tcp://10.109.175.138:9080",
+                "KUBERNETES_PORT_443_TCP_PORT=443",
+                "DETAILS_SERVICE_PORT_HTTP=9080",
+                "REVIEWS_SERVICE_PORT=9080",
+                "REVIEWS_PORT_9080_TCP_ADDR=10.108.108.18",
+                "DETAILS_PORT=tcp://10.103.196.48:9080",
+                "RATINGS_SERVICE_PORT=9080",
+                "RATINGS_SERVICE_PORT_HTTP=9080",
+                "REVIEWS_PORT_9080_TCP_PROTO=tcp",
+                "KUBERNETES_SERVICE_HOST=10.96.0.1",
+                "PRODUCTPAGE_SERVICE_PORT=9080",
+                "PRODUCTPAGE_PORT_9080_TCP=tcp://10.107.11.142:9080",
+                "DETAILS_SERVICE_PORT=9080",
+                "KUBERNETES_PORT_443_TCP_PROTO=tcp",
+                "PRODUCTPAGE_PORT=tcp://10.107.11.142:9080",
+                "PRODUCTPAGE_PORT_9080_TCP_PROTO=tcp",
+                "RATINGS_PORT_9080_TCP_PROTO=tcp",
+                "KUBERNETES_SERVICE_PORT=443",
+                "KUBERNETES_PORT=tcp://10.96.0.1:443",
+                "DETAILS_PORT_9080_TCP_PROTO=tcp",
+                "REVIEWS_PORT_9080_TCP=tcp://10.108.108.18:9080",
+                "REVIEWS_PORT_9080_TCP_PORT=9080",
+                "RATINGS_SERVICE_HOST=10.109.175.138",
+                "RATINGS_PORT_9080_TCP_ADDR=10.109.175.138",
+                "KUBERNETES_SERVICE_PORT_HTTPS=443",
+                "PRODUCTPAGE_SERVICE_PORT_HTTP=9080",
+                "PRODUCTPAGE_PORT_9080_TCP_PORT=9080",
+                "DETAILS_PORT_9080_TCP_PORT=9080",
+                "RATINGS_PORT=tcp://10.109.175.138:9080",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "DEBIAN_FRONTEND=noninteractive",
+                "ISTIO_META_ISTIO_PROXY_SHA=istio-proxy:4b528a87271e841bd64daf841a1a384ed4fcac68",
+                "ISTIO_META_ISTIO_VERSION=1.10.3"
+            ],
+            "Cmd": [
+                "proxy",
+                "sidecar",
+                "--domain",
+                "default.svc.cluster.local",
+                "--serviceCluster",
+                "productpage.default",
+                "--proxyLogLevel=warning",
+                "--proxyComponentLogLevel=misc:error",
+                "--log_output_level=default:info",
+                "--concurrency",
+                "2"
+            ],
+            "Healthcheck": {
+                "Test": [
+                    "NONE"
+                ]
+            },
+            "Image": "sha256:37f4e188f5b6f2e1455c0469e89c178c6e10a99e6310c9406fd5b00ea532c6d5",
+            "Volumes": null,
+            "WorkingDir": "/",
+            "Entrypoint": [
+                "/usr/local/bin/pilot-agent"
+            ],
+            "OnBuild": null,
+            "Labels": {
+                "annotation.io.kubernetes.container.hash": "e5e745fa",
+                "annotation.io.kubernetes.container.ports": "[{\"name\":\"http-envoy-prom\",\"containerPort\":15090,\"protocol\":\"TCP\"}]",
+                "annotation.io.kubernetes.container.restartCount": "0",
+                "annotation.io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+                "annotation.io.kubernetes.container.terminationMessagePolicy": "File",
+                "annotation.io.kubernetes.pod.terminationGracePeriod": "30",
+                "io.kubernetes.container.logpath": "/var/log/pods/default_productpage-v1-5d9b4c9849-c6rbk_548c4779-f884-40a1-afd7-3cb7ef4ca620/istio-proxy/0.log",
+                "io.kubernetes.container.name": "istio-proxy",
+                "io.kubernetes.docker.type": "container",
+                "io.kubernetes.pod.name": "productpage-v1-5d9b4c9849-c6rbk",
+                "io.kubernetes.pod.namespace": "default",
+                "io.kubernetes.pod.uid": "548c4779-f884-40a1-afd7-3cb7ef4ca620",
+                "io.kubernetes.sandbox.id": "6f7ed04d7db823421475c4364d020d892d8d72398c10ead9ef2eb36aefdc9cb0"
+            }
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": {},
+            "SandboxKey": "",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "",
+            "Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "MacAddress": "",
+            "Networks": {}
+        }
+    }
+]
+```
+
 ## envoy-rev0.json
 
 ```text
