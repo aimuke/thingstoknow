@@ -30,6 +30,7 @@
   * [YAML 语言教程](others/yaml-yu-yan-jiao-cheng.md)
 * [theory](theory/README.md)
   * [图解一致性哈希算法](theory/consistent-hashing.md)
+  * [JSON Web Token 入门教程](theory/json-web-token-ru-men-jiao-cheng.md)
 * [service mesh](service-mesh/README.md)
   * [Pilot MCP协议介绍](service-mesh/pilot-mcp-xie-yi-jie-shao.md)
   * [istio mcp-over-xds 原理及实现](service-mesh/istio-mcpoverxds-yuan-li-ji-shi-xian.md)
