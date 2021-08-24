@@ -40,4 +40,5 @@
     * [istiod](service-mesh/sheng-ji-istio-1.10.2/istiod.md)
     * [istio 安装脚本](service-mesh/sheng-ji-istio-1.10.2/istio-an-zhuang-jiao-ben.md)
     * [sidecar](service-mesh/sheng-ji-istio-1.10.2/sidecar.md)
+    * [test](service-mesh/sheng-ji-istio-1.10.2/test.md)
 
