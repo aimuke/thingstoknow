@@ -3,7 +3,7 @@
 productpage 中测试 
 
 ```text
-curl ${REVIEWS_SERVICE_HOST}:${REVIEWS_SERVICE_PORT_HTTP}/reviews/0 -v
+curl ${REVIEWS_SERVICE_HOST}:${REVIEWS_SERVICE_PORT_HTTP}/reviews/0
 ```
 
 对应的测试结果
