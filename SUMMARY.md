@@ -32,6 +32,8 @@
 * [theory](theory/README.md)
   * [图解一致性哈希算法](theory/consistent-hashing.md)
   * [JSON Web Token 入门教程](theory/json-web-token-ru-men-jiao-cheng.md)
+  * [raft协议](theory/raft-xie-yi/README.md)
+    * [寻找一种可以理解的一致性算法](theory/raft-xie-yi/xun-zhao-yi-zhong-ke-yi-li-jie-de-yi-zhi-xing-suan-fa.md)
 * [service mesh](service-mesh/README.md)
   * [Pilot MCP协议介绍](service-mesh/pilot-mcp-xie-yi-jie-shao.md)
   * [istio mcp-over-xds 原理及实现](service-mesh/istio-mcpoverxds-yuan-li-ji-shi-xian.md)
