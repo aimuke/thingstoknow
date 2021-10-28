@@ -38,7 +38,9 @@
 * candidate
 
    给出状态转移图能很直观的直到这三个状态的区别\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202049306-1194425087.png)
+
+
+![](<../../.gitbook/assets/image (106).png>)
 
   可以看出所有节点启动时都是follower状态；在一段时间内如果没有收到来自leader的心跳，从follower切换到candidate，发起选举；如果收到majority的造成票（含自己的一票）则切换到leader状态；如果发现其他节点比自己更新，则主动切换到follower。
 
@@ -47,7 +49,9 @@
 ### term <a href="term" id="term"></a>
 
    从上面可以看出，哪个节点做leader是大家投票选举出来的，每个leader工作一段时间，然后选出新的leader继续负责。这根民主社会的选举很像，每一届新的履职期称之为一届任期，在raft协议中，也是这样的，对应的术语叫_**term**_。\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202155162-452543292.png)
+
+
+![](<../../.gitbook/assets/image (97).png>)
 
    term（任期）以选举（election）开始，然后就是一段或长或短的稳定工作期（normal Operation）。从上图可以看到，任期是递增的，这就充当了逻辑时钟的作用；另外，term 3展示了一种情况，就是说没有选举出leader就结束了，然后会发起新的选举，后面会解释这种_split vote_的情况。
 
