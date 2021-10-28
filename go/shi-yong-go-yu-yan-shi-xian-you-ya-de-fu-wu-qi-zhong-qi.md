@@ -10,10 +10,10 @@ Go被设计为一种后台语言，它通常也被用于后端程序中。服务
 
 ## 原理
 
- 在基于Unix的操作系统中，signal\(信号\)是与长时间运行的进程交互的常用方法.
+&#x20;在基于Unix的操作系统中，signal(信号)是与长时间运行的进程交互的常用方法.
 
 * SIGTERM: 优雅地停止进程
-* SIGHUP: 重启/重新加载进程 \(例如: nginx, sshd, apache\)
+* SIGHUP: 重启/重新加载进程 (例如: nginx, sshd, apache)
 
 如果收到SIGHUP信号，优雅地重启进程需要以下几个步骤:
 
@@ -115,9 +115,9 @@ if os.Getenv("_GRACEFUL_RESTART") == "true" {
 
 ## 最后一步，等待旧服务连接停止
 
- 到此为止，就这样，我们已经将其传到另一个正在正确运行的进程，对于旧服务器的最后操作是等其连接关闭。由于标准库里提供了`sync.WaitGroup` 结构体，用go实现这个功能很简单。
+&#x20;到此为止，就这样，我们已经将其传到另一个正在正确运行的进程，对于旧服务器的最后操作是等其连接关闭。由于标准库里提供了`sync.WaitGroup `结构体，用go实现这个功能很简单。
 
-每次接收一个连接，在 `WaitGroup` 上加 `1` ,然后，我们在它完成时将计数器减一：
+每次接收一个连接，在` WaitGroup` 上加 `1` ,然后，我们在它完成时将计数器减一：
 
 ```go
 for { 
@@ -162,17 +162,16 @@ select {
 
 socket 传递配合 `ForkExec` 使用确实是一种无干扰更新进程的有效方式，在最大时间上，新的连接会等待几毫秒——用于服务的启动和恢复 `socket`，但这个时间很短。
 
-这篇文章是我 \#周五技术系列 的一部分，下这个周不会有新的更新了，大家圣诞节快乐。
+这篇文章是我 #周五技术系列 的一部分，下这个周不会有新的更新了，大家圣诞节快乐。
 
 ## References
 
 * 示例: [https://github.com/Scalingo/go-graceful-restart-example](https://github.com/Scalingo/go-graceful-restart-example)
 * Go变量的隐形声明: [http://www.qureet.com/blog/golang-beartrap/](http://www.qureet.com/blog/golang-beartrap/)
-* Bonus的问题:fork\(\)Golang进程安全吗？ : [https://groups.google.com/forum/\#!msg/golang-nuts/beKfn7rujNg/zwY6zwl7QtQJ](https://groups.google.com/forum/#!msg/golang-nuts/beKfn7rujNg/zwY6zwl7QtQJ)
+* Bonus的问题:fork()Golang进程安全吗？ : [https://groups.google.com/forum/#!msg/golang-nuts/beKfn7rujNg/zwY6zwl7QtQJ](https://groups.google.com/forum/#!msg/golang-nuts/beKfn7rujNg/zwY6zwl7QtQJ)
 * 我们的网站: [https://appsdeck.eu](https://appsdeck.eu)
 
-     — Léo Unbekandt CTO @ Appsdeck
+&#x20;    — Léo Unbekandt CTO @ Appsdeck
 
 * 译文地址：[https://www.oschina.net/translate/graceful-server-restart-with-go](https://www.oschina.net/translate/graceful-server-restart-with-go)
 * 原文地址：[http://blog.appsdeck.eu/post/105609534953/graceful-server-restart-with-go](http://blog.appsdeck.eu/post/105609534953/graceful-server-restart-with-go)
-

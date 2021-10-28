@@ -1,15 +1,15 @@
 # Consul原理解析
 
- 发表于 2019-01-04 \|  分类于 [distributed-system ](http://ljchen.net/categories/distributed-system/)\|  阅读时长 ≈ 19 mins
+&#x20;发表于 2019-01-04 |  分类于 [distributed-system ](http://ljchen.net/categories/distributed-system/)|  阅读时长 ≈ 19 mins
 
-从2016年开始接触微服务的时候就使用consul，当初只知道其特别方便，是一款不错的服务注册与发现工具。至于其部署架构，实现原理都没有深入去了解过，就如同年少读书不求甚解。最近，在着手搞微服务治理，服务治理与发现这块正好选型consul，这才详细的琢磨了下其代码，也对其原理有了一定的认识。下面就听我就徐徐道来……  
+从2016年开始接触微服务的时候就使用consul，当初只知道其特别方便，是一款不错的服务注册与发现工具。至于其部署架构，实现原理都没有深入去了解过，就如同年少读书不求甚解。最近，在着手搞微服务治理，服务治理与发现这块正好选型consul，这才详细的琢磨了下其代码，也对其原理有了一定的认识。下面就听我就徐徐道来……\
 
 
-## 架构介绍 <a id="&#x67B6;&#x6784;&#x4ECB;&#x7ECD;"></a>
+## 架构介绍 <a href="jia-gou-jie-shao" id="jia-gou-jie-shao"></a>
 
 下面是consul官方给出的一张架构图，我们先来理解一下
 
-![](../.gitbook/assets/image%20%2877%29.png)
+![](<../.gitbook/assets/image (77).png>)
 
 首先，从架构上，图片被两个datacenter分成了上下两部分；但这两部分又并不是完全隔离的，他们之间通过WAN GOSSIP在Internet上交互报文。因此，我们了解到consul是可以支持多个数据中心之间基于WAN来做同步的。
 
@@ -21,31 +21,31 @@
 
 同一个consul agent程序，通过启动的时候指定不同的参数来运行server或client模式。这两种模式下，各自所负责的事务具体如下。
 
-### Server节点 <a id="Server&#x8282;&#x70B9;"></a>
+### Server节点 <a href="server-jie-dian" id="server-jie-dian"></a>
 
-* 参与共识仲裁\(raft\)
-* 存储群集状态\(日志存储\)
+* 参与共识仲裁(raft)
+* 存储群集状态(日志存储)
 * 处理查询
-* 维护与周边\(LAN/WAN\)各节点关系
+* 维护与周边(LAN/WAN)各节点关系
 
-### Agent节点 <a id="Agent&#x8282;&#x70B9;"></a>
+### Agent节点 <a href="agent-jie-dian" id="agent-jie-dian"></a>
 
 * 负责通过该节点注册到consul的微服务的健康检查
 * 将客户端注册请求以及查询转化为对server的RPC请求
-* 维护与周边\(LAN/WAN\)各节点关系
+* 维护与周边(LAN/WAN)各节点关系
 
-### 服务端口 <a id="&#x670D;&#x52A1;&#x7AEF;&#x53E3;"></a>
+### 服务端口 <a href="fu-wu-duan-kou" id="fu-wu-duan-kou"></a>
 
-| 端口 | 作用 |
-| :--- | :--- |
-| 8300 | RPC exchanges |
-| 8301 | LAN GOSSIP |
-| 8302 | WAN GOSSIP |
-| 8400 | RPC exchanges by the CLI |
+| 端口   | 作用                                  |
+| ---- | ----------------------------------- |
+| 8300 | RPC exchanges                       |
+| 8301 | LAN GOSSIP                          |
+| 8302 | WAN GOSSIP                          |
+| 8400 | RPC exchanges by the CLI            |
 | 8500 | Used for HTTP API and web interface |
-| 8600 | Used for DNS server |
+| 8600 | Used for DNS server                 |
 
-## 实现原理 <a id="&#x5B9E;&#x73B0;&#x539F;&#x7406;"></a>
+## 实现原理 <a href="shi-xian-yuan-li" id="shi-xian-yuan-li"></a>
 
 纵观consul的实现，其核心在于两点：
 
@@ -57,11 +57,11 @@
 * 使用gossip协议在集群内传播信息
 * 使用raft协议来保障日志的一致性
 
-### Serf <a id="Serf"></a>
+### Serf <a href="serf" id="serf"></a>
 
-serf是hashicorp基于GOSSIP协议来实现的一个用于分布式集群成员管理，失败检测以及编排的工具，当前最新版本为v0.8.1。有兴趣的朋友可以到这个链接具体了解[hashicorp serf](https://www.serf.io/)，下面我来简单介绍一下其功能。
+serf是hashicorp基于GOSSIP协议来实现的一个用于分布式集群成员管理，失败检测以及编排的工具，当前最新版本为v0.8.1。有兴趣的朋友可以到这个链接具体了解[hashicorp serf](https://www.serf.io)，下面我来简单介绍一下其功能。
 
-#### 集群管理 <a id="&#x96C6;&#x7FA4;&#x7BA1;&#x7406;"></a>
+#### 集群管理 <a href="ji-qun-guan-li" id="ji-qun-guan-li"></a>
 
 这台机器上有两个IP地址，一个是172.20.20.10，另一个为172.20.20.10。我准备启动两个serf agent进程，分别绑定到不同的两个IP地址上，各自叫做agent-one和agent-two。
 
@@ -81,9 +81,9 @@ agent-two     172.20.20.11:7946    alive
 
 
 
-#### 事件响应 <a id="&#x4E8B;&#x4EF6;&#x54CD;&#x5E94;"></a>
+#### 事件响应 <a href="shi-jian-xiang-ying" id="shi-jian-xiang-ying"></a>
 
-在前面的步骤中，我们将两个serf进程加入到了同一个LAN中，接下来我们将进行一些更加激动人心的实践。接下来，我们创建了一个脚本\(handler.sh\)，大致内容为:当脚本被调用的时候，会打印出一些具体的信息。然后，我们在启动serf agent的时候，通过参数将该脚本传递给serf agent。这样当收该serf节点收到event时，就会调用用户指定的handler（即执行脚本）。
+在前面的步骤中，我们将两个serf进程加入到了同一个LAN中，接下来我们将进行一些更加激动人心的实践。接下来，我们创建了一个脚本(handler.sh)，大致内容为:当脚本被调用的时候，会打印出一些具体的信息。然后，我们在启动serf agent的时候，通过参数将该脚本传递给serf agent。这样当收该serf节点收到event时，就会调用用户指定的handler（即执行脚本）。
 
 ```bash
 $ cat handler.sh
@@ -105,7 +105,7 @@ $ serf agent -log-level=debug -event-handler=handler.sh
 $ serf event hello-there
 ```
 
-#### Event类型 <a id="Event&#x7C7B;&#x578B;"></a>
+#### Event类型 <a href="event-lei-xing" id="event-lei-xing"></a>
 
 serf指定了下面这些类型的event，各自的作用如下所示：
 
@@ -119,18 +119,18 @@ user           A custom user event, covered later in this guide.
 query          A query event, covered later in this guide
 ```
 
-### Raft <a id="Raft"></a>
+### Raft <a href="raft" id="raft"></a>
 
 由于介绍raft协议的文章已经比较多，我这里就不在详述。这里重点分析一下在consul中，raft协议运作的一些实践和日志。
 
-#### 节点状态变更 <a id="&#x8282;&#x70B9;&#x72B6;&#x6001;&#x53D8;&#x66F4;"></a>
+#### 节点状态变更 <a href="jie-dian-zhuang-tai-bian-geng" id="jie-dian-zhuang-tai-bian-geng"></a>
 
 1. 在节点数达到bootstrap-expect的数时，开始启用raft选举
 2. 在节点数超过bootstrap-expect数时，其他节点为follower
 3. 在leader被干掉后，raft如果判断到节点数依然大于等于bootstrap-expect时，重新选举
 4. 逐一干掉节点，当节点数少于bootstrap-expect时，raft协议不再选举，将维持先前的状态。
 
-#### Raft选举日志分析 <a id="Raft&#x9009;&#x4E3E;&#x65E5;&#x5FD7;&#x5206;&#x6790;"></a>
+#### Raft选举日志分析 <a href="raft-xuan-ju-ri-zhi-fen-xi" id="raft-xuan-ju-ri-zhi-fen-xi"></a>
 
 ```bash
 # 选举日志信息 （bootstrap）
@@ -222,33 +222,38 @@ bootstrap_expect > 0: expecting 3 servers
 
 
 
-## 源码架构 <a id="&#x6E90;&#x7801;&#x67B6;&#x6784;"></a>
+## 源码架构 <a href="yuan-ma-jia-gou" id="yuan-ma-jia-gou"></a>
 
 先来看Consul内部是如何做服务注册与发现的流程，下图是consul客户端向agent注册以及发现目标服务的时序图
 
-![](../.gitbook/assets/image%20%2879%29.png)
+![](<../.gitbook/assets/image (79).png>)
 
 通过上图，我们大概知道了在consul agent中，功能分为了consul server和consul agent（client）。在前面[架构介绍](http://ljchen.net/2019/01/04/consul%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/#%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D)中我们已经阐述了server和client各自的职责。
 
 consul源码中，server和client都是在一套代码中，通过指定启动参数的形势来运行consul server。这里我们先来重点讲解一下consul client的内部架构。
 
-### Consul Client架 <a id="Consul-Client&#x67B6;&#x6784;"></a>
+### Consul Client架 <a href="consulclient-jia-gou" id="consulclient-jia-gou"></a>
 
-![](../.gitbook/assets/image%20%2878%29.png)
+![](<../.gitbook/assets/image (78).png>)
 
 上图简要描述了consul client中的各重要服务，以及它们之间的关系。
 
-* `lan serf` 主要职责是维护节点之间的关系，当有节点加入或者离开的时候，所有节点都会接收到对应的event，这里的lan serf就是指对这些event做处理的handler的go routine服务。
-* `state sync` 在consul启动的时候，会启动该服务，它监听一个channel，当其他服务有向consul server同步配置的需求的时候，就会像channel中写入event信息；然后就会触发该服务向consul server同步配置信息。这里的同步又分为全同步和部分同步，主要是为了降低网路的负担。
-* `gRPC router` 这是对连接到consul server的gRPC连接的维护和负载均衡机制。在该服务中心，一方面会基于lan serf对consul server节点的拓扑变更事件来维护server列表，另一方面也会对到存活server的connection做定期的ping来维护连接列表；除此之外，还能够对server连接做客户端负载均衡。
-* `local state` 是一个本地的内存数据库，一般执行sync就是从server将数据同步过来保存到该db中；平时做一些配置更改也会对应更新该db。
-* `api` consul是提供了HTTP和CLI两种对外访问方式的，这里所谓的API并不是想说接口的细节，而指的是consul所提供对外API对应controller逻辑实现。比如下一节要讲到的服务注册的API，后面都做了什么业务逻辑，这是很重要的一部分，对于复杂的逻辑一般包括了：更新本地local state，启动对应的go routine来做事，使用gRPC向server更新数据，向sync channel发消息从而触发sync等操作。
+* `lan serf`\
+  主要职责是维护节点之间的关系，当有节点加入或者离开的时候，所有节点都会接收到对应的event，这里的lan serf就是指对这些event做处理的handler的go routine服务。
+* `state sync`\
+  在consul启动的时候，会启动该服务，它监听一个channel，当其他服务有向consul server同步配置的需求的时候，就会像channel中写入event信息；然后就会触发该服务向consul server同步配置信息。这里的同步又分为全同步和部分同步，主要是为了降低网路的负担。
+* `gRPC router`\
+  这是对连接到consul server的gRPC连接的维护和负载均衡机制。在该服务中心，一方面会基于lan serf对consul server节点的拓扑变更事件来维护server列表，另一方面也会对到存活server的connection做定期的ping来维护连接列表；除此之外，还能够对server连接做客户端负载均衡。
+* `local state`\
+  是一个本地的内存数据库，一般执行sync就是从server将数据同步过来保存到该db中；平时做一些配置更改也会对应更新该db。
+* `api`\
+  consul是提供了HTTP和CLI两种对外访问方式的，这里所谓的API并不是想说接口的细节，而指的是consul所提供对外API对应controller逻辑实现。比如下一节要讲到的服务注册的API，后面都做了什么业务逻辑，这是很重要的一部分，对于复杂的逻辑一般包括了：更新本地local state，启动对应的go routine来做事，使用gRPC向server更新数据，向sync channel发消息从而触发sync等操作。
 
-### 服务注册流程 <a id="&#x670D;&#x52A1;&#x6CE8;&#x518C;&#x6D41;&#x7A0B;"></a>
+### 服务注册流程 <a href="fu-wu-zhu-ce-liu-cheng" id="fu-wu-zhu-ce-liu-cheng"></a>
 
 基于前面一节的介绍，我们大概能够猜测到服务注册大概都需要些什么样的流程，接下来我们就将以下这块的逻辑
 
-![](../.gitbook/assets/image%20%2876%29.png)
+![](<../.gitbook/assets/image (76).png>)
 
 上图是其服务注册API的controller中函数调用的一个简化流程。
 
@@ -257,11 +262,11 @@ consul源码中，server和client都是在一套代码中，通过指定启动�
 * 对于在注册的时候制定了healthcheck内容的服务，需要继续注册healthcheck。由于consul支持的healthcheck类型较多，这里对其所指定类型做了简单的校验，然后就开始干正事了。启动一个goroutine来专门为这个服务执行定期的健康检查操作，可见，如果该consul agent上注册的服务太多的话，势必消耗很多资源，这就要求我们部署方案要做好规划了。
 * 当健康检查的结果与先前的结果不一致的时候，会触发对local state的更新，同时，需要局部同步该服务到consul server上的内容。为什么呢？因为服务的健康状态其实是保存到其check字段下的，而非是service的一个一级属性，这块大家可以下去查阅一下代码。另外，每次状态变更都会触发consul agent通过gRPC调用server的`Catalog.Register`来注册服务，我的理解其实是覆盖先前注册关于该服务的信息。
 
-## 操作实践 <a id="&#x64CD;&#x4F5C;&#x5B9E;&#x8DF5;"></a>
+## 操作实践 <a href="cao-zuo-shi-jian" id="cao-zuo-shi-jian"></a>
 
 介绍consul agent的配置参数，以及各种使用场景下的命令。
 
-### consul agent参数 <a id="consul-agent&#x53C2;&#x6570;"></a>
+### consul agent参数 <a href="consulagent-can-shu" id="consulagent-can-shu"></a>
 
 ```bash
 -advertise        通知展现地址用来改变我们给集群中的其他节点展现的地址，一般情况下-bind地址就是展现地址
@@ -288,9 +293,9 @@ consul源码中，server和client都是在一套代码中，通过指定启动�
 -pid-file         提供一个路径来存放pid文件，可以使用该文件进行SIGINT/SIGHUP(关闭/更新)agent
 ```
 
-### 常用命令 <a id="&#x5E38;&#x7528;&#x547D;&#x4EE4;"></a>
+### 常用命令 <a href="chang-yong-ming-ling" id="chang-yong-ming-ling"></a>
 
-#### 开发模式 <a id="&#x5F00;&#x53D1;&#x6A21;&#x5F0F;"></a>
+#### 开发模式 <a href="kai-fa-mo-shi" id="kai-fa-mo-shi"></a>
 
 最简单，可以用于本地微服务开发的时候，零时做服务注册与发现工具。请注意的是，开发模式下，consul不会做配置的持久化，当consul服务终止时，之前注册的服务和K/V都会随之丢失！
 
@@ -298,7 +303,7 @@ consul源码中，server和client都是在一套代码中，通过指定启动�
 docker run -d --name=dev-consul -e CONSUL_BIND_INTERFACE=eth0 consul
 ```
 
-#### server模式 <a id="server&#x6A21;&#x5F0F;"></a>
+#### server模式 <a href="server-mo-shi" id="server-mo-shi"></a>
 
 ```bash
 docker run -d --net=host -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}' consul agent -server -bind=<external ip> -retry-join=<root agent ip> -bootstrap-expect=<number of server agents>
@@ -310,7 +315,7 @@ docker run -d --net=host -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": tru
 docker run -d -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}' consul agent -server -retry-join=172.17.0.2 -bootstrap-expect=3
 ```
 
-#### client模式 <a id="client&#x6A21;&#x5F0F;"></a>
+#### client模式 <a href="client-mo-shi" id="client-mo-shi"></a>
 
 * 启动client
 
@@ -331,7 +336,7 @@ docker exec -t dev-consul consul members
 dig @localhost -p 8600 consul.service.consul
 ```
 
-#### 集群部署实践 <a id="&#x96C6;&#x7FA4;&#x90E8;&#x7F72;&#x5B9E;&#x8DF5;"></a>
+#### 集群部署实践 <a href="ji-qun-bu-shu-shi-jian" id="ji-qun-bu-shu-shi-jian"></a>
 
 下面是部署两个server和一个agent的实例
 
@@ -353,7 +358,7 @@ dig @localhost -p 8600 consul.service.consul
 ./consul agent -node=c1 -bind=10.200.204.133 -data-dir /etc/consul/data -ui -rejoin -config-dir=/etc/consul/conf -client 0.0.0.0 -retry-join=10.200.204.48
 ```
 
-#### 查看raft角色 <a id="&#x67E5;&#x770B;raft&#x89D2;&#x8272;"></a>
+#### 查看raft角色 <a href="cha-kan-raft-jiao-se" id="cha-kan-raft-jiao-se"></a>
 
 ```bash
 # consul operator raft list-peers
@@ -363,7 +368,7 @@ b603f61d1449  3844affd-9b4e-ad3d-84f3-25fb77806e7c  172.17.0.4:8300  follower  t
 edb64d232050  46ebd85c-5e96-f9bd-81e4-0a82d3b405c7  172.17.0.6:8300  leader    true   3
 ```
 
-#### 注册服务到consul <a id="&#x6CE8;&#x518C;&#x670D;&#x52A1;&#x5230;consul"></a>
+#### 注册服务到consul <a href="zhu-ce-fu-wu-dao-consul" id="zhu-ce-fu-wu-dao-consul"></a>
 
 ```bash
 cat << EOF >> payload.json
@@ -424,7 +429,7 @@ curl --request PUT --data @payload.json http://127.0.0.1:8500/v1/catalog/registe
 curl -X PUT -H 'application/json' -d '{"ID": "taobao","Name": "taobao","Tags": ["primary","v1"],"Address": "140.205.94.189","Port": 80,"Meta": {"taobao_version": "4.0"},"EnableTagOverride": false,"Check": {"DeregisterCriticalServiceAfter": "90m","HTTP": "http://140.205.94.189:80/","Interval": "10s"},"Weights": {"Passing": 10,"Warning": 1}}' http://127.0.0.1:8500/v1/agent/service/register
 ```
 
-#### 配置文件注册 <a id="&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x6CE8;&#x518C;"></a>
+#### 配置文件注册 <a href="pei-zhi-wen-jian-zhu-ce" id="pei-zhi-wen-jian-zhu-ce"></a>
 
 直接将以下json文件保存后存放到`--config-dir`目录下，重启consul服务
 
@@ -450,19 +455,19 @@ curl -X PUT -H 'application/json' -d '{"ID": "taobao","Name": "taobao","Tags": [
 
 会发现，在哪一个client节点上注册的服务，对应client节点就会负责做healthcheck，也就意味着，这个节点非常重要，如果做不好高可用，所有注册到上面的服务都有被deregisterd的风险。
 
-#### API 注册 <a id="API-&#x6CE8;&#x518C;"></a>
+#### API 注册 <a href="api-zhu-ce" id="api-zhu-ce"></a>
 
 ```bash
 curl -X PUT -d '{"id": "ljchen","name": "ljchen","address": "14.215.177.38","port": 80,"tags": ["dev"],"checks": [{"http": "http://14.215.177.38:80/","interval": "5s"}]}' http://127.0.0.1:8500/v1/agent/service/register
 ```
 
-#### 查询consul中的服务 <a id="&#x67E5;&#x8BE2;consul&#x4E2D;&#x7684;&#x670D;&#x52A1;"></a>
+#### 查询consul中的服务 <a href="cha-xun-consul-zhong-de-fu-wu" id="cha-xun-consul-zhong-de-fu-wu"></a>
 
 ```bash
 curl http://127.0.0.1:8500/v1/catalog/service/redis?tag=v1
 ```
 
-#### 删除node节点 <a id="&#x5220;&#x9664;node&#x8282;&#x70B9;"></a>
+#### 删除node节点 <a href="shan-chu-node-jie-dian" id="shan-chu-node-jie-dian"></a>
 
 ```bash
 curl -X PUT -H 'application/json' -d '{"Datacenter": "dc1","Node": "node-name"}' http://127.0.0.1:8500/v1/catalog/deregister
@@ -470,13 +475,11 @@ curl -X PUT -H 'application/json' -d '{"Datacenter": "dc1","Node": "node-name"}'
 
 * **本文作者：** ljchen
 * **本文链接：** [http://ljchen.net/2019/01/04/consul原理解析/](http://ljchen.net/2019/01/04/consul%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/)
-* **版权声明：** 本博客所有文章除特别声明外，均采用 [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/) 许可协议。转载请注明出处！
+* **版权声明： **本博客所有文章除特别声明外，均采用 [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/) 许可协议。转载请注明出处！
 
-[\# distributed-system](http://ljchen.net/tags/distributed-system/) [\# leader-election](http://ljchen.net/tags/leader-election/) [\# consul](http://ljchen.net/tags/consul/)
+[# distributed-system](http://ljchen.net/tags/distributed-system/) [# leader-election](http://ljchen.net/tags/leader-election/) [# consul](http://ljchen.net/tags/consul/)
 
 ## References
 
-* [原文 Consul原理解析](http://ljchen.net/2019/01/04/consul%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/),[ ljchen](http://ljchen.net/)
-
-
+* [原文 Consul原理解析](http://ljchen.net/2019/01/04/consul%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/),[ ljchen](http://ljchen.net)
 

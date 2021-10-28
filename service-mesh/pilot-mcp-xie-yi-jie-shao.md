@@ -6,7 +6,7 @@ Istio是目前主流的Service Mesh组件。Istio基于Service Mesh的理念，�
 
 ## 总体架构
 
-MCP协议推出的背后，是Pilot意图重构以解决之前架构带来的代码维护、测试、扩展及稳定性等多方面的问题。在之前的架构中，Pilot内嵌了与K8S的交互逻辑以及其他扩展的注册中心和配置中心的逻辑。这样导致Pilot内部逻辑比较复杂、承担职责不够清晰。同时与各个组件的交互协议也不统一，导致Pilot难以维护这些代码，对于后面的扩展组件接入，也望而却步。在Pilot的重构设计文档中，对于Pilot目前存在的问题是这么总结的\[1\]：  
+MCP协议推出的背后，是Pilot意图重构以解决之前架构带来的代码维护、测试、扩展及稳定性等多方面的问题。在之前的架构中，Pilot内嵌了与K8S的交互逻辑以及其他扩展的注册中心和配置中心的逻辑。这样导致Pilot内部逻辑比较复杂、承担职责不够清晰。同时与各个组件的交互协议也不统一，导致Pilot难以维护这些代码，对于后面的扩展组件接入，也望而却步。在Pilot的重构设计文档中，对于Pilot目前存在的问题是这么总结的\[1]：\
 “
 
 * Pilot is more difficult to test than is necessary. It requires a dependency on K8S Apiserver in order to write more complex unit or simple integration tests.
@@ -15,34 +15,34 @@ MCP协议推出的背后，是Pilot意图重构以解决之前架构带来的代
 * The contract between Pilot, Kubernetes and other platforms is under-specified. We implicitly consume the totality of the K8S API surface even if we don’t need it.
 * Writing extensions to Pilot requires developers to consume our build process and this has proven to be a barrier to adoption for partners. This is analogous to the recent architectural shift in Mixer to use out-of-process adapters for the same reasons.
 
-”  
-  
-Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架构。在这个架构中，Pilot与Envoy还是使用Envoy定义的ADS协议，Pilot与Galley、外部的注册中心、配置中心以及其他的Pilot之间，都是通过MCP协议进行通讯：  
-  
+”\
+\
+Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架构。在这个架构中，Pilot与Envoy还是使用Envoy定义的ADS协议，Pilot与Galley、外部的注册中心、配置中心以及其他的Pilot之间，都是通过MCP协议进行通讯：\
+\
 
 
-![](../.gitbook/assets/image%20%2859%29.png)
+![](<../.gitbook/assets/image (59).png>)
 
 这样的设计比较好的定义了Pilot的职责，就是整个Service Mesh的控制面，但是不感知任何Istio以外的组件，即使是K8S也是如此。所有与外部组件包括注册中心和配置中心的交互逻辑，都移到了Pilot进程以外，通过运行特定的MCP Server来与Pilot进行通讯。Galley的职责，我认为是Pilot中默认的配置来源的MCP Server，目前是实现了与K8S数据的对接。这个文档中还定义了Pilot与Pilot之间的数据访问也是通过MCA（基于MCP协议定义的API），但是文档里没有提供更多的细节，会不会是Pilot未来会支持数据的分片以提高Pilot整体的数据容量？
 
 ## 协议定义
 
-看完了Pilot的整体演进架构，我们来看一下MCP协议的设计\[2\]，MCP协议在设计上参考了与Envoy的交互协议xDS。
+看完了Pilot的整体演进架构，我们来看一下MCP协议的设计\[2]，MCP协议在设计上参考了与Envoy的交互协议xDS。
 
 ### 建立连接
 
-客户端发起连接  
+客户端发起连接\
 
 
-![](../.gitbook/assets/image%20%2864%29.png)
+![](<../.gitbook/assets/image (64).png>)
 
 服务端发起连接
 
-![](../.gitbook/assets/image%20%2861%29.png)
+![](<../.gitbook/assets/image (61).png>)
 
 ### 数据更新
 
-![](../.gitbook/assets/image%20%2866%29.png)
+![](<../.gitbook/assets/image (66).png>)
 
 在MCP协议中，定义了两个身份：Sink和Source。Sink指代的是数据的接收端，Source指代的是数据的发送端即数据源。MCP协议基于gRPC双向流协议进行定义，Sink端和Source端都可以随时往对端发送数据，相互不会阻塞。从上图的协议交互也可以看出，Sink端可以主动发送RequestResources请求来向Source端要求数据，同时Source端也可以主动将Resources数据发送给Sink端。Sink端在收到数据后会返回一个ACK确认。在RequestResources请求和ACK响应中，主要有两个字段：
 
@@ -51,15 +51,15 @@ Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架�
 
 而在返回的数据中，还有一个字段就是resources字段，里面包含真正的数据，具体的数据格式和collection的类型有关。
 
-同时MCP协议还定义了增量推送的能力，如下图所示。可以在RequestResouces请求中增加incremental=true字段，这样Sink在收到数据后，会根据增量的形式进行数据的更新。协议的文档中还指出，必须在RequestResouces请求中包含incremental=true的情况下，才能返回给Sink增量的数据，否则Sink端对于该数据的处理将是未知的。目前社区的Pilot还没有支持增量的MCP数据推送，从下一节的源码分析中可以看到，Pilot对于每一个Source（Pilot可以配置多个Source，每个Source之间的数据是隔离的）发送的数据，都是整体替换更新的。目前社区的一个进展是正在进行serviceentries类型数据的增量更新的支持，而且是endpoints粒度的增量更新\[3\]。
+同时MCP协议还定义了增量推送的能力，如下图所示。可以在RequestResouces请求中增加incremental=true字段，这样Sink在收到数据后，会根据增量的形式进行数据的更新。协议的文档中还指出，必须在RequestResouces请求中包含incremental=true的情况下，才能返回给Sink增量的数据，否则Sink端对于该数据的处理将是未知的。目前社区的Pilot还没有支持增量的MCP数据推送，从下一节的源码分析中可以看到，Pilot对于每一个Source（Pilot可以配置多个Source，每个Source之间的数据是隔离的）发送的数据，都是整体替换更新的。目前社区的一个进展是正在进行serviceentries类型数据的增量更新的支持，而且是endpoints粒度的增量更新\[3]。
 
-![](../.gitbook/assets/image%20%2867%29.png)
+![](<../.gitbook/assets/image (67).png>)
 
 ### 数据更新错误流程
 
-![](../.gitbook/assets/image%20%2865%29.png)
+![](<../.gitbook/assets/image (65).png>)
 
- The sink should only NACK in _exceptional_ cases. For example, if a set of resources was invalid, malformed, or could not be decoded. NACK'd updates should raise an alarm for subsequent investigation by a human. The source should not resend the same set of resources that were previously NACK'd. Canary pushes to dedicated sinks may also be used to verify correctness \(non-NACK\) before pushing to a larger fleet of resource sinks
+&#x20;The sink should only NACK in _exceptional_ cases. For example, if a set of resources was invalid, malformed, or could not be decoded. NACK'd updates should raise an alarm for subsequent investigation by a human. The source should not resend the same set of resources that were previously NACK'd. Canary pushes to dedicated sinks may also be used to verify correctness (non-NACK) before pushing to a larger fleet of resource sinks
 
 只有在异常的情况下，才应该返回NACK。比如资源不合法，格式不正确，或不能被解码等。一个返回NACK的更新应该抛出一个用于后续人为检查的告警。相关的资源也不应该在次被推送。对于大量数据的更新，可以先推送一小部分数据进行金丝雀测试，成功后在推送大量数据。
 
@@ -67,7 +67,7 @@ Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架�
 
 Pilot在启动的时候，会根据ConfigMap里的配置，进行MCP Server的初始化。主要的逻辑可以参考下图：
 
-![](../.gitbook/assets/image%20%2857%29.png)
+![](<../.gitbook/assets/image (57).png>)
 
 Pilot启动时，会调用server.NewServer来新建Pilot Server。在此过程中，会去读取ConfigSource配置里面的address。由于可能会配置多个address，那么Pilot在这里会循环去创建多个Sink客户端①，每一个Sink客户端拥有独立的数据。在这里有一点要注意的是，这个循环中会尝试与每个MCP Server建立gRPC连接，而如果其中一个MCP Server连接不上的话，整个循环就会推出，并返回error。也就是说如果Pilot在启动过程中无法连上每一个MCP Server，那么Pilot就会处于不健康状态，而在运行时没有这个限制②。当Sink客户端都新建完以后，就会再次循环异步调用每个Sink客户端的run方法，进行数据的收发了。
 
@@ -75,13 +75,13 @@ Sink端的run方法主要是调用EstablishResouceStream方法来建立双向流
 
 ## Pilot Sink端处理流程
 
-下面介绍的是Pilot的Sink端在接收到数据的处理逻辑。从下图中可以看出，在接收到数据后，会先判断是否返回了错误，如果返回错误则直接结束数据的更新。如果没有错误，则进入Apply\(change\)方法。在这个方法中，会先新建一个innerStore的Map来保存更新到的数据。然后会将原来的configStore里对应collection类型的数据直接由这个innerStore进行替换。因此可以看出Pilot目前还不支持增量的MCP数据推送。在更新完数据后，则调用serviceEntryEvents或者ClearDiscoveryServerCache来通知Envoy等组件进行数据的更新。
+下面介绍的是Pilot的Sink端在接收到数据的处理逻辑。从下图中可以看出，在接收到数据后，会先判断是否返回了错误，如果返回错误则直接结束数据的更新。如果没有错误，则进入Apply(change)方法。在这个方法中，会先新建一个innerStore的Map来保存更新到的数据。然后会将原来的configStore里对应collection类型的数据直接由这个innerStore进行替换。因此可以看出Pilot目前还不支持增量的MCP数据推送。在更新完数据后，则调用serviceEntryEvents或者ClearDiscoveryServerCache来通知Envoy等组件进行数据的更新。
 
-![](../.gitbook/assets/image%20%2860%29.png)
+![](<../.gitbook/assets/image (60).png>)
 
 ## 总结与展望
 
-目前Source端可以参考的代码有Galley，以及Nacos开发的独立MCP Server，用于进行MCP功能的测试和压测\[4\]，以及和Nacos Server一起部署的Java版本的MCP Server\[5\]。本文不做详细介绍，有兴趣的同学可以自行阅读相关源代码。
+目前Source端可以参考的代码有Galley，以及Nacos开发的独立MCP Server，用于进行MCP功能的测试和压测\[4]，以及和Nacos Server一起部署的Java版本的MCP Server\[5]。本文不做详细介绍，有兴趣的同学可以自行阅读相关源代码。
 
 整体来看目前Pilot MCP协议还处于快速的更新和迭代阶段，未来可能还会有很多的变化。但是Istio基于MCP协议进行重构的大方向应该是不会跑了。Nacos团队目前也在密切关注着Istio及其他云原生组件的发展方向，同时将会陆续发布相关的功能，敬请期待。
 
@@ -91,9 +91,8 @@ Sink端的run方法主要是调用EstablishResouceStream方法来建立双向流
 
 * [原文 Pilot MCP协议介绍](https://nacos.io/en-us/blog/pilot%20mcp.html)
 
-\[1\] Pilot重构设计文档 [https://docs.google.com/document/d/1S5ygkxR1alNI8cWGG4O4iV8zp8dA6Oc23zQCvFxr83U/edit\#](https://docs.google.com/document/d/1S5ygkxR1alNI8cWGG4O4iV8zp8dA6Oc23zQCvFxr83U/edit#)  
-\[2\] MCP协议介绍 [https://github.com/istio/api/tree/master/mcp](https://github.com/istio/api/tree/master/mcp)  
-\[3\] Pilot serviceentries增量推送的PR [https://github.com/istio/istio/pull/12276](https://github.com/istio/istio/pull/12276)  
-\[4\] Nacos提供的独立的MCP Server，Go语言开发 [https://github.com/nacos-group/nacos-istio](https://github.com/nacos-group/nacos-istio)  
-\[5\] Nacos对接Istio的issue，以及相关的commits [https://github.com/alibaba/nacos/issues/1409](https://github.com/alibaba/nacos/issues/1409)
-
+\[1] Pilot重构设计文档 [https://docs.google.com/document/d/1S5ygkxR1alNI8cWGG4O4iV8zp8dA6Oc23zQCvFxr83U/edit#](https://docs.google.com/document/d/1S5ygkxR1alNI8cWGG4O4iV8zp8dA6Oc23zQCvFxr83U/edit#)\
+\[2] MCP协议介绍 [https://github.com/istio/api/tree/master/mcp](https://github.com/istio/api/tree/master/mcp)\
+\[3] Pilot serviceentries增量推送的PR [https://github.com/istio/istio/pull/12276](https://github.com/istio/istio/pull/12276)\
+\[4] Nacos提供的独立的MCP Server，Go语言开发 [https://github.com/nacos-group/nacos-istio](https://github.com/nacos-group/nacos-istio)\
+\[5] Nacos对接Istio的issue，以及相关的commits [https://github.com/alibaba/nacos/issues/1409](https://github.com/alibaba/nacos/issues/1409)

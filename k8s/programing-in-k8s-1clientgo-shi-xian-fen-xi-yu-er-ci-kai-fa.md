@@ -14,7 +14,7 @@ github地址： [https://github.com/kubernetes/client-go](https://github.com/kub
 
 ## 2. Client-go 结构
 
-![](../.gitbook/assets/image%20%2820%29.png)
+![](<../.gitbook/assets/image (20).png>)
 
 ### RESTClient
 
@@ -50,7 +50,7 @@ for _, d := range result.Items {
 
 ### ClientSet
 
-`ClientSet` 是使用最多的客户端，它继承自 `RESTClient`，使用K8s的代码生成机制\(client-gen机制\)，在编译过程中，会根据目前K8s内置的资源信息，自动生成他们的客户端代码\(前提是需要添加适当的注解\)，使用者可以通过builder pattern进行初始化，得到自己在意的目标资源类型的客户端。`ClientSet` 如同它的名字一样，代表的是一组内置资源的客户端。例如：
+`ClientSet` 是使用最多的客户端，它继承自 `RESTClient`，使用K8s的代码生成机制(client-gen机制)，在编译过程中，会根据目前K8s内置的资源信息，自动生成他们的客户端代码(前提是需要添加适当的注解)，使用者可以通过builder pattern进行初始化，得到自己在意的目标资源类型的客户端。`ClientSet` 如同它的名字一样，代表的是一组内置资源的客户端。例如：
 
 ```go
 clientset, err := kubernetes.NewForConfig(config) // 根据config对象创建clientSet对象
@@ -113,7 +113,7 @@ for _, list := range APIResourceList {
 
 本地缓存路径：
 
-![](../.gitbook/assets/image%20%2812%29.png)
+![](<../.gitbook/assets/image (12).png>)
 
 本地存储了 `serverresources.json` 文件，感兴趣的可以打开看下，是json格式化后的资源信息。
 
@@ -143,28 +143,28 @@ func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Facto
 
 ### 小结
 
-| 客户端名称 | 源码目录 | 简单描述 |
-| :--- | :--- | :--- |
-| RESTClient | client-go/rest/ | 基础客户端，对HTTP Request封装 |
-| ClientSet | client-go/kubernetes/ | 在 `RESTClient` 基础上封装了对Resource和Version，也就是说我们使用 `ClientSet` 的话是必须要知道 `Resource` 和 `Version`， 例如`AppsV1().Deployments` 或者 `CoreV1.Pods`，缺点是不能访问`CRD` 自定义资源 |
-| DynamicClient | client-go/dynamic/ | 包含一组动态的客户端，可以对任意的K8S API对象执行通用操作，包括CRD自定义资源   |
-| DiscoveryClient  | client-go/discovery/ | ClientSet必须要知道Resource和Version, 但使用者通常很难记住所有的 `GVR` 信息，这个 `DiscoveryClient` 是提供一个发现客户端，发现API Server支持的资源组，资源版本和资源信息 |
+| 客户端名称            | 源码目录                  | 简单描述                                                                                                                                                      |
+| ---------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RESTClient       | client-go/rest/       | 基础客户端，对HTTP Request封装                                                                                                                                     |
+| ClientSet        | client-go/kubernetes/ | 在 `RESTClient` 基础上封装了对Resource和Version，也就是说我们使用 `ClientSet` 的话是必须要知道 `Resource` 和 `Version`， 例如`AppsV1().Deployments` 或者 `CoreV1.Pods`，缺点是不能访问`CRD` 自定义资源 |
+| DynamicClient    | client-go/dynamic/    | 包含一组动态的客户端，可以对任意的K8S API对象执行通用操作，包括CRD自定义资源                                                                                                               |
+| DiscoveryClient  | client-go/discovery/  | ClientSet必须要知道Resource和Version, 但使用者通常很难记住所有的 `GVR` 信息，这个 `DiscoveryClient` 是提供一个发现客户端，发现API Server支持的资源组，资源版本和资源信息                                       |
 
 ## 3. Client-go 内部原理
 
 官方的client-go架构图如下，可以看到 `Informer` 机制是里面的核心模块。`Informer` 顾名思义就是消息通知器。是连接本地客户端与API Server的关键。
 
-![](../.gitbook/assets/image%20%2815%29.png)
+![](<../.gitbook/assets/image (15).png>)
 
 针对 `Informer` 中的组件，我们自下而上的分析。
 
 ### 3.1 Indexer
 
- 在Informer的结构图中，`Local Storage` 就是 `Indexer` , `Indexer` 字面意思就是索引器，索引器+存储，有经验的开发，大概已经能理解这两者之间的关联了。`Indexer` 通过某种方式构建资源对象的索引，来存储资源对象。相应的，使用者可以依据这种索引，快速检索到自己关注的资源对象。
+&#x20;在Informer的结构图中，`Local Storage` 就是 `Indexer` , `Indexer` 字面意思就是索引器，索引器+存储，有经验的开发，大概已经能理解这两者之间的关联了。`Indexer` 通过某种方式构建资源对象的索引，来存储资源对象。相应的，使用者可以依据这种索引，快速检索到自己关注的资源对象。
 
 `Indexer` 是一个继承自 `Store` 的接口，`Delta_FIFO`也同样继承自 `Store`，一个 `Indexer` 对象中，可以存在多种不同的索引。
 
-首先看看 `indexer` 和 `Store` 的声明：
+首先看看 `indexer `和 `Store` 的声明：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/index.go
@@ -217,11 +217,11 @@ type Indices map[string]Index
 type Index map[string]sets.String   
 ```
 
-只看说明有一些绕\(中文里索引一词，一会儿是动词，一会儿是名词\)，这里我画了两个图解释一下：
+只看说明有一些绕(中文里索引一词，一会儿是动词，一会儿是名词)，这里我画了两个图解释一下：
 
-![](../.gitbook/assets/image%20%2811%29.png)
+![](<../.gitbook/assets/image (11).png>)
 
-![](../.gitbook/assets/image%20%287%29.png)
+![](<../.gitbook/assets/image (7).png>)
 
 不难发现，其实可以类比MySql里面索引的实现， `Items` 里面存储的是聚簇索引， `Index` 里面存储的是没有数据信息的二级索引，即使在二级索引里找到了对象键，要想找到原始的 `object`，还需要回 `Items` 里面查找。
 
@@ -283,7 +283,7 @@ type ThreadSafeStore interface {
 
 `Indexer` 是 `Informer` 实现本地缓存的关键模块。作为 `Indexer` 的主要实现， `cache` 是一个存储在内存中的缓存器，初始化时，会指定 `keyFunc`，通常会根据对象的资源名与对象名组合成一个唯一的字符串作为对象键。此外，`cache` 将缓存的维护工作委托给 `threadSafeMap` 来完成，`threadSafeMap` 内部实现了一套类似MySql覆盖索引、二级索引的存储机制，用户可以自行添加具有特定索引生成方法的二级索引，方便自己的数据存取。
 
-另外：K8s内部，目前使用的默认对象键计算方法\(也就是 `cache` 里面的 `keyfunc` \)是`MetaNamespaceKeyFunc`：
+另外：K8s内部，目前使用的默认对象键计算方法(也就是 `cache` 里面的 `keyfunc` )是`MetaNamespaceKeyFunc`：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/store.go
@@ -332,7 +332,7 @@ func indexByPodNodeName(obj interface{}) ([]string, error) {
 
 `DeltaFIFO` 其实是两个词：`Delta + FIFO`，`Delta` 代表变化，`FIFO` 则是先入先出的队列。
 
-![](../.gitbook/assets/image%20%2819%29.png)
+![](<../.gitbook/assets/image (19).png>)
 
 `DeltaFIFO` 将接受来的资源 `event`,转化为特定的变化类型，存储在队列中，周期性的 `POP` 出去，分发到事件处理器，并更新 `Indexer` 中的本地缓存。
 
@@ -396,7 +396,7 @@ type DeltaFIFO struct {
 
 可以用一张图简单描述下 `Delta_FIFO` 里面 `items` 和 `queue` 的关系：
 
-![](../.gitbook/assets/image%20%289%29.png)
+![](<../.gitbook/assets/image (9).png>)
 
 采用这样的结构把对象与事件的存储分离，好处就是不会因为某个对象的事件太多，而导致其他对象的事件一直得不到消费。
 
@@ -475,13 +475,13 @@ func (f *DeltaFIFO) Pop(process PopProcessFunc) (interface{}, error) {
 
 ### 3.3 Reflector
 
- 自下而上，到 `Reflector` 了。不记得 `Reflector` 是什么的，可以回到 3.1 前面看一下结构图。
+&#x20;自下而上，到 `Reflector` 了。不记得 `Reflector` 是什么的，可以回到 3.1 前面看一下结构图。
 
 K8s的设计是事件驱动的、充分微服务化的，我们可以从事件传递的角度重新理解一下K8s:
 
 组件之间互相看作是事件的生产者、消费者，API Server看作是一个只用内存存储事件的 `Broker` ,我们可以从消息队列的角度取理解一下，如下图展示的：
 
-![](../.gitbook/assets/image%20%2823%29.png)
+![](<../.gitbook/assets/image (23).png>)
 
 k8s服务端通过读取 `etcd` 的资源变更信息，向所有客户端发布资源变更事件。k8s中，组件之间通过HTTP协议进行通信，在不额外引入其他中间件的情况下，保证消息传递的实时性、可靠性、顺序性不是一个容易的事情。K8s内部所有的组件都是通过 `Informer` 机制实现与API Server的通信的。`Informer` 直译就是消息通知者的意思。
 
@@ -608,11 +608,11 @@ loop:
 
 可以总结一下`Reflector`：
 
-1. `Reflector`利用apiserver的client列举全量对象\(版本为0以后的对象全部列举出来\) 
-2. 将全量对象同步到`DeltaFIFO`中，并且更新资源的版本号，后续`watch`会依赖此版本号； 
-3. 在后台启动一个定时`resync`的协程，把全量对象以`Update`事件的方式通知出去\(如果没有设置同步周期，这一步可以不执行\)； 
-4. 基于当前资源版本号`watch`资源; 
-5. 一旦有对象发生变化，那么就会根据变化的类型\(新增、更新、删除\)调用`DeltaFIFO`的相应接口，同时更新当前资源的版本号 
+1. `Reflector`利用apiserver的client列举全量对象(版本为0以后的对象全部列举出来)&#x20;
+2. 将全量对象同步到`DeltaFIFO`中，并且更新资源的版本号，后续`watch`会依赖此版本号；&#x20;
+3. 在后台启动一个定时`resync`的协程，把全量对象以`Update`事件的方式通知出去(如果没有设置同步周期，这一步可以不执行)；&#x20;
+4. 基于当前资源版本号`watch`资源;&#x20;
+5. 一旦有对象发生变化，那么就会根据变化的类型(新增、更新、删除)调用`DeltaFIFO`的相应接口，同时更新当前资源的版本号&#x20;
 
 ### 3.4 Controller
 
@@ -719,7 +719,7 @@ func (c *controller) processLoop() {
 
 ### 3.5 SharedInformer
 
- 结构图上，`Indexer`等几个组件都被框在`Informer`里，对应的类型就是`SharedInformer`。
+&#x20;结构图上，`Indexer`等几个组件都被框在`Informer`里，对应的类型就是`SharedInformer`。
 
 一路分析下来，其实直到`Contorller`组件，都没有用到`Indexer`组件。`SharedInformer`是所有组件最终汇聚的地方。
 
@@ -923,10 +923,10 @@ func (p *processorListener) run() {
 
 到此为止，`Informer`机制下，服务端与客户端的交互分层逻辑比较清晰了：
 
-1. `Reflector`通过`List&watch`机制与API Server拉取信息 
-2. 一级缓存+消息队列 `Delta_FIFO`缓存事件，分发到下游的事件处理器+二级缓存`Indexer` 
-3. 二级缓存作为只读缓存，给客户端提供快速读取资源信息的能力 
-4. 客户端处理事件回调、可以从二级缓存读取感兴趣的信息、可以向API Server发送资源对象的变更请求 
+1. `Reflector`通过`List&watch`机制与API Server拉取信息&#x20;
+2. 一级缓存+消息队列 `Delta_FIFO`缓存事件，分发到下游的事件处理器+二级缓存`Indexer `
+3. 二级缓存作为只读缓存，给客户端提供快速读取资源信息的能力&#x20;
+4. 客户端处理事件回调、可以从二级缓存读取感兴趣的信息、可以向API Server发送资源对象的变更请求&#x20;
 
 以上是单个`Informer`的工作过程。
 
@@ -1104,8 +1104,8 @@ func (q *Type) Done(item interface{}) {
 
 所以`dirty`的作用是？
 
-* 快速去重，避免遍历`queue` 
-* `queue`的辅助结构 
+* 快速去重，避免遍历`queue `
+* `queue`的辅助结构&#x20;
 
 其他的功能就类似正常的队列。不赘叙。这里的逻辑有点绕，但是最终的效果是： 在等待处理的数据中，每一个对象只能存在一份，不能重复添加。 不过这里为什么这么设计，具体的场景，需要进一步的查看别的`controller`组件了。
 
@@ -1230,23 +1230,23 @@ func (q *delayingType) waitingLoop() {
 
 延迟队列的添加过程如下所示，通过`AddAfter`方法，将对象数据与期望添加的时间包装成`WaitFor`对象传递到`waitingForAddCh`这个`channel`中，然后另一个协程中运行的`waitingLoop`中会捕获该数据，放入优先队列：
 
-![](../.gitbook/assets/image%20%2816%29.png)
+![](<../.gitbook/assets/image (16).png>)
 
 然后同样在`waitingLoop`中，会轮询的检测优先队列的`top`元素是否到达既定的时间，如果到了，则`pop`元素并添加到`FIFO`中：
 
-![](../.gitbook/assets/image%20%2810%29.png)
+![](<../.gitbook/assets/image (10).png>)
 
 所以可以看出来延迟队列的关键在于：
 
-* 时间优先队列（`heap`结构的，篇幅有限，不赘叙） 
-* 等待循环 
+* 时间优先队列（`heap`结构的，篇幅有限，不赘叙）&#x20;
+* 等待循环&#x20;
 
 #### 3.6.3 限速队列
 
- 限速队列的应用很广泛，常见场景有：
+&#x20;限速队列的应用很广泛，常见场景有：
 
-* 失败后重试，例如：第一次失败，隔1秒重试，第二次失败，隔2秒，其实就是一种限速 
-* 限制平均QPS，避免处理不过来，被瞬时流量打爆 
+* 失败后重试，例如：第一次失败，隔1秒重试，第二次失败，隔2秒，其实就是一种限速&#x20;
+* 限制平均QPS，避免处理不过来，被瞬时流量打爆&#x20;
 
 除了客户端，nginx这些服务器软件上也应用颇多，主要是流量控制上。
 
@@ -1310,14 +1310,14 @@ type RateLimiter interface {
 
 令牌桶算法是通过发令牌的频率，来控制流量的速度的。
 
-这里提一下，最基础的限流算法是漏桶算法，也是nginx默认使用的限流算法，漏桶算法的原理是，假设流量源源不断的往一个桶里面流入，并且以一定的速度流出桶，桶的容量有限。漏桶算法的原理很简单，达到的效果就是，流量进入系统的平均速度永远不会超过桶漏水的速度。超过桶容量的流量会被丢弃。漏桶算法的缺点没有考虑流量的“峰谷”效应。\(nginx使用的是改进版的漏桶算法，这里不赘叙\)。
+这里提一下，最基础的限流算法是漏桶算法，也是nginx默认使用的限流算法，漏桶算法的原理是，假设流量源源不断的往一个桶里面流入，并且以一定的速度流出桶，桶的容量有限。漏桶算法的原理很简单，达到的效果就是，流量进入系统的平均速度永远不会超过桶漏水的速度。超过桶容量的流量会被丢弃。漏桶算法的缺点没有考虑流量的“峰谷”效应。(nginx使用的是改进版的漏桶算法，这里不赘叙)。
 
-令牌桶算法则允许流量一定程度的爆发\(`burst`\)，令牌桶算法的原理：
+令牌桶算法则允许流量一定程度的爆发(`burst`)，令牌桶算法的原理：
 
-1. 以固定的速率发放令牌 
-2. 流量想要进入系统，必须获得一个令牌，否则无法进入 
-3. 在流量较小时，令牌消耗不掉会积累起来 
-4. 在流量较大时，即便流量流入的速度短时间大于发令牌的速度，只要还有库存的令牌，那么流量也可以进入系统； 
+1. 以固定的速率发放令牌&#x20;
+2. 流量想要进入系统，必须获得一个令牌，否则无法进入&#x20;
+3. 在流量较小时，令牌消耗不掉会积累起来&#x20;
+4. 在流量较大时，即便流量流入的速度短时间大于发令牌的速度，只要还有库存的令牌，那么流量也可以进入系统；&#x20;
 
 令牌桶算法的效果：在整个时间线上，流量的平均流入速度不会超过令牌的发放速度，但是系统允许短时间的流量爆发，此时，系统处理的流量会大于令牌的发放速度。
 
@@ -1327,7 +1327,7 @@ type RateLimiter interface {
 
 网上找了一个令牌桶算法的原理图
 
-![](../.gitbook/assets/image%20%2813%29.png)
+![](<../.gitbook/assets/image (13).png>)
 
 **2、排队指数算法 ItemExponentialFailureRateLimiter**
 
@@ -1362,7 +1362,7 @@ func (r *ItemExponentialFailureRateLimiter) When(item interface{}) time.Duration
 
 
 
-**3. 计数器算法（ItemFastSlowRateLimiter）** 
+**3. 计数器算法（ItemFastSlowRateLimiter）**&#x20;
 
 计数器算法是限速算法中最简单的一种，其原理是：限制一段时间内允许通过的元素数量，例如在1分钟内只允许通过100个元素，每插入一个元素，计数器自增1，当计数器数到100的阈值且还在限速周期内时，则不允许元素再通过。但`WorkQueue`在此基础上扩展了`fast`和`slow`速率。计数器算法提供了4个主要字段：`failures`、`fastDelay`、`slowDelay`及`maxFastAttempts`。其中，`failures`字段用于统计元素排队数，每当`AddRateLimited`方法插入新元素时，会为该字段加1；而`fastDelay`和`slowDelay`字段是用于定义`fast`、`slow`速率的；另外，`maxFastAttempts`字段用于控制从`fast`速率转换到`slow`速率。
 
@@ -1382,7 +1382,7 @@ func (r *ItemFastSlowRateLimiter) When(item interface{}) time.Duration {
 }
 ```
 
-**4. 混合模式（MaxOfRateLimiter）** 
+**4. 混合模式（MaxOfRateLimiter）**&#x20;
 
 K8s默认的限速器采用的混合模式，混合模式的限速器里面包含了多个限速器，计算延迟时间时，遍历所有的限速器，以最大的限速时间作为当前的延迟时间，从而实现最严格的限速。
 
@@ -1525,9 +1525,9 @@ func main() {
 
 `go run main.go`，提取的Event信息：
 
-![](../.gitbook/assets/image%20%288%29.png)
+![](<../.gitbook/assets/image (8).png>)
 
-### 4.2 解决第二个小问题 指定node上的pod数监控 
+### 4.2 解决第二个小问题 指定node上的pod数监控&#x20;
 
 假定我们需要观测某个node上面pod数量,结合之前的部分，我们可以通过自定义`indexer`,快速方便的获取到相关的数量，同时不需要额外的网络开销：
 
@@ -1574,12 +1574,11 @@ func main() {
 
 运行效果：每隔一秒会周期性的打印出目前10.157.6.25上面的pod数量
 
-![](../.gitbook/assets/image%20%2817%29.png)
+![](<../.gitbook/assets/image (17).png>)
 
 综上所述，就是client-go中大部分组件的分析；以及二次开发的demo。
 
 ## References
 
-* [Programing In K8s 1：Client-go 实现分析与二次开发](https://blog.csdn.net/King_DJF/article/details/108307735)
-* [英文 Programing In K8s 1: Client-go implementation analysis and secondary development](https://www.programmersought.com/article/48907085150/) 
-
+* [Programing In K8s 1：Client-go 实现分析与二次开发](https://blog.csdn.net/King\_DJF/article/details/108307735)
+* [英文 Programing In K8s 1: Client-go implementation analysis and secondary development](https://www.programmersought.com/article/48907085150/)&#x20;

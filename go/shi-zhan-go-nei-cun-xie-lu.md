@@ -10,21 +10,21 @@
 
 > 本文草稿最初数据都是生产坏境数据，为了防止敏感内容泄露，全部替换成了demo数据，demo的数据比生产环境数据简单多了，更适合入门理解，有助于掌握pprof。
 
-## go pprof基本知识 <a id="go-pprof&#x57FA;&#x672C;&#x77E5;&#x8BC6;"></a>
+## go pprof基本知识 <a href="gopprof-ji-ben-zhi-shi" id="gopprof-ji-ben-zhi-shi"></a>
 
 定位goroutine泄露会使用到pprof，pprof是Go的性能工具，在开始介绍内存泄露前，先简单介绍下pprof的基本使用，更详细的使用给大家推荐了资料。
 
-### 什么是pprof <a id="&#x4EC0;&#x4E48;&#x662F;pprof"></a>
+### 什么是pprof <a href="shi-mo-shi-pprof" id="shi-mo-shi-pprof"></a>
 
 pprof是Go的性能分析工具，在程序运行过程中，可以记录程序的运行信息，可以是CPU使用情况、内存使用情况、goroutine运行情况等，当需要性能调优或者定位Bug时候，这些记录的信息是相当重要。
 
-### 基本使用 <a id="&#x57FA;&#x672C;&#x4F7F;&#x7528;"></a>
+### 基本使用 <a href="ji-ben-shi-yong" id="ji-ben-shi-yong"></a>
 
 使用pprof有多种方式，Go已经现成封装好了1个：`net/http/pprof`，使用简单的几行命令，就可以开启pprof，记录运行信息，并且提供了Web服务，能够通过浏览器和命令行2种方式获取运行数据。
 
 看个最简单的pprof的例子：
 
-{% code title="golang\_step\_by\_step/pprof/pprof/demo.go" %}
+{% code title="golang_step_by_step/pprof/pprof/demo.go" %}
 ```go
 package main
 
@@ -46,9 +46,9 @@ func main() {
 
 _提醒：本文所有代码部分可左右滑动_
 
-#### 浏览器方式 <a id="&#x6D4F;&#x89C8;&#x5668;&#x65B9;&#x5F0F;"></a>
+#### 浏览器方式 <a href="liu-lan-qi-fang-shi" id="liu-lan-qi-fang-shi"></a>
 
-![](../.gitbook/assets/image%20%2849%29.png)
+![](<../.gitbook/assets/image (49).png>)
 
 输入网址`ip:port/debug/pprof/`打开pprof主页，从上到下依次是**5类profile信息**：
 
@@ -60,7 +60,7 @@ _提醒：本文所有代码部分可左右滑动_
 
 这篇文章我们主要关注goroutine和heap，这两个都会打印调用栈信息，goroutine里面还会包含goroutine的数量信息，heap则是内存分配信息，本文用不到的地方就不展示了，最后推荐几篇文章大家去看。
 
-#### 命令行方式 <a id="&#x547D;&#x4EE4;&#x884C;&#x65B9;&#x5F0F;"></a>
+#### 命令行方式 <a href="ming-ling-hang-fang-shi" id="ming-ling-hang-fang-shi"></a>
 
 当连接在服务器终端上的时候，是没有浏览器可以使用的，Go提供了命令行的方式，能够获取以上5类信息，这种方式用起来更方便。
 
@@ -86,7 +86,7 @@ go tool pprof http://localhost:6060/debug/pprof/mutex
 
 上面的`pprof/demo.go`太简单了，如果去获取内存profile，几乎获取不到什么，换一个Demo进行内存profile的展示
 
-{% code title="golang\_step\_by\_step/pprof/heap/demo2.go" %}
+{% code title="golang_step_by_step/pprof/heap/demo2.go" %}
 ```go
 // 展示内存增长和pprof，并不是泄露
 package main
@@ -257,13 +257,13 @@ Time: May 16, 2019 at 7:08pm (CST)
 1. Go官方博客关于pprof的介绍，很详细，也包含样例，可以实操：[Profiling Go Programs](https://blog.golang.org/profiling-go-programs)。
 2. 跟煎鱼也讨论过pprof，煎鱼的这篇文章也很适合入门： [Golang 大杀器之性能剖析 PProf](https://github.com/EDDYCJY/blog/blob/master/golang/2018-09-15-Golang%20%E5%A4%A7%E6%9D%80%E5%99%A8%E4%B9%8B%E6%80%A7%E8%83%BD%E5%89%96%E6%9E%90%20PProf.md)。
 
-## 什么是内存泄露 <a id="&#x4EC0;&#x4E48;&#x662F;&#x5185;&#x5B58;&#x6CC4;&#x9732;"></a>
+## 什么是内存泄露 <a href="shi-mo-shi-nei-cun-xie-lou" id="shi-mo-shi-nei-cun-xie-lou"></a>
 
 内存泄露指的是程序运行过程中已不再使用的内存，没有被释放掉，导致这些内存无法被使用，直到程序结束这些内存才被释放的问题。
 
 Go虽然有GC来回收不再使用的堆内存，减轻了开发人员对内存的管理负担，但这并不意味着Go程序不再有内存泄露问题。在Go程序中，如果没有Go语言的编程思维，也不遵守良好的编程实践，就可能埋下隐患，造成内存泄露问题。
 
-## 怎么发现内存泄露 <a id="&#x600E;&#x4E48;&#x53D1;&#x73B0;&#x5185;&#x5B58;&#x6CC4;&#x9732;"></a>
+## 怎么发现内存泄露 <a href="zen-mo-fa-xian-nei-cun-xie-lou" id="zen-mo-fa-xian-nei-cun-xie-lou"></a>
 
 在Go中发现内存泄露有2种方法，一个是通用的监控工具，另一个是go pprof：
 
@@ -272,11 +272,11 @@ Go虽然有GC来回收不再使用的堆内存，减轻了开发人员对内存�
 
 这2种方式分别介绍一下。
 
-### 监控工具查看进程内在占用情况 <a id="&#x76D1;&#x63A7;&#x5DE5;&#x5177;&#x67E5;&#x770B;&#x8FDB;&#x7A0B;&#x5185;&#x5728;&#x5360;&#x7528;&#x60C5;&#x51B5;"></a>
+### 监控工具查看进程内在占用情况 <a href="jian-kong-gong-ju-cha-kan-jin-cheng-nei-zai-zhan-yong-qing-kuang" id="jian-kong-gong-ju-cha-kan-jin-cheng-nei-zai-zhan-yong-qing-kuang"></a>
 
 **如果使用云平台部署Go程序**，云平台都提供了内存查看的工具，可以查看OS的内存占用情况和某个进程的内存占用情况，比如阿里云，我们在1个云主机上只部署了1个Go服务，所以OS的内存占用情况，基本是也反映了进程内存占用情况，OS内存占用情况如下，可以看到**随着时间的推进，内存的占用率在不断的提高，这是内存泄露的最明显现象**：
 
-![](../.gitbook/assets/image%20%2850%29.png)
+![](<../.gitbook/assets/image (50).png>)
 
 **如果没有云平台这种内存监控工具，可以制作一个简单的内存记录工具。**
 
@@ -298,17 +298,17 @@ echo $time"\tmemory(Byte)\t"$prog_mem >>~/record/prog_mem.log
 
 脚本输出的内容保存在`prog_mem.log`，只要大体浏览一下就可以发现内存的增长情况，判断是否存在内存泄露。如果需要可视化，可以直接黏贴`prog_mem.log`内容到Excel等表格工具，绘制内存占用图。
 
-![](../.gitbook/assets/image%20%2856%29.png)
+![](<../.gitbook/assets/image (56).png>)
 
-### go pprof发现存在内存问题 <a id="go-pprof&#x53D1;&#x73B0;&#x5B58;&#x5728;&#x5185;&#x5B58;&#x95EE;&#x9898;"></a>
+### go pprof发现存在内存问题 <a href="gopprof-fa-xian-cun-zai-nei-cun-wen-ti" id="gopprof-fa-xian-cun-zai-nei-cun-wen-ti"></a>
 
-> 有情提醒：如果对pprof不了解，可以先看\[go pprof基本知识\]\(\#go pprof基本知识\)，这是下一节，看完再倒回来看。
+> 有情提醒：如果对pprof不了解，可以先看\[go pprof基本知识]\(#go pprof基本知识)，这是下一节，看完再倒回来看。
 
 如果你Google或者百度，Go程序内存泄露的文章，它总会告诉你使用**pprof heap**，能够生成漂亮的调用路径图，火焰图等等，然后你根据调用路径就能定位内存泄露问题，我最初也是对此深信不疑，尝试了若干天后，只是发现内存泄露跟某种场景有关，根本找不到内存泄露的根源，**如果哪位朋友用heap就能定位内存泄露的线上问题，麻烦介绍下**。
 
-后来读了Dave的[《High Performance Go Workshop》](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#using_more_than_one_cpu)，刷新了对heap的认识，内存pprof的简要内容如下：
+后来读了Dave的[《High Performance Go Workshop》](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#using\_more\_than\_one\_cpu)，刷新了对heap的认识，内存pprof的简要内容如下：
 
-![](../.gitbook/assets/image%20%2855%29.png)
+![](<../.gitbook/assets/image (55).png>)
 
 Dave讲了以下几点：
 
@@ -325,11 +325,11 @@ Dave讲了以下几点：
 
 接下来，我介绍怎么用heap发现问题，然后再解释为什么heap几乎不能定位内存泄露的根因。
 
-#### 怎么用heap发现内存问题 <a id="&#x600E;&#x4E48;&#x7528;heap&#x53D1;&#x73B0;&#x5185;&#x5B58;&#x95EE;&#x9898;"></a>
+#### 怎么用heap发现内存问题 <a href="zen-mo-yong-heap-fa-xian-nei-cun-wen-ti" id="zen-mo-yong-heap-fa-xian-nei-cun-wen-ti"></a>
 
 使用pprof的heap能够获取程序运行时的内存信息，在程序平稳运行的情况下，每个一段时间使用heap获取内存的profile，**然后使用`base`能够对比两个profile文件的差别，就像`diff`命令一样显示出增加和减少的变化**，使用一个简单的demo来说明heap和base的使用，依然使用demo2进行展示。
 
-{% code title="golang\_step\_by\_step/pprof/heap/demo2.go" %}
+{% code title="golang_step_by_step/pprof/heap/demo2.go" %}
 ```go
 // 展示内存增长和pprof，并不是泄露
 package main
@@ -421,7 +421,7 @@ buf = append(buf, make([]byte, 1024*1024)...)
 
 001和002 profile的文件不进去看了，你本地测试下计算差值，绝对是刚才对比出的970.34MB。
 
-#### heap“不能”定位内存泄露 <a id="heap&#x201C;&#x4E0D;&#x80FD;&#x201D;&#x5B9A;&#x4F4D;&#x5185;&#x5B58;&#x6CC4;&#x9732;"></a>
+#### heap“不能”定位内存泄露 <a href="heap-bu-neng-ding-wei-nei-cun-xie-lou" id="heap-bu-neng-ding-wei-nei-cun-xie-lou"></a>
 
 heap能显示内存的分配情况，以及哪行代码占用了多少内存，我们能轻易的找到占用内存最多的地方，如果这个地方的数值还在不断怎大，基本可以认定这里就是内存泄露的位置。
 
@@ -434,17 +434,17 @@ heap能显示内存的分配情况，以及哪行代码占用了多少内存，�
 
 **第2种情况，就是goroutine泄露，这是通过heap无法发现的，所以heap在定位内存泄露这件事上，发挥的作用不大**。
 
-![](../.gitbook/assets/image%20%2853%29.png)
+![](<../.gitbook/assets/image (53).png>)
 
-## goroutine泄露怎么导致内存泄露 <a id="goroutine&#x6CC4;&#x9732;&#x600E;&#x4E48;&#x5BFC;&#x81F4;&#x5185;&#x5B58;&#x6CC4;&#x9732;"></a>
+## goroutine泄露怎么导致内存泄露 <a href="goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou" id="goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou"></a>
 
-### 什么是goroutine泄露 <a id="&#x4EC0;&#x4E48;&#x662F;goroutine&#x6CC4;&#x9732;"></a>
+### 什么是goroutine泄露 <a href="shi-mo-shi-goroutine-xie-lou" id="shi-mo-shi-goroutine-xie-lou"></a>
 
 如果你启动了1个goroutine，但并没有符合预期的退出，直到程序结束，此goroutine才退出，这种情况就是goroutine泄露。
 
 > 提前思考：什么会导致goroutine无法退出/阻塞？
 
-### goroutine泄露怎么导致内存泄露 <a id="goroutine&#x6CC4;&#x9732;&#x600E;&#x4E48;&#x5BFC;&#x81F4;&#x5185;&#x5B58;&#x6CC4;&#x9732;-1"></a>
+### goroutine泄露怎么导致内存泄露 <a href="goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou-1" id="goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou-1"></a>
 
 每个goroutine占用2KB内存，泄露1百万goroutine至少泄露`2KB * 1000000 = 2GB`内存，为什么说至少呢？
 
@@ -457,19 +457,19 @@ goroutine执行过程中还存在一些变量，如果这些变量指向堆内�
 
 Dave在文章中也提到了，如果不知道何时停止一个goroutine，这个goroutine就是潜在的内存泄露：
 
-> [7.1.1 Know when to stop a goroutine](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#know_when_to_stop_a_goroutine)
+> [7.1.1 Know when to stop a goroutine](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#know\_when\_to\_stop\_a\_goroutine)
 >
 > If you don’t know the answer, that’s a potential memory leak as the goroutine will pin its stack’s memory on the heap, as well as any heap allocated variables reachable from the stack.
 
-### 怎么确定是goroutine泄露引发的内存泄露 <a id="&#x600E;&#x4E48;&#x786E;&#x5B9A;&#x662F;goroutine&#x6CC4;&#x9732;&#x5F15;&#x53D1;&#x7684;&#x5185;&#x5B58;&#x6CC4;&#x9732;"></a>
+### 怎么确定是goroutine泄露引发的内存泄露 <a href="zen-mo-que-ding-shi-goroutine-xie-lou-yin-fa-de-nei-cun-xie-lou" id="zen-mo-que-ding-shi-goroutine-xie-lou-yin-fa-de-nei-cun-xie-lou"></a>
 
-掌握了前面的pprof命令行的基本用法，很快就可以确认是否是goroutine泄露导致内存泄露，如果你不记得了，马上回去看一下\[go pprof基本知识\]\(\#go pprof基本知识\)。
+掌握了前面的pprof命令行的基本用法，很快就可以确认是否是goroutine泄露导致内存泄露，如果你不记得了，马上回去看一下\[go pprof基本知识]\(#go pprof基本知识)。
 
 **判断依据：在节点正常运行的情况下，隔一段时间获取goroutine的数量，如果后面获取的那次，某些goroutine比前一次多，如果多获取几次，是持续增长的，就极有可能是goroutine泄露**。
 
 goroutine导致内存泄露的demo：
 
-{% code title="golang\_step\_by\_step/pprof/goroutine/leak\_demo1.go" %}
+{% code title="golang_step_by_step/pprof/goroutine/leak_demo1.go" %}
 ```bash
 // goroutine泄露导致内存泄露
 package main
@@ -589,20 +589,20 @@ Dropped 32 nodes (cum <= 121)
 
 是什么导致如此多的goroutine被挂起而无法退出？接下来就看怎么定位goroutine泄露。
 
-## 定位goroutine泄露的2种方法 <a id="&#x5B9A;&#x4F4D;goroutine&#x6CC4;&#x9732;&#x7684;2&#x79CD;&#x65B9;&#x6CD5;"></a>
+## 定位goroutine泄露的2种方法 <a href="ding-wei-goroutine-xie-lou-de-2-zhong-fang-fa" id="ding-wei-goroutine-xie-lou-de-2-zhong-fang-fa"></a>
 
 使用pprof有2种方式，一种是web网页，一种是`go tool pprof`命令行交互，这两种方法查看goroutine都支持，但有轻微不同，也有各自的优缺点。
 
 我们先看Web的方式，再看命令行交互的方式，这两种都很好使用，结合起来用也不错。
 
-### Web可视化查看 <a id="Web&#x53EF;&#x89C6;&#x5316;&#x67E5;&#x770B;"></a>
+### Web可视化查看 <a href="web-ke-shi-hua-cha-kan" id="web-ke-shi-hua-cha-kan"></a>
 
 Web方式适合web服务器的端口能访问的情况，使用起来方便，有2种方式：
 
 1. **查看某条调用路径上，当前阻塞在此goroutine的数量**
 2. 查看所有goroutine的运行栈（调用路径），可以**显示阻塞在此的时间**
 
-#### 方式一 <a id="&#x65B9;&#x5F0F;&#x4E00;"></a>
+#### 方式一 <a href="fang-shi-yi" id="fang-shi-yi"></a>
 
 url请求中设置debug=1：
 
@@ -612,7 +612,7 @@ http://ip:port/debug/pprof/goroutine?debug=1
 
 效果如下：
 
-![](../.gitbook/assets/image%20%2852%29.png)
+![](<../.gitbook/assets/image (52).png>)
 
 看起来密密麻麻的，其实简单又十分有用，看上图标出来的部分，手机上图看起来可能不方便，那就放大图片，或直接看下面各字段的含义：
 
@@ -650,7 +650,7 @@ if false {
 }
 ```
 
-#### 方式二 <a id="&#x65B9;&#x5F0F;&#x4E8C;"></a>
+#### 方式二 <a href="fang-shi-er" id="fang-shi-er"></a>
 
 url请求中设置debug=2：
 
@@ -658,7 +658,7 @@ url请求中设置debug=2：
 http://ip:port/debug/pprof/goroutine?debug=2
 ```
 
-![](../.gitbook/assets/image%20%2854%29.png)
+![](<../.gitbook/assets/image (54).png>)
 
 第2种方式和第1种方式是互补的，它可以看到每个goroutine的信息：
 
@@ -675,7 +675,7 @@ created by main.alloc1
 	/home/ubuntu/heap/leak_demo.go:42 +0x3f
 ```
 
-### 命令行交互式方法 <a id="&#x547D;&#x4EE4;&#x884C;&#x4EA4;&#x4E92;&#x5F0F;&#x65B9;&#x6CD5;"></a>
+### 命令行交互式方法 <a href="ming-ling-hang-jiao-hu-shi-fang-fa" id="ming-ling-hang-jiao-hu-shi-fang-fa"></a>
 
 Web的方法是简单粗暴，无需登录服务器，浏览器打开看看就行了。但就像前面提的，没有浏览器可访问时，命令行交互式才是最佳的方式，并且也是手到擒来，感觉比Web一样方便。
 
@@ -759,19 +759,19 @@ $ wget http://localhost:6060/debug/pprof/goroutine?debug=1
 
 下载网页后，使用编辑器打开文件，使用关键字`main.alloc2.func1`进行搜索，找到与当前相同的调用栈，就可以看到该goroutine阻塞在哪一行了，不要忘记使用`debug=2`还可以看到阻塞了多久和原因，Web方式中已经介绍了，此处省略代码几十行。
 
-## 总结 <a id="&#x603B;&#x7ED3;"></a>
+## 总结 <a href="zong-jie" id="zong-jie"></a>
 
 文章略长，但全是干货，感谢阅读到这。然读到着了，跟定很想掌握pprof，建议实践一把，现在和大家温习一把本文的主要内容。
 
-### goroutine泄露的本质 <a id="goroutine&#x6CC4;&#x9732;&#x7684;&#x672C;&#x8D28;"></a>
+### goroutine泄露的本质 <a href="goroutine-xie-lou-de-ben-zhi" id="goroutine-xie-lou-de-ben-zhi"></a>
 
 goroutine泄露的本质是channel阻塞，无法继续向下执行，导致此goroutine关联的内存都无法释放，进一步造成内存泄露。
 
-### goroutine泄露的发现和定位 <a id="goroutine&#x6CC4;&#x9732;&#x7684;&#x53D1;&#x73B0;&#x548C;&#x5B9A;&#x4F4D;"></a>
+### goroutine泄露的发现和定位 <a href="goroutine-xie-lou-de-fa-xian-he-ding-wei" id="goroutine-xie-lou-de-fa-xian-he-ding-wei"></a>
 
 利用好go pprof获取goroutine profile文件，然后利用3个命令top、traces、list定位内存泄露的原因。
 
-### goroutine泄露的场景 <a id="goroutine&#x6CC4;&#x9732;&#x7684;&#x573A;&#x666F;"></a>
+### goroutine泄露的场景 <a href="goroutine-xie-lou-de-chang-jing" id="goroutine-xie-lou-de-chang-jing"></a>
 
 泄露的场景不仅限于以下两类，但因channel相关的泄露是最多的。
 
@@ -781,30 +781,29 @@ goroutine泄露的本质是channel阻塞，无法继续向下执行，导致此g
    3. 期待从channel读数据，结果没有goroutine写
 2. select操作，select里也是channel操作，如果所有case上的操作阻塞，goroutine也无法继续执行。
 
-### 编码goroutine泄露的建议 <a id="&#x7F16;&#x7801;goroutine&#x6CC4;&#x9732;&#x7684;&#x5EFA;&#x8BAE;"></a>
+### 编码goroutine泄露的建议 <a href="bian-ma-goroutine-xie-lou-de-jian-yi" id="bian-ma-goroutine-xie-lou-de-jian-yi"></a>
 
 为避免goroutine泄露造成内存泄露，启动goroutine前要思考清楚：
 
 1. goroutine如何退出？
 2. 是否会有阻塞造成无法退出？如果有，那么这个路径是否会创建大量的goroutine？
 
-## 示例源码 <a id="&#x793A;&#x4F8B;&#x6E90;&#x7801;"></a>
+## 示例源码 <a href="shi-li-yuan-ma" id="shi-li-yuan-ma"></a>
 
-**本文所有示例源码，及历史文章、代码都存储在Github，阅读原文可直接跳转**，Github：[https://github.com/Shitaibin/golang\_step\_by\_step/tree/master/pprof](https://github.com/Shitaibin/golang_step_by_step/tree/master/pprof) 。
+**本文所有示例源码，及历史文章、代码都存储在Github，阅读原文可直接跳转**，Github：[https://github.com/Shitaibin/golang\_step\_by\_step/tree/master/pprof](https://github.com/Shitaibin/golang\_step\_by\_step/tree/master/pprof) 。
 
-## References <a id="&#x63A8;&#x8350;&#x9605;&#x8BFB;"></a>
+## References <a href="tui-jian-yue-du" id="tui-jian-yue-du"></a>
 
-*  原文 [实战Go内存泄露](https://lessisbetter.site/2019/05/18/go-goroutine-leak/) 
+* &#x20;原文 [实战Go内存泄露](https://lessisbetter.site/2019/05/18/go-goroutine-leak/)&#x20;
 
 这些既是参考资料也是推荐阅读的文章，不容错过。
 
 【Go Blog关于pprof详细介绍和Demo】 [https://blog.golang.org/profiling-go-programs](https://blog.golang.org/profiling-go-programs)
 
-【Dave关于高性能Go程序的workshop】 [https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html\#using\_more\_than\_one\_cpu](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#using_more_than_one_cpu)
+【Dave关于高性能Go程序的workshop】 [https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#using\_more\_than\_one\_cpu](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#using\_more\_than\_one\_cpu)
 
 【煎鱼pprof文章，很适合入门 Golang大杀器之性能剖析PProf】 [https://segmentfault.com/a/1190000016412013](https://segmentfault.com/a/1190000016412013)
 
 【SO上goroutine调用栈各字段的介绍】[https://stackoverflow.com/a/38414527/4296218](https://stackoverflow.com/a/38414527/4296218)
 
 【我的老文，有runtime.main的介绍，想学习调度器，可以看下系列文章 Go调度器系列（2）宏观看调度器】[http://lessisbetter.site/2019/03/26/golang-scheduler-2-macro-view/](http://lessisbetter.site/2019/03/26/golang-scheduler-2-macro-view/)
-

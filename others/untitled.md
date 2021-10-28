@@ -18,23 +18,23 @@
 
 ### 2.1 架构
 
-![](../.gitbook/assets/image%20%2843%29.png)
+![](<../.gitbook/assets/image (43).png>)
 
 ### 2.2 LBaaS V1和V2区别
 
 #### 2.2.1 区别
 
-OpenStack中的网络服务通过neutron-lbaas service plugin提供了两种负载均衡器实现方案：  
-● BLaaS v1：Juno版本中引入（Liberty版本中弃用）  
-● LBaaS v2：Kilo版本中引入  
-LBaaS v1和LBaaS v2这2种实现都使用代理。代理处理HAProxy配置和管理HAProxy守护进程。相对于LBaaS v1负载平衡器，LBaaS v2增加了listeners的概念。LBaaS v2允许在一个负载均衡器IPaddress上配置多个listener ports。  
+OpenStack中的网络服务通过neutron-lbaas service plugin提供了两种负载均衡器实现方案：\
+● BLaaS v1：Juno版本中引入（Liberty版本中弃用）\
+● LBaaS v2：Kilo版本中引入\
+LBaaS v1和LBaaS v2这2种实现都使用代理。代理处理HAProxy配置和管理HAProxy守护进程。相对于LBaaS v1负载平衡器，LBaaS v2增加了listeners的概念。LBaaS v2允许在一个负载均衡器IPaddress上配置多个listener ports。\
 目前，v1和v2负载均衡器之间不存在迁移路径。如果你选择从v1变为v2，需要重新创建所有的负载均衡器和health monitors。
 
 #### 2.2.2 命令
 
 V1:
 
-```text
+```
 root@controller:~# neutron help | grep lb-
   lb-agent-hosting-pool             Get loadbalancer agent hosting a pool.
   lb-healthmonitor-associate        Create a mapping between a health monitor and a pool.
@@ -65,7 +65,7 @@ root@controller:~# neutron help | grep lb-
 
 V2:
 
-```text
+```
 root@controller:~# neutron help | grep lbaas-
   lbaas-agent-hosting-loadbalancer  Get lbaas v2 agent hosting a loadbalancer.
   lbaas-healthmonitor-create        LBaaS v2 Create a healthmonitor.
@@ -135,37 +135,37 @@ To control incoming traffic on the VIP address as well as traffic for a specific
 
 For HTTP and HTTPS protocols, since several HTTP requests can be multiplexed on the same TCP connection, the connection limit value is interpreted as the maximum number of requests allowed.
 
-![](../.gitbook/assets/image%20%2840%29.png)
+![](<../.gitbook/assets/image (40).png>)
 
 #### 2.2.4 LBaaS V2概念
 
-![](../.gitbook/assets/image%20%2841%29.png)
+![](<../.gitbook/assets/image (41).png>)
 
-负载均衡器 :负载均衡器占用Neutron网络端口，并具有从子网分配的IP地址。   
-侦听器 :负载平衡器可以侦听多个端口上的请求。 这些端口中的每一个都由侦听器指定。   
-池 :池包含通过负载均衡器提供内容的成员的列表。   
-成员 :成员是为负载均衡器后面的流量提供服务的服务器。 每个成员由用于提供流量的IP地址和端口指定。   
-健康监视器 :成员可能不时离线，健康监视器将流量从没有正确响应的成员转移。 运行状况监视器与池相关联。  
+负载均衡器 :负载均衡器占用Neutron网络端口，并具有从子网分配的IP地址。 \
+侦听器 :负载平衡器可以侦听多个端口上的请求。 这些端口中的每一个都由侦听器指定。 \
+池 :池包含通过负载均衡器提供内容的成员的列表。 \
+成员 :成员是为负载均衡器后面的流量提供服务的服务器。 每个成员由用于提供流量的IP地址和端口指定。 \
+健康监视器 :成员可能不时离线，健康监视器将流量从没有正确响应的成员转移。 运行状况监视器与池相关联。\
 
 
 参考：[http://blog.csdn.net/zhaihaifei/article/details/39963163](http://blog.csdn.net/zhaihaifei/article/details/39963163)
 
-## 3 安装配置基于haproxy的负载均衡服务\(LBaaS\)
+## 3 安装配置基于haproxy的负载均衡服务(LBaaS)
 
 ### 3.1 安装配置LBaaS V1
 
-安装环境是一个包扩controller节点, network节点和computer节点的标准Openstack环境。  
+安装环境是一个包扩controller节点, network节点和computer节点的标准Openstack环境。\
 
 
 #### 3.1.1 在network节点安装agent
 
-```text
+```
 apt-get install neutron-lbaas-agent
 ```
 
 安装过程：
 
-```text
+```
 root@network:~# ls /etc/neutron/
 api-paste.ini   dnsmasq-neutron.conf  l3_agent.ini        neutron.conf  policy.d     rootwrap.conf
 dhcp_agent.ini  fwaas_driver.ini      metadata_agent.ini  plugins       policy.json  rootwrap.d
@@ -202,28 +202,28 @@ dhcp_agent.ini  fwaas_driver.ini      lbaas_agent.ini  neutron.conf        plugi
 
 #### 3.1.2 配置
 
-Lbaas主要分两部分plugin、providers和agent，  
+Lbaas主要分两部分plugin、providers和agent，\
 
 
-1. 在controller节点的配置
+1\. 在controller节点的配置
 
-1.1\)配置服务插件plugin，修改/etc/neutron/neutron.conf，添加如下内容：
+1.1)配置服务插件plugin，修改/etc/neutron/neutron.conf，添加如下内容：
 
-```text
+```
 [DEFAULT]  
 service_plugins = lbaas 
 ```
 
 注意：如果已使用使用service\_plugins，需要将lbass也加入，如下：
 
-```text
+```
 [DEFAULT]
 service_plugins = router,lbaas
 ```
 
-1.2\).配置service provider，修改/etc/neutron/neutron\_lbaas.conf，添加如下内容：
+1.2).配置service provider，修改/etc/neutron/neutron\_lbaas.conf，添加如下内容：
 
-```text
+```
 [service_providers]
 # Must be in form:
 # service_provider=<service_type>:<name>:<driver>[:default]
@@ -250,26 +250,26 @@ service_plugins = router,lbaas
 service_provider=LOADBALANCER:Haproxy:neutron_lbaas.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
 ```
 
-1.3\) 启动neutron-server服务
+1.3) 启动neutron-server服务
 
-```text
+```
 root@controller:~# service neutron-server restart
 ```
 
-2. 在network节点的配置
+2\. 在network节点的配置
 
-2.1\) 配置device\_driver，修改/etc/neutron/lbaas\_agent.ini，添加如下内容。注意在liberty版本里的device\_driver必须是"neutron\_lbaas.services.loadbalancer.drivers.haproxy.namespace\_driver.HaproxyNSDriver"，因为旧的"neutron.services.loadbalancer.drivers.haproxy.namespace\_driver.HaproxyNSDriver"已经被移除了。
+2.1) 配置device\_driver，修改/etc/neutron/lbaas\_agent.ini，添加如下内容。注意在liberty版本里的device\_driver必须是"neutron\_lbaas.services.loadbalancer.drivers.haproxy.namespace\_driver.HaproxyNSDriver"，因为旧的"neutron.services.loadbalancer.drivers.haproxy.namespace\_driver.HaproxyNSDriver"已经被移除了。
 
-2.2\) 配置interface\_driver
+2.2) 配置interface\_driver
 
-Enable the Open vSwitch LBaaS driver: interface\_driver = neutron.agent.linux.interface.OVSInterfaceDriver  
-enable the Linux Bridge LBaaS driver: interface\_driver = neutron.agent.linux.interface.BridgeInterfaceDriver  
+Enable the Open vSwitch LBaaS driver: interface\_driver = neutron.agent.linux.interface.OVSInterfaceDriver\
+enable the Linux Bridge LBaaS driver: interface\_driver = neutron.agent.linux.interface.BridgeInterfaceDriver\
 
 
-  
+\
 配置后：
 
-```text
+```
 [DEFAULT]
 # Show debugging output in log (sets DEBUG log level output).
 # debug = False
@@ -313,17 +313,17 @@ device_driver = neutron_lbaas.services.loadbalancer.drivers.haproxy.namespace_dr
 user_group = haproxy
 ```
 
-2.3\) 启动neutron-lbaas-agent服务：
+2.3) 启动neutron-lbaas-agent服务：
 
-```text
+```
 root@network:~# service neutron-lbaas-agent restart
 ```
 
-3 Enable load balancing in the Project section of the dashboard.  
-Change the enable\_lb option to True in the/etc/openstack-dashboard/local\_settings file:  
+3 Enable load balancing in the Project section of the dashboard.\
+Change the enable\_lb option to True in the/etc/openstack-dashboard/local\_settings file:\
 
 
-```text
+```
 OPENSTACK_NEUTRON_NETWORK = {
 'enable_lb': True,
 ...
@@ -332,9 +332,9 @@ OPENSTACK_NEUTRON_NETWORK = {
 
 Apply the settings by restarting the httpd service. You can now view the Load Balancer management options in the Project view in the dashboard.
 
-2.4\) 检查neutron-lbaas-agent服务：
+2.4) 检查neutron-lbaas-agent服务：
 
-```text
+```
 root@controller:~# neutron agent-list
 +--------------------------------------+--------------------+---------+-------+----------------+---------------------------+
 | id                                   | agent_type         | host    | alive | admin_state_up | binary                    |
@@ -352,45 +352,45 @@ root@controller:~# neutron agent-list
 
 3.1.3.1 命令行
 
-This list shows example neutron commands that enable you to complete basic LBaaS operations:  
-• Creates a load balancer pool by using specific provider.  
---provider is an optional argument. If not used, the pool is created with default provider for LBaaS service. You should configure the default provider in the  
-\[service\_providers\] section of neutron.conf file. If no default provider is specified for LBaaS, the --provider option is required for pool creation.  
+This list shows example neutron commands that enable you to complete basic LBaaS operations:\
+• Creates a load balancer pool by using specific provider.\
+\--provider is an optional argument. If not used, the pool is created with default provider for LBaaS service. You should configure the default provider in the\
+\[service\_providers] section of neutron.conf file. If no default provider is specified for LBaaS, the --provider option is required for pool creation.\
 
 
-```text
+```
 $ neutron lb-pool-create --lb-method ROUND_ROBIN --name mypool --protocol HTTP --subnet-id SUBNET_UUID --provider PROVIDER_NAME
 ```
 
-• Associates two web servers with pool.  
+• Associates two web servers with pool.\
 
 
-```text
+```
 $ neutron lb-member-create --address WEBSERVER1_IP --protocol-port 80 mypool
 ```
 
-```text
+```
 $ neutron lb-member-create --address WEBSERVER2_IP --protocol-port 80 mypool
 ```
 
-• Creates a health monitor that checks to make sure our instances are still running on the specified protocol-port.  
+• Creates a health monitor that checks to make sure our instances are still running on the specified protocol-port.\
 
 
-```text
+```
 $ neutron lb-healthmonitor-create --delay 3 --type HTTP --max-retries 3 --timeout 3
 ```
 
-• Associates a health monitor with pool.  
+• Associates a health monitor with pool.\
 
 
-```text
+```
 $ neutron lb-healthmonitor-associate HEALTHMONITOR_UUID mypool
 ```
 
-• Creates a virtual IP \(VIP\) address that, when accessed through the load balancer, directs the requests to one of the pool members.  
+• Creates a virtual IP (VIP) address that, when accessed through the load balancer, directs the requests to one of the pool members.\
 
 
-```text
+```
 $ neutron lb-vip-create --name myvip --protocol-port 80 --protocol HTTP --subnet-id SUBNET_UUID mypool
 ```
 
@@ -400,16 +400,16 @@ $ neutron lb-vip-create --name myvip --protocol-port 80 --protocol HTTP --subnet
 
 ### 3.2 安装配置LBaaS V2
 
-安装环境是一个包扩controller节点, network节点和computer节点的标准Openstack环境。  
+安装环境是一个包扩controller节点, network节点和computer节点的标准Openstack环境。\
 
 
 #### 3.2.1 在controller和network节点安装agent
 
-apt-get install neutron-lbaasv2-agent  
-安装过程：  
+apt-get install neutron-lbaasv2-agent\
+安装过程：\
 
 
-```text
+```
 root@network:~# ls /etc/neutron/
 api-paste.ini   dnsmasq-neutron.conf  l3_agent.ini        neutron.conf  policy.d     rootwrap.conf
 dhcp_agent.ini  fwaas_driver.ini      metadata_agent.ini  plugins       policy.json  rootwrap.d
@@ -445,11 +445,11 @@ dhcp_agent.ini  fwaas_driver.ini      lbaas_agent.ini  neutron.conf        plugi
 多出3个文件：lbaas_agent.ini、neutron_lbaas.conf、services_lbaas.conf
 ```
 
-  
-如果不在controller节点安装，会找不到service\_plugins出现错误：  
+\
+如果不在controller节点安装，会找不到service\_plugins出现错误：\
 
 
-```text
+```
 root@controller:~# neutron lbaas-loadbalancer-list
 Unable to establish connection to http://controller:9696/v2.0/lbaas/loadbalancers.json
 root@controller:~# tailf /var/log/neutron/neutron-server.log
@@ -459,33 +459,33 @@ ImportError: No module named neutron_lbaas.services.loadbalancer.plugin
 
 #### 3.2.2 配置
 
-Lbaas主要分两部分plugin、providers和agent，  
+Lbaas主要分两部分plugin、providers和agent，\
 
 
 **3.2.2.1. 在controller节点的配置**
 
-1.1\)配置服务插件plugin，修改/etc/neutron/neutron.conf，添加如下内容：  
+1.1)配置服务插件plugin，修改/etc/neutron/neutron.conf，添加如下内容：\
 
 
-```text
+```
 [DEFAULT]  
 service_plugins = neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2 
 ```
 
-  
-注意：如果已使用使用service\_plugins，需要将lbass也加入，如下：  
+\
+注意：如果已使用使用service\_plugins，需要将lbass也加入，如下：\
 
 
-```text
+```
 [DEFAULT]
 service_plugins = router,neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2
 ```
 
-  
-1.2\).配置service provider，修改/etc/neutron/neutron\_lbaas.conf，添加如下内容：  
+\
+1.2).配置service provider，修改/etc/neutron/neutron\_lbaas.conf，添加如下内容：\
 
 
-```text
+```
 [service_providers]
 # Must be in form:
 # service_provider=<service_type>:<name>:<driver>[:default]
@@ -511,29 +511,29 @@ service_plugins = router,neutron_lbaas.services.loadbalancer.plugin.LoadBalancer
 service_provider=LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
 ```
 
-  
-1.3\) 启动neutron-server服务  
-root@controller:~\# service neutron-server restart  
+\
+1.3) 启动neutron-server服务\
+root@controller:\~# service neutron-server restart\
 
 
 **3.2.2.2. 在network节点的配置**
 
-2.1\) 不用配置device\_driver。如果配置，在创建loadbalancer时，后出错：  
+2.1) 不用配置device\_driver。如果配置，在创建loadbalancer时，后出错：\
 
 
-```text
+```
 root@network:~# vi /var/log/neutron/neutron-lbaasv2-agent.log
 AttributeError: 'HaproxyNSDriver' object has no attribute 'loadbalancer'
 ```
 
-  
-2.2\) 配置interface\_driver，修改/etc/neutron/lbaas\_agent.ini  
-Enable the Open vSwitch LBaaS driver: interface\_driver = neutron.agent.linux.interface.OVSInterfaceDriver  
-enable the Linux Bridge LBaaS driver: interface\_driver = neutron.agent.linux.interface.BridgeInterfaceDriver  
-配置后：  
+\
+2.2) 配置interface\_driver，修改/etc/neutron/lbaas\_agent.ini\
+Enable the Open vSwitch LBaaS driver: interface\_driver = neutron.agent.linux.interface.OVSInterfaceDriver\
+enable the Linux Bridge LBaaS driver: interface\_driver = neutron.agent.linux.interface.BridgeInterfaceDriver\
+配置后：\
 
 
-```text
+```
 [DEFAULT]
 # Show debugging output in log (sets DEBUG log level output).
 # debug = False
@@ -576,39 +576,39 @@ interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
 user_group = haproxy
 ```
 
-  
-2.3\) 在控制节点，运行neutron-lbaas数据库迁移：  
-neutron-db-manage --subproject neutron-lbaas upgrade head  
-如果不迁移，会出错：  
+\
+2.3) 在控制节点，运行neutron-lbaas数据库迁移：\
+neutron-db-manage --subproject neutron-lbaas upgrade head\
+如果不迁移，会出错：\
 
 
-```text
+```
 2017-07-10 11:21:50.162 15238 ERROR neutron.service DBError: (pymysql.err.InternalError) (1054, u"Unknown column 'lbaas_loadbalancers.operating_status' in 'field list'") 
 ```
 
-如果您已部署LBaaS v1，现在停止LBaaS v1代理。 v1和v2代理无法同时运行。   
-2.4\) 启动neutron-lbaasv2-agent服务：  
+如果您已部署LBaaS v1，现在停止LBaaS v1代理。 v1和v2代理无法同时运行。 \
+2.4) 启动neutron-lbaasv2-agent服务：\
 
 
-```text
+```
 root@network:~# service neutron-lbaasv2-agent restart
 neutron-lbaasv2-agent stop/waiting
 neutron-lbaasv2-agent start/running, process 24265
 ```
 
-2.5\) 重新启动网络服务以激活新配置。   
+2.5) 重新启动网络服务以激活新配置。 \
 
 
-```text
+```
 root@controller:~# service neutron-server restart
 neutron-server stop/waiting
 neutron-server start/running, process 21566
 ```
 
-2.6\) 检查neutron-lbaasv2-agent服务：  
+2.6) 检查neutron-lbaasv2-agent服务：\
 
 
-```text
+```
 root@controller:~# neutron agent-list
 +--------------------------------------+----------------------+---------+-------+----------------+---------------------------+
 | id                                   | agent_type           | host    | alive | admin_state_up | binary                    |
@@ -624,47 +624,47 @@ root@controller:~# neutron agent-list
 
 **3.2.2.3 把LBaaS的模块加入仪表板**
 
-用于管理LBaaS v2的仪表板面板可从Mitaka发行版开始提供。 在我实验的Liberty版本中安装失败。  
-1.克隆neutron-lbaas-dashboard存储库，并查看与安装的Dashboard版本相匹配的发行版分支：  
+用于管理LBaaS v2的仪表板面板可从Mitaka发行版开始提供。 在我实验的Liberty版本中安装失败。\
+1.克隆neutron-lbaas-dashboard存储库，并查看与安装的Dashboard版本相匹配的发行版分支：\
 
 
-```text
+```
 $ git clone https://git.openstack.org/openstack/neutron-lbaas-dashboard
 $ cd neutron-lbaas-dashboard
 $ git checkout OPENSTACK_RELEASE
 ```
 
-2.安装仪表板面板插件：  
-$ python setup.py install  
-3.将\_1481\_project\_ng\_loadbalancersv2\_panel.py文件从neutron-lbaas-dashboard / enabled目录复制到Dashboard Openstack\_dashboard / local / enabled目录中。   
-此步骤可确保在插件枚举其所有可用面板时，Dashboard可以找到该插件。   
-4.通过在OPENSTACK\_NEUTRON\_NETWORK字典中编辑local\_settings.py文件并将enable\_lb设置为True，在Dashboard中启用插件。   
-5.如果将Dashboard配置为压缩静态文件以获得更好的性能（通常通过local\_settings.py中的COMPRESS\_OFFLINE设置），请再次优化静态文件：  
+2.安装仪表板面板插件：\
+$ python setup.py install\
+3.将\_1481\_project\_ng\_loadbalancersv2\_panel.py文件从neutron-lbaas-dashboard / enabled目录复制到Dashboard Openstack\_dashboard / local / enabled目录中。 \
+此步骤可确保在插件枚举其所有可用面板时，Dashboard可以找到该插件。 \
+4.通过在OPENSTACK\_NEUTRON\_NETWORK字典中编辑local\_settings.py文件并将enable\_lb设置为True，在Dashboard中启用插件。 \
+5.如果将Dashboard配置为压缩静态文件以获得更好的性能（通常通过local\_settings.py中的COMPRESS\_OFFLINE设置），请再次优化静态文件：\
 
 
-```text
+```
 $ ./manage.py collectstatic
 $ ./manage.py compress
 ```
 
-6.重新启动Apache以激活新面板：  
+6.重新启动Apache以激活新面板：\
 
 
-```text
+```
 $ sudo service apache2 restart
 ```
 
-要查找面板，请单击仪表板中的项目，然后单击网络下拉菜单，并选择负载平衡器。  
+要查找面板，请单击仪表板中的项目，然后单击网络下拉菜单，并选择负载平衡器。\
 
 
 #### 3.2.3 命令行操作
 
 **3.2.3.1 建立一个LBaaS v2 负载均衡器**
 
-1.首先在网络上创建负载均衡器。在此示例中，专用网络private是具有两个Web服务器实例aaa和bbb的隔离网络：  
+1.首先在网络上创建负载均衡器。在此示例中，专用网络private是具有两个Web服务器实例aaa和bbb的隔离网络：\
 
 
-```text
+```
 root@controller:~# . /home/stack/demo-openrc.sh 
 root@controller:~# neutron subnet-list
 +--------------------------------------+---------+----------------+----------------------------------------------------+
@@ -694,11 +694,11 @@ Created a new loadbalancer:
 +---------------------+--------------------------------------+
 ```
 
-  
-2.您可以使用neutron lbaas-loadbalancer-show命令查看负载均衡器状态和IP地址：  
+\
+2.您可以使用neutron lbaas-loadbalancer-show命令查看负载均衡器状态和IP地址：\
 
 
-```text
+```
 root@controller:~# neutron lbaas-loadbalancer-show lber
 +---------------------+--------------------------------------+
 | Field               | Value                                |
@@ -718,12 +718,12 @@ root@controller:~# neutron lbaas-loadbalancer-show lber
 +---------------------+--------------------------------------+
 ```
 
-  
-3.更新安全组以允许流量到达新的负载平衡器。 创建新的安全组以及入口规则，以允许流量进入新的负载平衡器。 负载平衡器的neutron端口在上面显示为vip\_port\_id。   
-创建安全组和规则以允许TCP端口80，TCP端口443和所有ICMP流量：  
+\
+3.更新安全组以允许流量到达新的负载平衡器。 创建新的安全组以及入口规则，以允许流量进入新的负载平衡器。 负载平衡器的neutron端口在上面显示为vip\_port\_id。 \
+创建安全组和规则以允许TCP端口80，TCP端口443和所有ICMP流量：\
 
 
-```text
+```
 root@controller:~# neutron security-group-create lbaas
 Created a new security_group:
 +----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -786,21 +786,21 @@ Created a new security_group_rule:
 +-------------------+--------------------------------------+
 ```
 
-  
-使用neutron lbaas-loadbalancer-show命令的vip\_port\_id将安全组应用于负载均衡器的网络端口：  
+\
+使用neutron lbaas-loadbalancer-show命令的vip\_port\_id将安全组应用于负载均衡器的网络端口：\
 
 
-```text
+```
 root@controller:~# neutron port-update --security-group lbaas 6b5dfa29-03bd-4af7-b41e-5c2de2360304
 Updated port: 6b5dfa29-03bd-4af7-b41e-5c2de2360304
 ```
 
-  
-此负载平衡器处于活动状态，随时可以在10.0.0.100上提供流量。   
-命令：  
+\
+此负载平衡器处于活动状态，随时可以在10.0.0.100上提供流量。 \
+命令：\
 
 
-```text
+```
 neutron security-group-create lbaas
 neutron security-group-rule-create --direction ingress --protocol tcp --port-range-min 80 --port-range-max 80 --remote-ip-prefix 0.0.0.0/0 lbaas
 neutron security-group-rule-create --direction ingress --protocol tcp --port-range-min 443 --port-range-max 443 --remote-ip-prefix 0.0.0.0/0 lbaas
@@ -810,10 +810,10 @@ neutron port-update --security-group lbaas 6b5dfa29-03bd-4af7-b41e-5c2de2360304
 
 **3.2.3.2 添加一个http侦听器**
 
-1.在负载平衡器联机的情况下，您可以为端口80上的明文HTTP流量添加侦听器：  
+1.在负载平衡器联机的情况下，您可以为端口80上的明文HTTP流量添加侦听器：\
 
 
-```text
+```
 root@controller:~# neutron lbaas-listener-create --name lber-http --loadbalancer lber --protocol HTTP --protocol-port 80
 Created a new listener:
 +---------------------------+------------------------------------------------+
@@ -840,12 +840,12 @@ root@controller:~# neutron lbaas-listener-list
 +--------------------------------------+-----------------+-----------+----------+---------------+----------------+
 ```
 
-  
-This load balancer is active and ready to serve traffic on10.0.0.100.  
-此时，在网络节点会生成命名空间：qlbaas-628b6622-154b-4342-8be1-cd645dbb601e  
+\
+This load balancer is active and ready to serve traffic on10.0.0.100.\
+此时，在网络节点会生成命名空间：qlbaas-628b6622-154b-4342-8be1-cd645dbb601e\
 
 
-```text
+```
 root@network:~# ip netns
 qlbaas-628b6622-154b-4342-8be1-cd645dbb601e
 qrouter-b1461108-8f9a-4746-bf48-6ba717608b34
@@ -876,11 +876,11 @@ PING 10.0.0.100 (10.0.0.100) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.059/0.096/0.133/0.037 ms
 ```
 
-  
-2.您可以开始构建池，并向池中添加成员以在端口80上提供HTTP内容。对于此示例，Web服务器为10.0.0.102和10.0.0.103：  
+\
+2.您可以开始构建池，并向池中添加成员以在端口80上提供HTTP内容。对于此示例，Web服务器为10.0.0.102和10.0.0.103：\
 
 
-```text
+```
 root@controller:~# nova list
 +--------------------------------------+------+--------+------------+-------------+-----------------------------------+
 | ID                                   | Name | Status | Task State | Power State | Networks                          |
@@ -890,29 +890,29 @@ root@controller:~# nova list
 +--------------------------------------+------+--------+------------+-------------+-----------------------------------+
 ```
 
-  
-在服务器aaa和bbb上启动http服务：  
-方法一：执行如下命令添加一个80端口的监听进程，模拟httpd监听  
+\
+在服务器aaa和bbb上启动http服务：\
+方法一：执行如下命令添加一个80端口的监听进程，模拟httpd监听\
 
 
-```text
+```
 root@aaa:~# while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to aaa" | nc -l -p 80 ; done& 
 ```
 
-方法二：  
+方法二：\
 
 
-```text
+```
 root@aaa:~# echo "Welcome to aaa" >index.html
 root@aaa:~# setsid python -m SimpleHTTPServer 80
 root@aaa:~# ps -ef | grep 80
 root 2654 1 0 08:15 pts/0 00:00:00 python -m SimpleHTTPServer 80
 ```
 
-方法三：安装并启动nginx服务：  
+方法三：安装并启动nginx服务：\
 
 
-```text
+```
 root@aaa:~# apt-get install nginx
 root@aaa:~# ps -ef | grep nginx
 root      3659     1  0 03:51 ?        00:00:00 nginx: master process /usr/sbin/nginx
@@ -925,12 +925,12 @@ LISTEN     0      128                       *:80                       *:*
 LISTEN     0      128                      :::80                      :::* 
 ```
 
-  
-创建pool：  
-root@controller:~\# neutron lbaas-pool-create --name lber-pool-http --lb-algorithm ROUND\_ROBIN --listener lber-http --protocol HTTP  
+\
+创建pool：\
+root@controller:\~# neutron lbaas-pool-create --name lber-pool-http --lb-algorithm ROUND\_ROBIN --listener lber-http --protocol HTTP\
 
 
-```text
+```
 Created a new pool:
 +---------------------+------------------------------------------------+
 | Field               | Value                                          |
@@ -982,11 +982,11 @@ root@controller:~# neutron lbaas-member-list lber-pool-http
 +--------------------------------------+------------+---------------+--------+--------------------------------------+----------------+
 ```
 
-  
-3.您可以使用curl验证通过负载平衡器到您的Web服务器的连接：  
+\
+3.您可以使用curl验证通过负载平衡器到您的Web服务器的连接：\
 
 
-```text
+```
 root@network:~# ip netns exec qrouter-b1461108-8f9a-4746-bf48-6ba717608b34 curl 10.0.0.100
 <html><body><h1>503 Service Unavailable</h1>
 No server is available to handle this request.
@@ -995,7 +995,7 @@ No server is available to handle this request.
 
 此问题是没有向pool中添加成员。用方法一启动http服务成功。重新生成新的虚拟机成员后，curl结果：
 
-```text
+```
 root@network:~# ip net exec qrouter-b1461108-8f9a-4746-bf48-6ba717608b34 curl 10.0.0.100
 Welcome to vm1!
 root@network:~# ip net exec qrouter-b1461108-8f9a-4746-bf48-6ba717608b34 curl 10.0.0.100
@@ -1006,12 +1006,12 @@ root@network:~# ip net exec qrouter-b1461108-8f9a-4746-bf48-6ba717608b34 curl 10
 Welcome to vm2!
 ```
 
-  
-在此示例中，负载平衡器使用轮转算法和后端的Web服务器之间的流量交替。   
-4.您可以添加运行状况监视器，以便从池中除去无响应的服务器：  
+\
+在此示例中，负载平衡器使用轮转算法和后端的Web服务器之间的流量交替。 \
+4.您可以添加运行状况监视器，以便从池中除去无响应的服务器：\
 
 
-```text
+```
 root@controller:~# neutron lbaas-healthmonitor-create --delay 5 --max-retries 2 --timeout 10 --type HTTP --pool lber-pool-http
 Created a new healthmonitor:
 +----------------+------------------------------------------------+
@@ -1054,32 +1054,32 @@ root@controller:~# neutron lbaas-healthmonitor-show acf9bb3c-5d85-4a01-a601-252b
 +----------------+------------------------------------------------+
 ```
 
-在此示例中，如果运行状况监视器以两个5秒的间隔时间未通过运行状况检查，则会从池中删除服务器。 当服务器恢复并再次开始响应运行状况检查时，它会再次添加到池中。  
+在此示例中，如果运行状况监视器以两个5秒的间隔时间未通过运行状况检查，则会从池中删除服务器。 当服务器恢复并再次开始响应运行状况检查时，它会再次添加到池中。\
 
 
 **3.2.3.3 添加一个https侦听器**
 
-您可以在端口443上为HTTPS通信添加另一个侦听器。 LBaaS v2在负载均衡器上提供SSL / TLS终止，但此示例采用更简单的方法，并允许加密连接在每个成员服务器上终止。   
+您可以在端口443上为HTTPS通信添加另一个侦听器。 LBaaS v2在负载均衡器上提供SSL / TLS终止，但此示例采用更简单的方法，并允许加密连接在每个成员服务器上终止。 \
 
 
-```text
+```
 neutron lbaas-listener-create --name lber-https --loadbalancer lber --protocol HTTPS --protocol-port 443
 neutron lbaas-pool-create --name lber-pool-https --lb-algorithm LEAST_CONNECTIONS --listener lber-https --protocol HTTPS
 neutron lbaas-member-create --subnet private --address 10.0.0.102 --protocol-port 443 lber-pool-https
 neutron lbaas-member-create --subnet private --address 10.0.0.103 --protocol-port 443 lber-pool-https
 ```
 
-你也可以为https池添加一个健康监视器  
-neutron lbaas-healthmonitor-create --delay 5 --max-retries 2 --timeout 10 --type HTTPS --pool lber-pool-https  
-负载均衡器现在控制着80和443端口的流量。  
+你也可以为https池添加一个健康监视器\
+neutron lbaas-healthmonitor-create --delay 5 --max-retries 2 --timeout 10 --type HTTPS --pool lber-pool-https\
+负载均衡器现在控制着80和443端口的流量。\
 
 
 **3.2.3.4 添加一个https侦听器**
 
-1 创建listener、pool、member，添加一个健康监视器  
+1 创建listener、pool、member，添加一个健康监视器\
 
 
-```text
+```
 root@controller:~# neutron lbaas-listener-create --name lber-ssh --loadbalancer lber --protocol TCP --protocol-port 22
 Created a new listener:
 +---------------------------+------------------------------------------------+
@@ -1169,21 +1169,21 @@ root@controller:~# neutron lbaas-healthmonitor-list
 +--------------------------------------+-------+----------------+
 ```
 
-2 通过LoadBalancer访问ssh server  
-在网络节点访问，第一次连上aaa服务器  
+2 通过LoadBalancer访问ssh server\
+在网络节点访问，第一次连上aaa服务器\
 
 
-```text
+```
 root@network:~# ip net exec qrouter-b1461108-8f9a-4746-bf48-6ba717608b34 ssh 10.0.0.100
 ...
 Last login: Tue Jul 11 03:46:53 2017 from 192.168.4.131
 root@aaa:~#
 ```
 
-第二次连上bbb服务器  
+第二次连上bbb服务器\
 
 
-```text
+```
 root@network:~# ssh-keygen -f "/root/.ssh/known_hosts" -R 10.0.0.100
 # Host 10.0.0.100 found: line 5 type ECDSA
 /root/.ssh/known_hosts updated.
@@ -1196,12 +1196,12 @@ root@bbb:~#
 
 **3.2.3.5 关联浮动IP地址**
 
-部署在公用或提供商网络上的外部客户端可访问的负载平衡器不需要分配浮动IP地址。 外部客户端可以直接访问这些负载平衡器的虚拟IP地址（VIP）。   
-但是，部署到专用或隔离网络上的负载平衡器需要分配浮动IP地址，如果它们必须可由外部客户端访问。 要完成此步骤，您必须在私有和公共网络之间有一个路由器和一个可用的浮动IP地址。   
-您可以使用本节开头的neutron lbaas-loadbalancer-show命令来查找vip\_port\_id。 vip\_port\_id是分配给负载平衡器的网络端口的ID。 您可以使用neutron floatingip-associate将自由浮动IP地址与负载均衡器关联：  
+部署在公用或提供商网络上的外部客户端可访问的负载平衡器不需要分配浮动IP地址。 外部客户端可以直接访问这些负载平衡器的虚拟IP地址（VIP）。 \
+但是，部署到专用或隔离网络上的负载平衡器需要分配浮动IP地址，如果它们必须可由外部客户端访问。 要完成此步骤，您必须在私有和公共网络之间有一个路由器和一个可用的浮动IP地址。 \
+您可以使用本节开头的neutron lbaas-loadbalancer-show命令来查找vip\_port\_id。 vip\_port\_id是分配给负载平衡器的网络端口的ID。 您可以使用neutron floatingip-associate将自由浮动IP地址与负载均衡器关联：\
 
 
-```text
+```
 $ neutron floatingip-associate FLOATINGIP_ID LOAD_BALANCER_PORT_ID
 root@controller:~# neutron lbaas-loadbalancer-show lber
 +---------------------+------------------------------------------------+
@@ -1224,11 +1224,11 @@ root@controller:~# neutron lbaas-loadbalancer-show lber
 +---------------------+------------------------------------------------+
 ```
 
-  
-关联floating ip后，直接ssh 192.168.4.144，可连接上aaa或bbb服务器  
+\
+关联floating ip后，直接ssh 192.168.4.144，可连接上aaa或bbb服务器\
 
 
-```text
+```
 root@network:~# ssh 192.168.4.144
 The authenticity of host '192.168.4.144 (192.168.4.144)' can't be established.
 ECDSA key fingerprint is 7e:8e:0c:b7:03:ab:91:21:62:75:aa:43:89:6c:ea:a4.
@@ -1258,19 +1258,19 @@ Connection to 192.168.4.144 closed.
 
 **3.2.3.6 为LBaaS v2 设置配额**
 
-配额可用于限制负载平衡器和负载平衡器池的数量。 默认情况下，两个配额都设置为10。   
-您可以使用neutron quota-update命令调整配额：  
-neutron quota-update --tenant-id TENANT\_UUID --loadbalancer 25  
-neutron quota-update --tenant-id TENANT\_UUID --pool 50  
-设置为-1会禁用租户的配额。  
+配额可用于限制负载平衡器和负载平衡器池的数量。 默认情况下，两个配额都设置为10。 \
+您可以使用neutron quota-update命令调整配额：\
+neutron quota-update --tenant-id TENANT\_UUID --loadbalancer 25\
+neutron quota-update --tenant-id TENANT\_UUID --pool 50\
+设置为-1会禁用租户的配额。\
 
 
 **3.2.3.7 检索负载平衡器统计信息**
 
-LBaaS v2代理每6秒为每个负载平衡器收集四种类型的统计信息。 用户可以使用neutron lbaas-loadbalancer-stats命令查询这些统计信息：  
+LBaaS v2代理每6秒为每个负载平衡器收集四种类型的统计信息。 用户可以使用neutron lbaas-loadbalancer-stats命令查询这些统计信息：\
 
 
-```text
+```
 $ neutron lbaas-loadbalancer-stats test-lb
 +--------------------+----------+
 | Field              | Value    |
@@ -1282,27 +1282,27 @@ $ neutron lbaas-loadbalancer-stats test-lb
 +--------------------+----------+
 ```
 
-  
-active\_connections计数是代理轮询负载平衡器时处于活动状态的连接总数。 自上次启动负载平衡器以来，其他三个统计信息是累积的。 例如，如果负载平衡器由于系统错误或配置更改而重新启动，则这些统计信息将被重置。  
-  
+\
+active\_connections计数是代理轮询负载平衡器时处于活动状态的连接总数。 自上次启动负载平衡器以来，其他三个统计信息是累积的。 例如，如果负载平衡器由于系统错误或配置更改而重新启动，则这些统计信息将被重置。\
+\
 
 
 ## 4 实现机制
 
-对于每一个 loadbalancer，Neutron 都会启动一个 haproxy 进程提供 load balancering 功能。   
-通过 ps 命令查找 haproxy 进程：  
+对于每一个 loadbalancer，Neutron 都会启动一个 haproxy 进程提供 load balancering 功能。 \
+通过 ps 命令查找 haproxy 进程：\
 
 
-```text
+```
 root@network:~# ps -ef | grep haproxy
 nobody   11368     1  0 15:47 ?        00:00:00 haproxy -f /var/lib/neutron/lbaas/v2/628b6622-154b-4342-8be1-cd645dbb601e/haproxy.conf -p /var/lib/neutron/lbaas/v2/628b6622-154b-4342-8be1-cd645dbb601e/haproxy.pid -sf 11361
 ```
 
-haproxy 配置文件保存在 /opt/stack/data/neutron/lbaas/&lt; pool ID&gt;/conf 中。   
-查看 “web servers” 的配置内容：  
+haproxy 配置文件保存在 /opt/stack/data/neutron/lbaas/< pool ID>/conf 中。 \
+查看 “web servers” 的配置内容：\
 
 
-```text
+```
 root@network:~# cat /var/lib/neutron/lbaas/v2/628b6622-154b-4342-8be1-cd645dbb601e/haproxy.conf
 # Configuration for lber
 global
@@ -1365,11 +1365,11 @@ backend 7bfd6d4f-6676-4eea-b319-99837dc335da
     server 7fcab79c-dc99-41e4-9218-437f5c59841b 10.0.0.102:443 weight 1 check inter 5s fall 2
 ```
 
-  
-可以看到：   
-1. frontend 使用的 HTTP 地址为 VIP:80   
-2. backend 使用的 HTTP 地址为 10.0.0.102:80 和 10.0.0.103:80   
-3. balance 方法为 roundrobin
+\
+可以看到： \
+1\. frontend 使用的 HTTP 地址为 VIP:80 \
+2\. backend 使用的 HTTP 地址为 10.0.0.102:80 和 10.0.0.103:80 \
+3\. balance 方法为 roundrobin
 
 ## References
 
@@ -1384,4 +1384,3 @@ backend 7bfd6d4f-6676-4eea-b319-99837dc335da
 4  [http://blog.csdn.net/CloudMan6/article/details/53613152](http://blog.csdn.net/CloudMan6/article/details/53613152)
 
 5  [http://www.cnblogs.com/sammyliu/p/4656176.html](http://www.cnblogs.com/sammyliu/p/4656176.html)
-

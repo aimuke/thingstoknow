@@ -1,4 +1,4 @@
-# \[译\] 使用 go/analysis 包实现自定义的 linter
+# \[译] 使用 go/analysis 包实现自定义的 linter
 
 **独家号 一亩三分地 作者 @colobu原文链接**
 
@@ -6,7 +6,7 @@ Fatih Arslan 是 [vim-go](https://github.com/fatih/vim-go)、[gomodifytags](http
 
 如果你问人们为什么爱Go爱的那么深沉，那么答案之一就是工具。原因在于使用Go写工具真是一件容易的事，尤其是为Go语言写一些定制的工具。lint工具就是其中的工具之一。如果你已经使用了Go，那么你一定已经知道和使用了其中的一些工具，比如go vet、goline、staticcheck等等。
 
-所有这些工具都是使用go/{ast, packages, types, ...}等包去解析\(parse\)和解释\(interpret\) Go代码，但是，并没有一个通用的框架更容易和有效地分析Go代码。如果你使用上面的包，你就不得不实现很多让你讨厌的东西\(flag解析，AST遍历，上下文信息的传递等等\)。
+所有这些工具都是使用go/{ast, packages, types, ...}等包去解析(parse)和解释(interpret) Go代码，但是，并没有一个通用的框架更容易和有效地分析Go代码。如果你使用上面的包，你就不得不实现很多让你讨厌的东西(flag解析，AST遍历，上下文信息的传递等等)。
 
 为了改善现状，为今后的工作奠定更好的基础，Go作者们引入了一个新的软件包：[go/analysis](https://godoc.org/golang.org/x/tools/go/analysis)。
 
@@ -18,9 +18,9 @@ go/analysis提供了一个实现checker的通用接口。checker就是能够报�
 
 ## 自定义的linter的需求
 
-首先让我们定义我们这个linter的需求\(功能\)。它非常简单，我们将这个linter工具称之为addlint。这个工具的功能就是报告整数相加的使用情况：
+首先让我们定义我们这个linter的需求(功能)。它非常简单，我们将这个linter工具称之为addlint。这个工具的功能就是报告整数相加的使用情况：
 
-```text
+```
 3 + 2
 ```
 
@@ -37,14 +37,14 @@ func main() {
 
 如果我们运行addlint检查这个文件，它应该报告如下的信息:
 
-```text
+```
 $ addlint foo.go
 /Users/fatih/foo.go:6:9: integer addition found: '3 + 2'
 ```
 
 它也可以用来分析包，就像其它的的Go工具一样:
 
-```text
+```
 $ addlint github.com/my/repo
 /Users/fatih/repo/foo.go:6:9: integer addition found: '3 + 2'
 ```
@@ -69,7 +69,7 @@ expr := &ast.BinaryExpr{
 }
 ```
 
-使用图来表示：  
+使用图来表示：\
 
 
 ![](https://img.toutiao.io/c/cd7ca9f77f01d7ba78dab69b9b39b518)
@@ -88,7 +88,7 @@ for _, goFile := range os.Args[1:] {
 }
 ```
 
-既然我们已经有了一组\[\]\*ast.File，那么让我们检查它们并搜索\*ast.BinaryExpr节点。我们使用ast.Inspect\(\)遍历AST文件：
+既然我们已经有了一组\[]\*ast.File，那么让我们检查它们并搜索\*ast.BinaryExpr节点。我们使用ast.Inspect()遍历AST文件：
 
 ```go
 for _, file := range files {
@@ -121,7 +121,7 @@ func render(fset *token.FileSet, x interface{}) string {
 }
 ```
 
-这里的主要逻辑是ast.Inspect\(\)。我把它写得非常详细，只是为了展示所有的步骤。之后您可以在分析器中创建可重用的函数进一步简化逻辑。我们还创建了一个简单的render\(\)函数来渲染表达式，这样我们就可以以可读的形式漂亮地打印加法。
+这里的主要逻辑是ast.Inspect()。我把它写得非常详细，只是为了展示所有的步骤。之后您可以在分析器中创建可重用的函数进一步简化逻辑。我们还创建了一个简单的render()函数来渲染表达式，这样我们就可以以可读的形式漂亮地打印加法。
 
 现在，如果你对几个文件运行这个程序，你会发现它运行得很好。然而，这里仍然存在一些问题。你知道这些问题是什么吗？以下是其中一个问题：
 
@@ -134,7 +134,7 @@ func main() {
 }
 ```
 
-如果我们对这个文件运行addlint，它将输出这个加法！但是，我们的需求是addlint应该只显示整数加法。那我们怎么解决呢？类型！  
+如果我们对这个文件运行addlint，它将输出这个加法！但是，我们的需求是addlint应该只显示整数加法。那我们怎么解决呢？类型！\
 我们需要对代码进行类型检查，以获取表达式左侧和右侧的基础类型。首先，让我们实现检查源代码：
 
 ```go
@@ -152,7 +152,7 @@ if err != nil {
 }
 ```
 
-它将检查我们传入的所有文件，然后用所有必要的信息填充信息变量的映射。因为我们将使用info.TypeOf\(\)方法，所以我们需要填充info.Defs、info.Uses和info.Types。接下来，我们将扩展ast.Inspect以检查表达式：
+它将检查我们传入的所有文件，然后用所有必要的信息填充信息变量的映射。因为我们将使用info.TypeOf()方法，所以我们需要填充info.Defs、info.Uses和info.Types。接下来，我们将扩展ast.Inspect以检查表达式：
 
 ```go
 ast.Inspect(f, func(n ast.Node) bool {
@@ -193,7 +193,7 @@ ast.Inspect(f, func(n ast.Node) bool {
 })
 ```
 
-如您所见，我们创建了一个新的isInteger\(\)匿名函数，它检查我们传入的表达式是否为Integer类型。然后我们使用这个函数来检查\*ast.BinaryExpr的左侧和右侧。这将涵盖加号两侧不是整数的异常情况。
+如您所见，我们创建了一个新的isInteger()匿名函数，它检查我们传入的表达式是否为Integer类型。然后我们使用这个函数来检查\*ast.BinaryExpr的左侧和右侧。这将涵盖加号两侧不是整数的异常情况。
 
 现在我们已经知道了如何使用底层的go{token,parser, ast,types ...}包来实现addlint程序，接下来我们使用go/analysis来改进整个cli. （注意：上面的linter仍然有许多异常的情况，为了简单起见，我将它们留作练习。如果要修复其中一些情况，请尝试检查3+2+1或a+3）
 
@@ -201,7 +201,7 @@ ast.Inspect(f, func(n ast.Node) bool {
 
 下面是我们准备使用的一个文件夹布局。这个布局非常流行，也是新的linter工具很好的起始布局:
 
-```text
+```
 .
 ├── addcheck
 │   └── addcheck.go
@@ -239,7 +239,7 @@ type Analyzer struct {
 
 让我们开始添加cmd/addlint的框架，为此，我们将创建一个包含analysis.Analyzer变量声明的addcheck包：
 
-addcheck.go  
+addcheck.go\
 
 
 ```go
@@ -259,7 +259,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 }
 ```
 
-核心逻辑在run\(...\)函数中实现，目前我们还没有实现它， 它接受一个\*analysis.Pass类型的参数:
+核心逻辑在run(...)函数中实现，目前我们还没有实现它， 它接受一个\*analysis.Pass类型的参数:
 
 ```go
 type Pass struct {
@@ -275,13 +275,13 @@ type Pass struct {
 
 \*analysis.Pass是核心数据，可以为分析器的run函数提供信息。正如你看到的，它包含了分析源代码所有必需的类型，比如:
 
-```text
+```
 *token.FileSet
 []*ast.File
 *types.Info
 ```
 
-它还包含一些辅助函数，比如pass.Report\(\)和pass.Reportf\(\)方法来报告诊断信息。是时候来实现run函数了。
+它还包含一些辅助函数，比如pass.Report()和pass.Reportf()方法来报告诊断信息。是时候来实现run函数了。
 
 ```go
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -395,9 +395,9 @@ $ addlint foo.go
 我们成功地用go/analysis创建了第一个linter！使用go/analysis的好处是非常巨大的。正如你所看到的，这种新方法使事情变得更加容易，因为您不必手动解析文件、对文件进行类型检查甚至解析flag！它集成好了传统的功能，可以随时使用。与旧的传统风格相比，go/analysis包为我们做了以下工作：
 
 * 它通过singlechecker包自动创建了一个带有所有重要标志的CLI程序。
-* 它解析文件并创建了一个包含所有文件信息的列表，格式为\[\]\*ast.File。
+* 它解析文件并创建了一个包含所有文件信息的列表，格式为\[]\*ast.File。
 * 它检查了所有文件的类型信息，并为我们提供了一个方便的\*types.Info变量，其中包含语法树的类型信息
-* 它为我们提供了方便的Reportf\(\)来报告诊断
+* 它为我们提供了方便的Reportf()来报告诊断
 
 既然我们已经基本了解了go/analysis是如何工作的，那么让我们继续讨论它的实际的核心特性，以及是什么使它变得更好。
 
@@ -424,9 +424,9 @@ type Analyzer struct {
 
 使用Requires字段，您可以定义你的分析器的依赖关系，go/analysis将确保以正确的顺序运行它们。go/analysis附带一些有用的分析器，您可以在编写自己的分析器时依赖它们。其中之一是go/analysis/passes/inspect包。
 
-go/analysis/passes/inspect分析器提供了一个构建块，您可以使用它来代替ast.Inspect\(\)或ast.Walk\(\)来遍历语法文件。我们在addlint中使用了ast.Inspect\(\)来遍历已解析的文件，以找到\*ast.BinaryExpr’s。但是，如果您有多个分析器，并且每个分析器都必须遍历语法树的话，则效率不是很高！
+go/analysis/passes/inspect分析器提供了一个构建块，您可以使用它来代替ast.Inspect()或ast.Walk()来遍历语法文件。我们在addlint中使用了ast.Inspect()来遍历已解析的文件，以找到\*ast.BinaryExpr’s。但是，如果您有多个分析器，并且每个分析器都必须遍历语法树的话，则效率不是很高！
 
-go/analysis/passes/inspect包比ast.Inspect\(\)快得多，因为它在底层使用golang.org/x/tools/go/ast/inspector包。以下摘抄自是包文档：
+go/analysis/passes/inspect包比ast.Inspect()快得多，因为它在底层使用golang.org/x/tools/go/ast/inspector包。以下摘抄自是包文档：
 
 ```go
 // ...
@@ -603,6 +603,4 @@ Registered analyzers:
 
 我希望这篇文章能为你提供一个开始使用go/analysis的介绍。还有很多事情我还没有涉及。go/analysis非常强大，有许多特性使分析go代码变得简单和高效。例如，这些特性之一就是Fact。可以通过使用analysis.Fact接口实现。当您分析某些内容时，可以为给定的分析器生成Fact（注释），然后从另一个分析器导入这些Fact, 这允许您使用多个分析器创建非常强大和有效的组合。
 
-这里写的所有代码都可以在[github.com/fatih/addlint](https://github.com/fatih/addlint) repo中找到。如果您对go/analysis有更多的问题，可以加入[gophers Slack](https://invite.slack.golangbridge.org/) \#tools频道，许多go开发人员在这里讨论go/analysis的问题。[Golang](https://toutiao.io/tags/Golang)  
-
-
+这里写的所有代码都可以在[github.com/fatih/addlint](https://github.com/fatih/addlint) repo中找到。如果您对go/analysis有更多的问题，可以加入[gophers Slack](https://invite.slack.golangbridge.org) #tools频道，许多go开发人员在这里讨论go/analysis的问题。[Golang](https://toutiao.io/tags/Golang)\

@@ -4,9 +4,9 @@
 
 模块示意图
 
-![](../.gitbook/assets/image%20%2848%29.png)
+![](<../.gitbook/assets/image (48).png>)
 
-  
+\
 这里参考的是 lbaasv2 的 driver，neutron\_lbaas.conf 中的 service\_provider 即为 lbaasv2 的 driver：
 
 ```python
@@ -21,7 +21,7 @@ lbaasv2 = neutron_lbaas.services.loadbalancer.plugin:LoadBalancerPluginv2
 
 ### plugin
 
-{% code title="neutron\_lbaas.services.loadbalancer.plugin.py" %}
+{% code title="neutron_lbaas.services.loadbalancer.plugin.py" %}
 ```python
 class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
     def __init__(self):
@@ -32,7 +32,7 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
 
 ### driver
 
-{% code title="neutron\_lbaas.drivers.haproxy.plugin\_driver.py" %}
+{% code title="neutron_lbaas.drivers.haproxy.plugin_driver.py" %}
 ```python
 class HaproxyOnHostPluginDriver(agent_driver_base.AgentDriverBase):
     device_driver = namespace_driver.DRIVER_NAME
@@ -41,16 +41,16 @@ class HaproxyOnHostPluginDriver(agent_driver_base.AgentDriverBase):
 
 ### agent rpc（plugin 向 agent 发送）
 
-{% code title="neutron\_lbaas.drivers.common.agent\_driver\_base.py" %}
+{% code title="neutron_lbaas.drivers.common.agent_driver_base.py" %}
 ```python
 class LoadBalancerAgentApi
     def __init__
 ```
 {% endcode %}
 
-###  plugin rpc（agent 向 plugin 发送）
+### &#x20;plugin rpc（agent 向 plugin 发送）
 
-{% code title="neutron\_lbaas.agent.agent\_api.py" %}
+{% code title="neutron_lbaas.agent.agent_api.py" %}
 ```python
 class LbaasAgentApi
     def __init__
@@ -59,7 +59,7 @@ class LbaasAgentApi
 
 ### agent 侧的回调
 
-{% code title="neutron\_lbaas.agent.agent\_manager.py" %}
+{% code title="neutron_lbaas.agent.agent_manager.py" %}
 ```python
 class LbaasAgentManager
 ```
@@ -67,14 +67,14 @@ class LbaasAgentManager
 
 ### plugin 侧的回调
 
-{% code title="neutron\_lbaas.drivers.common.agent\_driver\_base.py" %}
+{% code title="neutron_lbaas.drivers.common.agent_driver_base.py" %}
 ```python
 class AgentDriverBase
 def _set_callbacks_on_plugin
 ```
 {% endcode %}
 
-{% code title="neutron\_lbaas.drivers.common.agent\_callbacks.py" %}
+{% code title="neutron_lbaas.drivers.common.agent_callbacks.py" %}
 ```python
 class LoadBalancerCallbacks
 ```
@@ -82,7 +82,7 @@ class LoadBalancerCallbacks
 
 ### agent 入口函数
 
-{% code title="neutron\_lbaas.agent.agent.py" %}
+{% code title="neutron_lbaas.agent.agent.py" %}
 ```python
 def main
 ```
@@ -90,7 +90,7 @@ def main
 
 ### db 处理
 
-{% code title="neutron\_lbaas.db.loadbalancer.loadbalancer\_dbv2.py" %}
+{% code title="neutron_lbaas.db.loadbalancer.loadbalancer_dbv2.py" %}
 ```python
 class LoadBalancerPluginDbv2
 ```
@@ -104,7 +104,7 @@ class LoadBalancerPluginDbv2
 
 ### **plugin 入口**
 
-{% code title="neutron\_lbaas.services.loadbalancer.plugin.py" %}
+{% code title="neutron_lbaas.services.loadbalancer.plugin.py" %}
 ```python
 class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
 
@@ -130,7 +130,7 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
 
 ### **plugin 的 api 及 rpc 处理**
 
-{% code title="neutron\_lbaas.drivers.common.agent\_driver\_base.py" %}
+{% code title="neutron_lbaas.drivers.common.agent_driver_base.py" %}
 ```python
 class AgentDriverBase(driver_base.LoadBalancerBaseDriver):
 
@@ -189,7 +189,7 @@ class LoadBalancerAgentApi(object):
 
 **agent 的入口**
 
-{% code title="neutron\_lbaas.agent.agent.py - main" %}
+{% code title="neutron_lbaas.agent.agent.py - main" %}
 ```python
 def main():
     # mgr指向LbaasAgentManager
@@ -207,7 +207,7 @@ def main():
 
 ### **agent 处理 plugin 下发的消息**
 
-{% code title="neutron\_lbaas.agent.agent\_manager.py" %}
+{% code title="neutron_lbaas.agent.agent_manager.py" %}
 ```python
 class LbaasAgentManager(periodic_task.PeriodicTasks):
 
@@ -232,7 +232,7 @@ class LbaasAgentManager(periodic_task.PeriodicTasks):
 
 ### **agent 将任务下发给 driver**
 
-{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
+{% code title="neutron_lbaas.drivers.haproxy.namespace_driver.py" %}
 ```python
 NS_PREFIX = 'qlbaas-'
 
@@ -262,7 +262,7 @@ class HaproxyNSDriver(agent_device_driver.AgentDeviceDriver):
 ```
 {% endcode %}
 
-{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
+{% code title="neutron_lbaas.drivers.haproxy.namespace_driver.py" %}
 ```python
 class PoolManager(agent_device_driver.BasePoolManager):
     def create(self, pool):
@@ -287,7 +287,7 @@ class LoadBalancerManager(agent_device_driver.BaseLoadBalancerManager):
 
 ### **driver 通过 rpc 访问 plugin 侧的 db**
 
-{% code title="neutron\_lbaas.agent.agent\_api.py" %}
+{% code title="neutron_lbaas.agent.agent_api.py" %}
 ```python
 class LbaasAgentApi(object):
     def get_loadbalancer(self, loadbalancer_id):
@@ -301,7 +301,7 @@ class LbaasAgentApi(object):
 ```
 {% endcode %}
 
-{% code title="neutron\_lbaas.drivers.common.agent\_callbacks.py" %}
+{% code title="neutron_lbaas.drivers.common.agent_callbacks.py" %}
 ```python
 class LoadBalancerCallbacks(object):
     def get_loadbalancer(self, context, loadbalancer_id=None):
@@ -327,7 +327,7 @@ class LoadBalancerCallbacks(object):
 ```
 {% endcode %}
 
-{% code title="neutron\_lbaas.db.loadbalancer.loadbalancer\_dbv2.py" %}
+{% code title="neutron_lbaas.db.loadbalancer.loadbalancer_dbv2.py" %}
 ```python
 class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
                              agent_scheduler.LbaasAgentSchedulerDbMixin):
@@ -341,7 +341,7 @@ class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
 
 ### **driver 开始执行实际操作**
 
-{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
+{% code title="neutron_lbaas.drivers.haproxy.namespace_driver.py" %}
 ```python
 class HaproxyNSDriver(agent_device_driver.AgentDeviceDriver):
 
@@ -385,7 +385,7 @@ class HaproxyNSDriver(agent_device_driver.AgentDeviceDriver):
 
 #### `_plug`
 
-{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
+{% code title="neutron_lbaas.drivers.haproxy.namespace_driver.py" %}
 ```python
 def _plug(self, namespace, port, vip_address, reuse_existing=True):
         # 调用LbaasAgentApi的plug_vip_port函数，rpc的publisher
@@ -451,7 +451,7 @@ def _plug(self, namespace, port, vip_address, reuse_existing=True):
 
 #### `_spawn`
 
-{% code title="neutron\_lbaas.drivers.haproxy.namespace\_driver.py" %}
+{% code title="neutron_lbaas.drivers.haproxy.namespace_driver.py" %}
 ```python
 def _spawn(self, loadbalancer, extra_cmd_args=()):
         namespace = get_ns_name(loadbalancer.id)
@@ -548,4 +548,3 @@ $ neutron lbaas-healthmonitor-create \
 ## References
 
 * 原文 [Liberty 版本 Neutron LBaas 学习](https://www.laminar.fun/Openstack/2016-09-14-neutron-lbaas-arch-code-operation.html)
-

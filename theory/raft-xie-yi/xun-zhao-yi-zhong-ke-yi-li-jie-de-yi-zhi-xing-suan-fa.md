@@ -6,35 +6,35 @@ description: Raft协议中文翻译
 
 ## 写在前面
 
-一直以来， 对Raft协议的理解感觉都没有非常到位， 本着眼过千遍， 不如手过一遍的原则， 利用空闲时间， 就自己把Raft翻译一遍， 加深自己的理解， 也方便其他同学参考。[Raft协议英文版](https://raft.github.io/raft.pdf)  
-参考资料： [https://github.com/ongardie/dissertation\#readme](https://github.com/ongardie/dissertation#readme)
+一直以来， 对Raft协议的理解感觉都没有非常到位， 本着眼过千遍， 不如手过一遍的原则， 利用空闲时间， 就自己把Raft翻译一遍， 加深自己的理解， 也方便其他同学参考。[Raft协议英文版](https://raft.github.io/raft.pdf)\
+参考资料： [https://github.com/ongardie/dissertation#readme](https://github.com/ongardie/dissertation#readme)
 
 ## 摘要
 
-Raft是一种管理复制日志的算法。 它产生了一种结果和（multi-\)Paxos一样， 并且和Paxos同样有效， 但是结构不同于Paxos的算法；它使得Raft比Paxos更加容易理解， 同时也为构建实际系统提供更好的基础组件。为了增强可理解性， Raft把一致性的关键元素进行了分割， 例如leader选举， 日志复制以及安全性， 并且Raft增强了要考虑的状态的相关性来减少状态的数量。从一份用户调查的展示结果来看， Raft对于学习者来说比Paxos更加容易。 Raft也包含了一种新的改变集群成员的机制， 它使用包含大多数来保证安全性。
+Raft是一种管理复制日志的算法。 它产生了一种结果和（multi-)Paxos一样， 并且和Paxos同样有效， 但是结构不同于Paxos的算法；它使得Raft比Paxos更加容易理解， 同时也为构建实际系统提供更好的基础组件。为了增强可理解性， Raft把一致性的关键元素进行了分割， 例如leader选举， 日志复制以及安全性， 并且Raft增强了要考虑的状态的相关性来减少状态的数量。从一份用户调查的展示结果来看， Raft对于学习者来说比Paxos更加容易。 Raft也包含了一种新的改变集群成员的机制， 它使用包含大多数来保证安全性。
 
 ## 1 简介
 
-一致性算法允许一组机器成为一个相关的工作组， 即便有一些成员发生故障， 它还能提供服务。因此， 它在构建可靠的大规模软件系统中扮演了关键的角色。 Paxos\[13,14\]在过去十年内在讨论一致性算法一直占据主导地位：绝大部分的一致性的实现是基于Paxos或者受到它的影响， 而且Paxos已经成为教导学生一致性的主要的工具。
+一致性算法允许一组机器成为一个相关的工作组， 即便有一些成员发生故障， 它还能提供服务。因此， 它在构建可靠的大规模软件系统中扮演了关键的角色。 Paxos\[13,14]在过去十年内在讨论一致性算法一直占据主导地位：绝大部分的一致性的实现是基于Paxos或者受到它的影响， 而且Paxos已经成为教导学生一致性的主要的工具。
 
 在我们自己艰难的尝试过Paxos后， 我们尝试去找到一种新的一致性算法， 它能够提供系统构建和教育的功能。 我们方法不是常规的， 因为我们的主要目标是可理解性： 我们能不能定义一种新的相对于Paxos更容易学习的算法给实际的系统？ 此外，我们想要这个算法为系统构建者提供直观的开发功能。不但该算法能够work很重要， 它为什么可以work的原因很明显也同样重要。
 
 这项工作的结果是一个被称为Raft的一致性算法。 在设计Raft的过程中， 我采用了几种特别的技术来提高可理解性， 包括分解（Raft分割leader选举， 日志复制以及安全性）和状态空间的减少（相对于Paxos， Raft 减轻了不确定性的程度以及服务器相互不一致的程度）。 一份包含2个大学的43名学生的报告显示：Raft比Paxos明显容易理解：学习过2种算法之后， 其中33名学生能够回答关于Raft的问题， 这比Paxos要好。
 
-Raft 和很多现存的一致性算法（最为明显的， OKi和Liskov的Viewstamped Replication\[27,10\]）类似， 但它有一些新颖的特性：
+Raft 和很多现存的一致性算法（最为明显的， OKi和Liskov的Viewstamped Replication\[27,10]）类似， 但它有一些新颖的特性：
 
 * Strong leader： Raft相比其他的一致性算法， 使用了更强的领导形式。 例如， 日志单元仅仅从leader流向其他的服务器。 这简化了日志复制的管理同样令Raft更容易理解。
 * Leader election： Raft使用随机的定时器来选主。 它只是增加了有限的机制给任意的一致性算法的心跳过程， 但是可以很简单并且迅速的解决冲突。
 * Membership changes： Raft针对集群中的状态发生变化的服务器采用了联合一致性（joint consensus）的方法， 这里在状态转变过程中， 2种不同配置的大多数节点是重叠得到。
 
-论文的剩余部分，介绍复制状态机问题（Section 2）， 讨论Paxos的优点和缺陷（section 3）， 描述我们对可理解性的基本方法（section 4\), 说明Raft的一致性算法（section 5 - 7）， 评估Raft（Sectoin 8）， 讨论相关的著作（Section 9）。 由于篇幅的原因， Raft 算法的一些元素在这里被省略了， 它们可以从扩展的技术报告【29】里面得到。 其他的资料描述了客户端如何和系统交互， 以及在Raft中 日志空间是如何被回收的。
+论文的剩余部分，介绍复制状态机问题（Section 2）， 讨论Paxos的优点和缺陷（section 3）， 描述我们对可理解性的基本方法（section 4), 说明Raft的一致性算法（section 5 - 7）， 评估Raft（Sectoin 8）， 讨论相关的著作（Section 9）。 由于篇幅的原因， Raft 算法的一些元素在这里被省略了， 它们可以从扩展的技术报告【29】里面得到。 其他的资料描述了客户端如何和系统交互， 以及在Raft中 日志空间是如何被回收的。
 
 ## 2 复制状态机
 
-典型的复制算法在上下文中会采用复制状态机【33】。 在这种方法中， 在一组有相同副本的机器上计算状态机， 即便有一些机器发生故障， 系统还可以工作。 复制状态机被用来解决一系列分布式系统的容错问题。 例如， 在大规模的系统中， 有一个集群的leader， 比如GFS【7】， HDFS【34】 以及RAMCCloud【30】， 通常使用一个复制状态机来管理leader选举和保存用来恢复的leader 挂掉时候的配置文件。 Chubby【2】和ZooKeeper【9】是使用复制状态机的例子。  
+典型的复制算法在上下文中会采用复制状态机【33】。 在这种方法中， 在一组有相同副本的机器上计算状态机， 即便有一些机器发生故障， 系统还可以工作。 复制状态机被用来解决一系列分布式系统的容错问题。 例如， 在大规模的系统中， 有一个集群的leader， 比如GFS【7】， HDFS【34】 以及RAMCCloud【30】， 通常使用一个复制状态机来管理leader选举和保存用来恢复的leader 挂掉时候的配置文件。 Chubby【2】和ZooKeeper【9】是使用复制状态机的例子。\
 
 
-![&#x56FE;1](../../.gitbook/assets/image%20%2890%29.png)
+![图1](<../../.gitbook/assets/image (90).png>)
 
 复制状态机的典型实现是采用Figure 1所示的复制日志。 每一个服务器保存一份日志， 里面包含一连串的状态机按顺序执行的命令。每一份日志包含相同顺序的相同的命令， 因此状态机按照相同的顺序执行命令。 由于状态机的确定性， 每一个计算节点有相同的状态以及相同的输出顺序。
 
@@ -77,50 +77,50 @@ Paxos的第二个问题是他没有为创建实际实现提供好的基础。 �
 
 ## 5 Raft一致性协议
 
-Raft是一个如Session 2 表格描述的管理复制日志的算法。 图2以简练的方式总结了该算法以供参考， 图3 列出了该算法的核心的属性， 这些属性在本部分余下的章节逐个讨论。  
+Raft是一个如Session 2 表格描述的管理复制日志的算法。 图2以简练的方式总结了该算法以供参考， 图3 列出了该算法的核心的属性， 这些属性在本部分余下的章节逐个讨论。\
 
 
 
 
-![&#x56FE;2](../../.gitbook/assets/image%20%2889%29.png)
+![图2](<../../.gitbook/assets/image (89).png>)
 
 
 
-![&#x56FE;3](../../.gitbook/assets/image%20%2885%29.png)
+![图3](<../../.gitbook/assets/image (85).png>)
 
-  
+\
 Raft通过首先选出一个唯一的leader， 然后给它完全的权限来管理复制日志来实现一致性。 leader 从client端接收日志， 把这些日志复制到其它的服务器上， 并且告诉服务器什么时候把这些日志回放到它们的状态机是安全的。拥有一个leader简化了管理日志复制， 比如， leader可以决定将新的日志放置在日志文件的位置而不需要咨询其他的服务器， 而且数据流能够以简单的方式从leader到其他的服务器。leader可能会发生故障或者与其他的服务器断开连接， 在这种情况下新的leader会被选举出来。
 
 通过leader的方式， Raft把一致性问题分解成为3个相对独立的子问题， 我们在下面的章节会讨论它们：
 
-* Log replication \(日志复制\)：leader必须要从client接收日志， 并把它们复制到集群的成员中， 迫使所有的日志和它自己保持一致（Session 5.3）。
-* Safety（安全性）： Raft的主要的安全属性是图3 状态机安全属性：如果一个服务器已经在它的状态机上执行了某一条日志， 其他的的服务器在相同的log index不能执行不同的命令。 Session 5.3 描述了Raft如何保证这个属性， 这个方法在选举机制上引入了另一个限制， 会在Session 5.2描述它。
+* Log replication (日志复制)：leader必须要从client接收日志， 并把它们复制到集群的成员中， 迫使所有的日志和它自己保持一致（Session 5.3）。
+*   Safety（安全性）： Raft的主要的安全属性是图3 状态机安全属性：如果一个服务器已经在它的状态机上执行了某一条日志， 其他的的服务器在相同的log index不能执行不同的命令。 Session 5.3 描述了Raft如何保证这个属性， 这个方法在选举机制上引入了另一个限制， 会在Session 5.2描述它。
 
-  展示了一致性算法之后， 本章会讨论可用性和定时在系统中的作用。
+    展示了一致性算法之后， 本章会讨论可用性和定时在系统中的作用。
 
 ### 5.1 Raft 基础
 
-![&#x56FE;4](../../.gitbook/assets/image%20%2883%29.png)
+![图4](<../../.gitbook/assets/image (83).png>)
 
-  
+\
 一个Raft集群包含好几个服务器， 典型的个数是5个， 这样它能容许系统中有2个服务器发生故障。在任意时间点， 每一个服务器是处于3个状态之一： leader， follower， 或者candidate。 在正常的操作中， 只有一个leader， 其它都是follower。 Follower 是被动的： 它们自己不会发出请求， 而是简单的响应从leader或者candidate的请求。Leader处理所有的client请求（如果client连接到follower， follower会重定向到leader）。 第三种状态， candidate， 被用来选举一个新的leader， 如Session 5.2 所述。图4 显示这些状态以及它们的转换， 这些转换在下面讨论。
 
-![&#x56FE;5](../../.gitbook/assets/image%20%2896%29.png)
+![图5](<../../.gitbook/assets/image (96).png>)
 
-  
+\
 Raft 把时间划分成如图5 所示任意长度的term。 term通过连续的整数来标记。 每个term从一个选举开始， 如session 5.2所述， 有一个或多个candidate试图成为leader。 如果一个candidate赢得选举， 在剩下的term， 它就是leader。在一些场景下， 选举会导致脑裂， 在这种情况下， 该term没有leader， 一个新的term（同时一个新的选举）随后会开始。 Raft会确保在一个term里面最多只有一个leader。
 
 不同的服务器可能观察到在不同时间点term之间的状态转换， 在一些场景下一个服务器可能看不到一个选举甚至整个term。 Term在Raft中扮演了逻辑时钟【12】的角色， 并且它们允许服务器删除过时的信息， 例如，旧的leader。 每一个服务器保存了一个当前term的数字， 它是随着时间一直增加的。 当前的term值会在服务器之间通信进行交换， 如果一个服务器的当前term值小于其他的， 它就更新当前的term到表较大的那个数值。 如果一个candadate或者leader发现它自己的term值过时了， 它立刻把自己变成follower状态。 如果一个服务器接收到一个过时的term， 它拒绝该请求。
 
 Raft服务器间的通信使用远程程序调用（RPC）， 并且一致性算法只需要两种类型的RPC。RequestVote RPC是由candidate在选举的时候发起（Session5.2）， AppendEntries RPC是由leader发起来复制日志以及提供的一种心跳的方式（session 5.3）。 服务器会重新发送RPC如果在时间限制的方式下没有收到响应， 并且为了性能RPC的发送是并行的。
 
-### 5.2 Leader election（选主） <a id="52-leader-election&#x9009;&#x4E3B;"></a>
+### 5.2 Leader election（选主） <a href="52leaderelection-xuan-zhu" id="52leaderelection-xuan-zhu"></a>
 
 Raft 使用心跳的机制来触发选主。 当服务器启动的时候， 它们首先是follower， 一个服务器只要能从leader或者candidate收到有效的RPC， 它会一直是follower。Leader给所有的follower发送周期性的心跳（没有携带日志的AppendEntries RPC）来得到leader的权限。如果一个follower在一段称为election timeout的时间内没有收到与Leader的通信， 它认为没有有效的leader， 它会发起一次新的选举来选举新的leader。
 
 要开始一次新的选举， 一个follower会增加它的term值并且把它的状态变为candidate。 然后它开始为自己投票， 然后向集群内的其他服务器同步的发出RequestVote RPC。 在如下3中情况发生的时候，candidate的状态会发生变化：（a）它赢得选举， （b）另外一个服务器把它自己设为leader，（c）一段时间过后没有选举成功。这些结果会在本节下面分别讨论。
 
-如果一个candidate收到集群内有相同term的大多数服务器的选举， 它赢得了选举， 在某一个term内， 每一个服务器最多只能向一个candidate投票， 它依据先到先服务的原则\(注意， Session5.4 为投票添加了一个限制）。大多数的原则确保在一个特定的term内最多有一个candidate 能够选举获胜（图3选举的安全属性）。 一旦一个candidate赢得选举， 它变成leader， 然后它向其他的服务器发送心跳消息来建立它的权限， 并且阻止新的选举。
+如果一个candidate收到集群内有相同term的大多数服务器的选举， 它赢得了选举， 在某一个term内， 每一个服务器最多只能向一个candidate投票， 它依据先到先服务的原则(注意， Session5.4 为投票添加了一个限制）。大多数的原则确保在一个特定的term内最多有一个candidate 能够选举获胜（图3选举的安全属性）。 一旦一个candidate赢得选举， 它变成leader， 然后它向其他的服务器发送心跳消息来建立它的权限， 并且阻止新的选举。
 
 第三种可能的结果是一个candidate既没有赢得选举也没有输掉选举：如果有很多的follower同时变成了candidate， 脑裂可能出现，导致没有candidate能够获得大多数选票。 当这种情况发生时， 每一个candidate都会超时并且开始新一轮的选举（通过增加term值和发起另一轮RequestVote RPC）。 但是， 没有其他的措施， 这样的脑裂会无限的重复下去。
 
@@ -132,12 +132,12 @@ Raft使用随机选举超时时间来确保脑裂现象很少见并且可以很�
 
 一旦leader被选举出来， 它开始对客户端请求提供服务， 每一个客户端请求包含一条被复制状态机执行的命令。 Leader把该命令作为一条新的日志添加到日志文件， 接着它向其他的服务器同步的发送AppendEntries RPC， 当这条日志已经被安全的复制（如下描述）， leader执行命令， 将结果返回给调用的客户端。如果一个follower挂掉或者运行缓慢或者网络丢包， leader 会重新发AppendEntries RPC（甚至它已经响应了客户端）直到所有的follower实际的保存了所有的日志。
 
-![&#x56FE;6](../../.gitbook/assets/image%20%2888%29.png)
+![图6](<../../.gitbook/assets/image (88).png>)
 
-  
+\
 日志被按照图6 所示组织在一起， 当从leader收到日志的时候，每一条日志包含了一个状态机命令和一个term 数字， 日志内的term数字是用来检测不同日志的不一致性来确保图3 所示的属性。 每一条日志还包含一个标识它位置的index整数。
 
-leader决定什么时候执行日志命令到状态机是安全的， 这样的日志条目被称为已提交。 Raft 确保已提交的日志是持久化的， 并且被所有的可用状态的机器执行过。 一旦leader复制一条日志到大多数的服务器上（比如， 图6中的条目7）， 一条日志被称为已提交的。这也会提交leader的所有之前的日志条目， 包括前一个leader产生的日志。 Session5.4 讨论几个在leader变化后采用这种规则的细小的问题， 它也显示出采用这种已提交的定义是安全的。 Leader保持追踪要被提交的index的最大值， 并且它包含未来的Append Entries RPC \(包含心跳）以便其他的服务器能够找到。一旦一个follower知道一条日志已经提交， 它执行日志的命令到本地的状态机（按照日志的顺序）。
+leader决定什么时候执行日志命令到状态机是安全的， 这样的日志条目被称为已提交。 Raft 确保已提交的日志是持久化的， 并且被所有的可用状态的机器执行过。 一旦leader复制一条日志到大多数的服务器上（比如， 图6中的条目7）， 一条日志被称为已提交的。这也会提交leader的所有之前的日志条目， 包括前一个leader产生的日志。 Session5.4 讨论几个在leader变化后采用这种规则的细小的问题， 它也显示出采用这种已提交的定义是安全的。 Leader保持追踪要被提交的index的最大值， 并且它包含未来的Append Entries RPC (包含心跳）以便其他的服务器能够找到。一旦一个follower知道一条日志已经提交， 它执行日志的命令到本地的状态机（按照日志的顺序）。
 
 我们设计Raft日志机制来保持不同主机上的日志有一个高等级的相关性。这样不仅简化了系统的行为并且使得行为更容易预测， 而且它是确保安全性的重要模块。Raft维护如下的属性， 它们一起构成了如图3 的日志匹配属性：
 
@@ -148,9 +148,9 @@ leader决定什么时候执行日志命令到状态机是安全的， 这样的�
 
 在正常的操作中， leader和follower的日志保持一致， 因此，AppendEntries一致性检查从来不会失败。但是， leader挂掉会留下不一致的日志（旧的leader有可能没有完全复制它的日志）。 这些不执行可能由一系列的leader和following故障组成， 图 7 显示了follower和leader的日志不同的形式。 一个follower的日志可能缺失一些存在于leader的日志条目， 它也可能包含leader不存在的额外的日志条目， 或者另种状况都存在。 日志文件内缺失的或者额外的日志条目可能延续多个term。
 
-![&#x56FE;7](../../.gitbook/assets/image%20%2891%29.png)
+![图7](<../../.gitbook/assets/image (91).png>)
 
-![&#x56FE;7](https://img-blog.csdn.net/20171214201142273?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvYmFpaml3ZWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![图7](https://img-blog.csdn.net/20171214201142273?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvYmFpaml3ZWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 在Raft里， leader通过强制follower复制它自己的日志来处理不一致性， 这意味着follower的相冲突的日志被leader的日志覆盖掉。 Session 5.4显示附加一个额外的限制是安全的。
 
@@ -162,13 +162,13 @@ leader决定什么时候执行日志命令到状态机是安全的， 这样的�
 
 这种日志复制机制展示了预期的Session2 描述的一致性属性： Raft 可以接受， 复制以及回放新的日志条目只要大部分的服务器是可到达的， 在正常情况下， 一条新的日志需要一个RPC 就可以复制到大部分的集群成员， 某一个比较慢的follower不会影响性能。
 
-#### Safety （安全性） <a id="safety-&#x5B89;&#x5168;&#x6027;"></a>
+#### Safety （安全性） <a href="safety-an-quan-xing" id="safety-an-quan-xing"></a>
 
 在前面的章节描述了Raft如何选主和日志复制， 然而， 到目前为止， 这些机制还不足以保证每一台机器都按照相同的顺序执行相同的命令。 比如， 在leader提交一些日志的时候某个follower不可用， 然后它可能被选举为leader并且覆盖掉新的日志。 结果， 不同的状态机可能按照不同的顺序执行命令。
 
 本章通过给多个服务器可能被选为主添加限制条件来完成Raft算法。 这个限制确保在某个term内包含在前面的term内已经提交的所有日志（图3的leader完全属性）。 由这个选举的限制， 我们使提交的规则更加精确。最终， 我们展示了leader完全属性的证明草图， 并且显示它如何使得复制状态机的正确行为。
 
-\#\#\#\# 5.4.1 选举限制  
+\#### 5.4.1 选举限制\
 在任何leader-based 一致性算法， leader必须最终保存所有的已经提交的日志。 在一些一致性算法， 比如Viewstamped Replication【20】，能够选举出来一个leader， 即便它一开始没有包含所有的已提交的日志， 这些算法包含额外的机制来指示缺失的日志并把它们转移到新的leader， 或者在选举的过程或者随后。不幸的是， 这导致相当多的额外的机制和复杂性。 Raft使用一种比较简单的方法， 该方法确保在选举的时候所有之前已提交的日志在新的leader里， 不需要将那些日志转移到新的leader。这意味着，日志的转移只有一个方向， 从leader到follower， 并且leader从不覆盖已经存在的日志。
 
 Raft 使用选举过程来阻止一个candidate赢得选举除非它包含所有已经提交的日志。一个candidate必须和集群中的大多数连接以便能够被选中， 这意味着每一条已经提交的日志至少在其中的一个服务器内。如果candidate的日志是集群内大多数服务期内最新的（这里， ”最新“ 被精确的定义如下）， 那么他将包含所有的已经提交的日志。 RequestVote RPC实现了这个限制： RPC包含了candidate的日志信息， 如果投票者的日志比candidate的更新， 投票者拒绝投票。
@@ -177,9 +177,9 @@ Raft通过比较文件的最后一条的index和term来决定哪一个日志文�
 
 #### **5.4.2 前面的term中已经提交的日志**
 
-![&#x56FE;8](../../.gitbook/assets/image%20%2892%29.png)
+![图8](<../../.gitbook/assets/image (92).png>)
 
-  
+\
 如Session5.3 所述， leader知道当前的term的一条日志要被提交一旦该日志被保存在大多数的服务器上。 如果在提交一条日志之前leader挂掉了， 新的leader会尝试完成复制这条日志， 但是， 一个leader无法马上得出结论说这条日志已经被保存到集群的大多数服务器上需要被前一个term提交。 图8 描述了一个这样的状况， 与一条旧的日志被保存到了大多数的服务器上， 但它仍然被新的leader覆盖了。
 
 要去除像图8 的问题， Raft从来不提交有前一个term计数复制的日志，只有来自于当前term的日志， leader才会根据计数副本来提交， 一旦一条日志以这种方式被提交， 那么所有以前的日志由于Log Match Property （日至匹配属性）被提交。有几种情况， leader能够安全的得出结论说旧的日志被提交了（比如 如果该条日志比保存在每一个服务器上）， 但是Raft采取了一个更加保守的方法来简化。
@@ -188,10 +188,10 @@ Raft在提交日志规则上遭受这个额外的复杂性是因为当leader复�
 
 **5.4.3 安全性的讨论**
 
-  
-给定完整的Raft算法， 我们现在可以更精确的讨论Leader Completeness Property（leader完整属性）的内容（这个讨论是基于安全的证据， 参考Session8.2）。 我们假定Leader Completeness Property站不住脚的， 然后我们证明它是矛盾的。 假定term T的leader （leaderT）提交了一个日志，但是该日志没有被存储在以后的leader的term内， 假设最小的term U &gt; T， 它的leader（leaderU） 没有保存该条日志。
+\
+给定完整的Raft算法， 我们现在可以更精确的讨论Leader Completeness Property（leader完整属性）的内容（这个讨论是基于安全的证据， 参考Session8.2）。 我们假定Leader Completeness Property站不住脚的， 然后我们证明它是矛盾的。 假定term T的leader （leaderT）提交了一个日志，但是该日志没有被存储在以后的leader的term内， 假设最小的term U > T， 它的leader（leaderU） 没有保存该条日志。
 
-![&#x56FE;9](../../.gitbook/assets/image%20%2881%29.png)
+![图9](<../../.gitbook/assets/image (81).png>)
 
 1. 在选举的时候， leaderU的日志必须已经缺少该已提交的日志（leader从来不会删除或者覆盖日志）。
 2. leaderT复制日志到集群的大多数， 并且leaderU获得集群内大多数的选票。这样， 至少有一个服务器（投票者）既从leaderT接收该日志，又选举leaderU 如图9所示。这个投票者是矛盾的关键。
@@ -201,21 +201,22 @@ Raft在提交日志规则上遭受这个额外的复杂性是因为当leader复�
 6. 首先， 如果投票者和leaderU有同样的日志term， 那么leaderU的日志必定至少和投票者一样长，因此它包含投票者的所有的日志。 这是一个矛盾，因为投票者包含已提交的日志而leaderU假定是没有的；
 7. 否则， leaderU的最后的日志的term一定会大于投票者， 而且也大于T, 因为投票者的最后日志的term至少是T（它包含term T的已提交的日志）。前面的创建leaderU最后日志的leader一定包含该已提交的日志（根据假定）。 那么， 根据Log Matching Property , leaderU的日志也包含该条已提交的日志， 这是一个矛盾。
 8. 这就完成了这个矛盾。因此， term大于T的leader一定包含所有的在term T内提交的日志；
-9. Log Matching Property确保未来的leader也会包含间接提交的日志， 如图8（d）的index 2. 给定Leader Completness Property， 我们很容易证明图3的状态机安全属性， 并且所有的状态机按照相同的顺序执行日志（参考【29】）。
+9. Log Matching Property确保未来的leader也会包含间接提交的日志， 如图8（d）的index 2.\
+   给定Leader Completness Property， 我们很容易证明图3的状态机安全属性， 并且所有的状态机按照相同的顺序执行日志（参考【29】）。
 
-#### 5.5 follower和candidate故障 <a id="55-follower&#x548C;candidate&#x6545;&#x969C;"></a>
+#### 5.5 follower和candidate故障 <a href="55follower-he-candidate-gu-zhang" id="55follower-he-candidate-gu-zhang"></a>
 
 至此， 我们我们一直关注leader故障， follower和candidate故障比leader故障更容易处理， 并且它们两个采用相同的处理方式。如果一个candidate或者follower发生故障， 那么接下来的RequestVotte 和AppendEntries RPC会失败， Raft通过无限重试的方式来处理RPC失败， 如果故障的服务器重启， 那么RPC会成功的完成。 如果一个服务器在完成RPC之后但是在响应之前故障， 它会在重启之后收到同样的RPC。 Raft的RPC是幂等的， 因此重复的RPC是没有害处的。比如， 如果一个follower收到一个AppendEntries请求， 该请求包含已经存在的日志， 它忽略请求中的日志。
 
-#### 5.6 计时和可用性 <a id="56-&#x8BA1;&#x65F6;&#x548C;&#x53EF;&#x7528;&#x6027;"></a>
+#### 5.6 计时和可用性 <a href="56-ji-shi-he-ke-yong-xing" id="56-ji-shi-he-ke-yong-xing"></a>
 
 对于Raft其中一个需求是它的安全性不能依赖于计时：系统一定不能只是因为有些事件发生的比预期比较快或者慢而产生错误的结果。 但是， 可用性（系统以一个计时的方式响应客户端）必须不可避免的依赖于计时。 比如， 如果信息交换的时间长于通常服务器故障的时间， candidate不会一直等待， 没有一个leader， Raft不能进行下去。
 
-leader选举是Raft 计时至关重要的一个方面， Raft能够选举和维护一个稳定的leader只要系统慢如下的计时条件：  
-  
-`broadcastTime ≪ electionTimeout ≪ MTBF`  
-  
-在这个不等式里， broadcastTime是一个服务器同步发送RPC到集群的服务器以及收到响应的平均时间， electionTimeout 是在Session5.2描述的选举超时时间， MTBF是一个服务器故障的平均时间。广播时间应比选举超时时间小一个数量级， 以便leader可靠地发送心跳消息来阻止follower发起选举，给选举超时时间一个给定的随机值的方法， 这个不等式也使得脑裂不可能发生。选举的超时时间应该比MTBF小几个数量级以便系统稳步进行。 当leader故障， 系统会在大约选举超时时间内不可用， 我们希望它只是整个时间很小的一部分。
+leader选举是Raft 计时至关重要的一个方面， Raft能够选举和维护一个稳定的leader只要系统慢如下的计时条件：\
+\
+`broadcastTime ≪ electionTimeout ≪ MTBF`\
+``\
+``在这个不等式里， broadcastTime是一个服务器同步发送RPC到集群的服务器以及收到响应的平均时间， electionTimeout 是在Session5.2描述的选举超时时间， MTBF是一个服务器故障的平均时间。广播时间应比选举超时时间小一个数量级， 以便leader可靠地发送心跳消息来阻止follower发起选举，给选举超时时间一个给定的随机值的方法， 这个不等式也使得脑裂不可能发生。选举的超时时间应该比MTBF小几个数量级以便系统稳步进行。 当leader故障， 系统会在大约选举超时时间内不可用， 我们希望它只是整个时间很小的一部分。
 
 广播时间和MTBF是底层系统的属性， 然而选举超时时间是我们必须选择的。 Raft RPC通常需要接受者持久化信息到存储系统， 因此广播时间可能在0.5毫秒到20毫秒， 依赖于存储技术。 结果， 选举超时时间可能大致在10毫秒和500毫秒之间。典型的服务器MTBF是几个月或者更多， 很容易满足计时的需求。
 
@@ -225,9 +226,9 @@ leader选举是Raft 计时至关重要的一个方面， Raft能够选举和维�
 
 到目前为止， 我们都假定集群的配置（参加一致性算符的服务器集合）是固定的， 实际上， 配置有时候是需要改变的， 比如， 当服务器故障的时候，要替换它或者改变复制的级别。尽管这可以通过下线整个集群，然后重启集群的方式来实现， 但是它会导致集群在变化过程中不可用。另外，如果有手工操作的步骤， 有操作错误的风险。 为了避免这些问题， 我们决定自动变更配置并且把它合并到Raft一致算法里面。
 
-![&#x56FE;10](../../.gitbook/assets/image%20%2884%29.png)
+![图10](<../../.gitbook/assets/image (84).png>)
 
-![&#x56FE;10](https://img-blog.csdn.net/20171216154321486?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvYmFpaml3ZWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)  
+![图10](https://img-blog.csdn.net/20171216154321486?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvYmFpaml3ZWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)\
 为了使配置变更安全， 在变更过程中，一定不能有一个时间点会有两个leader被选举出来。 不幸的是， 任何将服务器从旧的配置转到新的配置都是不安全的， 不太可能自动的将集群内所有的服务器更换配置， 因为集群在转变过程中有可能分裂成两个独立的大多数。 （参考图10）。
 
 为了保证安全， 配置变更必须使用两阶段的方法。 比如， 有些系统（像【20】）采用第一个阶段是旧的配置失效以便它不能处理客户端的请求， 然后在第二个阶段使新的配置生效。在Raft内， 集群首先转移到一个过渡的配置我们称之为joint 一致性， 一旦joint一致性被提交了， 系统转移到新的配置。 joint一致性联合了新旧两种配置：
@@ -238,18 +239,18 @@ leader选举是Raft 计时至关重要的一个方面， Raft能够选举和维�
 
 joint 一致性允许单个的服务器在不同的时间点在不同配置间转变而不需要承诺安全性， 而且， 它允许集群在配置变更的整个过程持续对外提供服务。
 
-![&#x56FE;11](../../.gitbook/assets/image%20%2886%29.png)
+![图11](<../../.gitbook/assets/image (86).png>)
 
-  
+\
 集群的配置使用特殊的复制日志条目进行保存和通信，图11 描述了配置变更的过程。当leader收到一个变更配置Cold到Cnew的请求， 它把joint一致性配置（图中的Cold，new）作为一条日志存储， 并且采用前面描述的机制复制该日志。 一旦一个服务器把新的配置放进它的日志它使用该配置做未来的所有决定（一个服务器总是使用最新的配置， 不管改配置是否已经提交）。 这意味着leader会使用Cold，new 规则来决定什么时候日志Cold，new应该被提交。 如果leader故障， 一个新的采用Cold或者Cold，new的leader被选举出来，这依赖于赢得选举的candidate是否收到了Cold，new。 在任何情况下， Cnew 在这段时间不能单方面做出决定。
 
 一旦Cold,new被提交， Cold或者Cnew没有对方的同意无法做出决定，Leader Completeness Property 保证只有服务器包含了Cold,new 日志才能被选举为leader。现在让leader产生一个新的Cnew 日志并且复制到集群其他成员， 当该日志被看到的时候， 新的排至就开始起作用。 当新的配置在Cnew下被提交， 旧的配置就不再相关， 并且不在新的配置里面的服务器可以被关机。如图11 所示， 没有一个时间点Cold和Cnew都可以作出决定， 这确保了安全性。
 
 还有3个关于重新配置的问题需要指出来。第一个问题是新加入的服务器有可能没有包含任何日志，在这种状态下加入集群， 它要花费相当长的时间来同步日志， 在这段时间内， 它不太可能提交新的日志。为了避免可用性的缺口， Raft在配置改变之前引入了一个额外的阶段， 在该阶段， 新的服务器作为不可投票的成员加入集群（leader复制日志给它们， 但是它们不被认为是大多数成员之一）。 一旦新的服务器赶上了集群中其他的服务器， 可以进行上面描述的变更配置。
 
-第二个问题是集群的leader有可能不是新的配置的一部分。 在这种情况下， leader退出（返回到follower状态）一旦它完成了Cnew日志的提交，这意味着会有一段时间（在它提交Cnew的时候\)leader管理一个集群但是它不属于该集群， 它复制日志给集群成员但是自己不包含在大多数内。转变发生在Cnew被提交的时候， 此时是新的配置第一次可以独立的执行操作（通常很有可能从Cnew选举出来一个leader）， 在该时间点之前只有一个来自于Cold的服务器能被选举为leader。
+第二个问题是集群的leader有可能不是新的配置的一部分。 在这种情况下， leader退出（返回到follower状态）一旦它完成了Cnew日志的提交，这意味着会有一段时间（在它提交Cnew的时候)leader管理一个集群但是它不属于该集群， 它复制日志给集群成员但是自己不包含在大多数内。转变发生在Cnew被提交的时候， 此时是新的配置第一次可以独立的执行操作（通常很有可能从Cnew选举出来一个leader）， 在该时间点之前只有一个来自于Cold的服务器能被选举为leader。
 
-第三个问题是已删除的服务器（不包含在Cnew\)能破坏集群。 这些服务器不会收到心跳， 所以会造成超时并且开始一次新的选举， 它们会采用新的term发送requestVote RPC， 这会造成当前的leader变成follower状态。 有一个新的leader最终会被选举出来，但是已删除的服务器会再一次超时， 重复上述过程， 造成很差的可用性。
+第三个问题是已删除的服务器（不包含在Cnew)能破坏集群。 这些服务器不会收到心跳， 所以会造成超时并且开始一次新的选举， 它们会采用新的term发送requestVote RPC， 这会造成当前的leader变成follower状态。 有一个新的leader最终会被选举出来，但是已删除的服务器会再一次超时， 重复上述过程， 造成很差的可用性。
 
 为了避免这个问题， 当服务器认为当前的leader存在， 它们会忽视RequestVote RPC， 特别是， 如果一个服务器在最小超时时间内收到了来自当前leader的RequestVote RPC， 它不会更新自己的term或者授权投票，这不会影响正常的选举， 在开始一轮选举之前， 一个服务器等待至少一个最小选举超时时间。 但是这种方式能够避免已经删除的服务器破坏集群： 如果一个leader能够从它的集群内收到心跳，它不会被大的term数字免职。
 
@@ -267,22 +268,22 @@ joint 一致性允许单个的服务器在不同的时间点在不同配置间�
 
 为了衡量Raft相对于Paxos的可理解性， 我们在斯坦福大学高年级本科生和研究生的高级操作系统课程和U.C.伯克利大学的分布式计算课程进行了一次实验性的研究， 我们用视频记录了Raft课程和Paxos课程， 并且进行了相应的测试。Raft课程覆盖了这篇论文的内容， Paxos课程包括创建一个等价的复制状态机， 包括single-decress Paxos， multi-decree Paxos， 变配以及一些实际中需要的优化（比如选举leader）。考试测验了对算法的基本理解， 并且也要求学生们对特殊状况的处理， 每一个学生观看第一段视频， 参加相应的考试， 观看第二段视频， 参加第二个考试。 大约一半的参加者首先进行Paxos部分， 另外一半首先进行Raft部分，以便说明个人在表现和经验的获得上的差异，我们比较参加者的每一次测试的分数来判断参加者是否显示Raft更容易理解。
 
-![&#x8868;1](../../.gitbook/assets/image%20%2882%29.png)
+![表1](<../../.gitbook/assets/image (82).png>)
 
-  
+\
 我们尽可能使Raft和Paxos的比较公平， 这个实验在两个方面更加有利于Paxos：43个人中间有15人之前有Paxos的经验， 并且Paxos的视频比Raft长14%。如表格1 总结， 我们已经采取了措施来减少潜在的偏见来源。 我们所有的资料可以得到，参考【26,28】。
 
-![&#x56FE;12](../../.gitbook/assets/image%20%2894%29.png)
+![图12](<../../.gitbook/assets/image (94).png>)
 
-  
+\
 平均的， 参赛者的Raft 测试的分数比Paxos测试的分数多4.9分（可能60分， Raft的平均分数是25.7， Paxos的平均分数是20.8）， 图12显示了个体的分数， 一个成对的t-测试表明， 我们有95% 的信息说真正的Raft分数分布比整整的Paxos分数分布至少高2.5分。
 
 我们也创建了一个线性回归模型， 它依据3个因素预测学生的测试分数：参加哪一种测试. 之前Paxos经验的程度以及他们学习两种算法的顺序。这个模型预测对该测试的选择产生了12.5分的有利于Raft的差异。这远高于之前观察到的4.9分的差异， 因为很多学生之前有Paxos的经验，这能够比较大的帮助Paxos， 然而对Raft的帮助比较少。奇怪的是， 该模型也预测已经参加过Paxos测验的人会少6.3分， 尽管我们不知道为什么会这样，但是它具有统计的意义。
 
-![&#x56FE;13](../../.gitbook/assets/image%20%2895%29.png)
+![图13](<../../.gitbook/assets/image (95).png>)
 
-  
-我们在参赛者参加完测验后，也调查了参赛者来看一下哪一种算法让他们觉得更容易实现或者解释， 结果显示在图13. 绝大部分的参赛者称Raft会更容易实现和解释（44个人中的33个）。然而， 这些自我感觉得回答可能没有参赛者的分数那么可靠， 而且参赛者可能已经被我们Raft更加容易理解的假设而带有偏见。  
+\
+我们在参赛者参加完测验后，也调查了参赛者来看一下哪一种算法让他们觉得更容易实现或者解释， 结果显示在图13. 绝大部分的参赛者称Raft会更容易实现和解释（44个人中的33个）。然而， 这些自我感觉得回答可能没有参赛者的分数那么可靠， 而且参赛者可能已经被我们Raft更加容易理解的假设而带有偏见。\
 一份详细的Raft用户调研可以在【28】得到。
 
 ### 8.2 正确性
@@ -295,14 +296,14 @@ Raft的性能和其他的一致性算法类似， 比如Paxos。关于性能最�
 
 我们使用Raft实现来度量Raft选主的性能并未回答两个问题， 第一， 选举过程能不能很快的合并？第二， leader故障后系统挂掉的最短时间？
 
-![&#x56FE;14](../../.gitbook/assets/image%20%2893%29.png)
+![图14](<../../.gitbook/assets/image (93).png>)
 
-  
+\
 要衡量选主，我们不断地5个节点的集群leader挂掉， 计时检测到leader挂掉和新的leader选举出来的时间（参考图14）。为了产生最坏的场景， 在每一次试验中， 服务器有不同长度的日志文件， 以便有一些candidate不适合成为leader， 而且， 为了更容易得到脑裂， 我们的测试脚本从leader在被终止之前触发一个同步的心跳RPC的广播（这接近于leader在挂掉之前复制新的日志）。leader在均匀的的随机的心跳间隔内被crash掉， 在所有的测试都是最短选举超时时间的一半， 这样最短的故障时间就是最短选举超时时间的一半。
 
 在图14 上面的那个图显示在选举中少量的选举超时时间的随机性就最易防止脑裂， 在没有随机性下， leader的选举中由于很多额外的脑裂一直需要超过10秒钟。 只是添加5毫秒的随机性时间就有很大的帮助， 导致中位数是287毫秒的故障时间， 使用更多的随机性， 能够提高最坏情况的行为：用50毫秒的随机性时间最差情况完成的时间是513毫秒（超过1000个实验）。
 
-在图14 下面的一幅图显示故障时间可以通过减少选举超时时间来减少， 用超时时间是12 ~ 24 毫秒， 平均花费35毫秒来选举leader（最长的时延花费152毫秒）。 但是， 将超时时间减少到小于这个点违反了Raft的计时要求：leader在其他服务器开始新一轮选举之前进行广播是有困难的， 这会造成不必要的leader变化并且降低整体的可用性。 我们建议使用一个保守点的选举超时时间， 比如150 ~ 300毫秒，这样的超时时间不太可能造成不必要的leader切换并还会提供好的可用性。
+在图14 下面的一幅图显示故障时间可以通过减少选举超时时间来减少， 用超时时间是12 \~ 24 毫秒， 平均花费35毫秒来选举leader（最长的时延花费152毫秒）。 但是， 将超时时间减少到小于这个点违反了Raft的计时要求：leader在其他服务器开始新一轮选举之前进行广播是有困难的， 这会造成不必要的leader变化并且降低整体的可用性。 我们建议使用一个保守点的选举超时时间， 比如150 \~ 300毫秒，这样的超时时间不太可能造成不必要的leader切换并还会提供好的可用性。
 
 ## 9 相关的工作
 
@@ -312,7 +313,7 @@ Raft的性能和其他的一致性算法类似， 比如Paxos。关于性能最�
 * 阐述Paxos， 填补缺失的资料以及修改算法来为实现提供更好的基础【24,35,11】。
 * 实现一致性算法的系统， 比如Chubby【2,4】， Zookeeper【9， 10】， 和Spanner【5】。Chubby和Spanner的算法没有详细的公布， 尽管它们都声称基于Paxos， Zookeeper的算法很详细的公布， 但是它和Paxos有很大的不同。
 * 应用到Paxos的性能优化【16,17,3,23，1,25】。
-* Oki和Liskov的Viewstamped Replication \(VR\), 大约和Paxos同时被开发的另外一种一致性方法， 最初的描述【27】和分布式事物协议交织在一起， 但是核心的一致性协议已经被最近的更新【20】分离出来。 VR采用了基于leader的方法和Raft有很多相似性。
+* Oki和Liskov的Viewstamped Replication (VR), 大约和Paxos同时被开发的另外一种一致性方法， 最初的描述【27】和分布式事物协议交织在一起， 但是核心的一致性协议已经被最近的更新【20】分离出来。 VR采用了基于leader的方法和Raft有很多相似性。
 
 Raft和Paxos最大的不同在于Raft的强leadership： Raft使用leader作为一致性协议的一个必须的部分， 并且它集中了尽可能多的功能在leader上， 这种方法导致了更容易理解的简单的算法。 比如， 在Paxos， leader选举和基本的一致性协议是正交的，leader只是用来做性能优化， 不是达到一致性的条件。 然而，这就导致了额外的机制：Paxos包含了2阶段的基本的一致性协议和一个单独的leader选举机制。 相反， Raft把leader选举直接合并到一致性算法并且使用它作为一致性2个阶段的第一个阶段， 这使得它比Paxos有更少的机制。
 
@@ -331,6 +332,5 @@ Raft和其他我们知道的的基于一致性日志复制算法相比， 有更
 ## References
 
 * [Raft协议中文翻译（1）](https://blog.csdn.net/baijiwei/article/details/78759364)，  [baijiwei](https://blog.csdn.net/baijiwei)
-* [Raft协议中文翻译（2）](https://blog.csdn.net/baijiwei/article/details/78760308?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link)，  [baijiwei](https://blog.csdn.net/baijiwei)
-* [Raft协议中文翻译（3）](https://blog.csdn.net/baijiwei/article/details/78819381?utm_source=blogxgwz2&utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-0.no_search_link&spm=1001.2101.3001.4242)，  [baijiwei](https://blog.csdn.net/baijiwei)
-
+* [Raft协议中文翻译（2）](https://blog.csdn.net/baijiwei/article/details/78760308?depth\_1-utm\_source=distribute.pc\_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no\_search\_link)，  [baijiwei](https://blog.csdn.net/baijiwei)
+* [Raft协议中文翻译（3）](https://blog.csdn.net/baijiwei/article/details/78819381?spm=1001.2101.3001.4242)，  [baijiwei](https://blog.csdn.net/baijiwei)

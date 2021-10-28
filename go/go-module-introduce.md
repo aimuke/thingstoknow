@@ -4,22 +4,22 @@
 
 ### GOROOT
 
-go的安装路径 在`~/.bash_profile`中添加下面语句配置`GOROOT`环境变量  `export GOROOT=/usr/local/go` 。要执行go命令和go工具, 就要配置go的可执行文件的路径: `export $PATH:$GOROOT/bin` 
+go的安装路径 在`~/.bash_profile`中添加下面语句配置`GOROOT`环境变量  `export GOROOT=/usr/local/go` 。要执行go命令和go工具, 就要配置go的可执行文件的路径: `export $PATH:$GOROOT/bin`&#x20;
 
 > 注：$PATH windows用`;`符号分割, mac和类unix用`:`符号分割
 
 ### GOPATH
 
-go的工作路径 可以在自己的用户目录下面创建一个目录, 如 gopath 
+go的工作路径 可以在自己的用户目录下面创建一个目录, 如 gopath&#x20;
 
 ```bash
 cd ~ 
 mkdir gopath
 ```
 
- 在`~/.bash_profile`中添加如下语句: `export GOPATH=/Users/username/gopath` 。
+&#x20;在`~/.bash_profile`中添加如下语句: `export GOPATH=/Users/username/gopath` 。
 
-不要把`GOPATH`设置成go的安装路径, `GOPATH`下主要包含三个目录：`bin` ， `pkg` ，`src` 
+不要把`GOPATH`设置成go的安装路径, `GOPATH`下主要包含三个目录：`bin` ， `pkg` ，`src`&#x20;
 
 > 注：Go 1.8 版本之前，GOPATH 环境变量默认是空的；1.8版本之后，默认路径是：`$HOME/go`
 
@@ -33,7 +33,7 @@ mkdir gopath
 
 ### GO111MODULE
 
-有三个值：`off`、`on` 和 `auto` \(默认值\) 。在使用模块的时候`GOPATH` 是无意义的，不过它还是会把下载的依赖储存在 `$GOPATH/src/mod` 中，也会把 `go install` 的结果放在 `$GOPATH/bin` 中。
+有三个值：`off`、`on` 和 `auto` (默认值) 。在使用模块的时候`GOPATH` 是无意义的，不过它还是会把下载的依赖储存在 `$GOPATH/src/mod` 中，也会把 `go install` 的结果放在 `$GOPATH/bin` 中。
 
 * `GO111MODULE=off`，无模块支持，go 会从 GOPATH 和 vendor 文件夹寻找包
 * `GO111MODULE=on`，模块支持，go 会忽略 GOPATH 和 vendor 文件夹，只根据 `go.mod` 下载依赖
@@ -41,7 +41,7 @@ mkdir gopath
 
 ### GOPROXY
 
-由于中国政府的网络监管系统，Go 生态系统中有着许多中国 Gopher 们无法获取的模块，比如最著名的 `golang.org/x/...`。并且在中国大陆从 GitHub 获取模块的速度也有点慢。因此需要配置GOPROXY来加速Module依赖下载，这里使用goproxy.cn代理，详细介绍：传送门 
+由于中国政府的网络监管系统，Go 生态系统中有着许多中国 Gopher 们无法获取的模块，比如最著名的 `golang.org/x/...`。并且在中国大陆从 GitHub 获取模块的速度也有点慢。因此需要配置GOPROXY来加速Module依赖下载，这里使用goproxy.cn代理，详细介绍：传送门&#x20;
 
 > 注: 推荐将 GO111MODULE 设置为on 而不是auto
 
@@ -52,7 +52,7 @@ mkdir gopath
 
 Golang 1.11 版本引入的 go mod ，其思想类似maven：摒弃vendor和GOPATH，拥抱本地库。从 Go 1.11 开始，Go 允许在 `$GOPATH/src` 外的任何目录下使用 go.mod 创建项目。在`$GOPATH/src`中，为了兼容性，Go 命令仍然在旧的 GOPATH 模式下运行。从 Go 1.13 开始，Module模式将成为默认模式。
 
-### go mod 命令 
+### go mod 命令&#x20;
 
 ```bash
 > go help mod
@@ -96,8 +96,8 @@ Use "go help mod <command>" for more information about a command.
 
 默认情况下，使用的是 -mod=readonly 模式。但在 go 1.14及以上的版本中，如果目录中出现了 vendor 目录，将默认使用 -mod=vendor 模式进行编译。 三种 go build 的 flag 如下：
 
-* **-mod=readonly** 只读模式，如果待引入的 package 不在 go.mod 文件的列表中。不会修改 go.mod ，而是报错。 此外，若模块的 checksum 不在 go.sum 中也会报错。这种模式可以在编译时候避免隐式修改 go.mod。
-* **-mod=vendor** 模式下。 将使用工程的 vendor 目录下的 package 而不是 mod cache\( GOPATH/pkg/mod\) 目录。该模式下编译，将不会检查 go.mod 文件下的包版本。但是会检查 vendor 目录下的 modules.txt\(由 go mod vendor 生成\)。在 go.1.14 及更高版本，若存在 vendor 目录，将优先使用 vendor 模式。
+* **-mod=readonly **只读模式，如果待引入的 package 不在 go.mod 文件的列表中。不会修改 go.mod ，而是报错。 此外，若模块的 checksum 不在 go.sum 中也会报错。这种模式可以在编译时候避免隐式修改 go.mod。
+* **-mod=vendor** 模式下。 将使用工程的 vendor 目录下的 package 而不是 mod cache( GOPATH/pkg/mod) 目录。该模式下编译，将不会检查 go.mod 文件下的包版本。但是会检查 vendor 目录下的 modules.txt(由 go mod vendor 生成)。在 go.1.14 及更高版本，若存在 vendor 目录，将优先使用 vendor 模式。
 * **-mod=mod** 模式下，将使用 module cache，即使存在 vendor 目录，也会使用 GOPATH/pkg/mod 下的package，若 package 不存在，将自动下载指定版本的 package。
 
 ![](../.gitbook/assets/image.png)
@@ -110,7 +110,7 @@ Use "go help mod <command>" for more information about a command.
 
 ### 老项目
 
- 假设你已经有了一个go 项目， 比如在`$GOPATH/github.com/smallnest/rpcx`下， 你可以使用`go mod init github.com/smallnest/rpcx`在这个文件夹下创建一个空的`go.mod` \(只有第一行 `module github.com/smallnest/rpcx`\)。 然后你可以通过 `go get ./...`让它查找依赖，并记录在`go.mod`文件中\(你还可以指定 `-tags`,这样可以把tags的依赖都查找到\)。 通过`go mod tidy`也可以用来为`go.mod`增加丢失的依赖，删除不需要的依赖，但是我不确定它怎么处理`tags`。 执行上面的命令会把`go.mod`的`latest`版本换成实际的最新的版本，并且会生成一个`go.sum`记录每个依赖库的版本和哈希值。
+&#x20;假设你已经有了一个go 项目， 比如在`$GOPATH/github.com/smallnest/rpcx`下， 你可以使用`go mod init github.com/smallnest/rpcx`在这个文件夹下创建一个空的`go.mod` (只有第一行 `module github.com/smallnest/rpcx`)。 然后你可以通过 `go get ./...`让它查找依赖，并记录在`go.mod`文件中(你还可以指定 `-tags`,这样可以把tags的依赖都查找到)。 通过`go mod tidy`也可以用来为`go.mod`增加丢失的依赖，删除不需要的依赖，但是我不确定它怎么处理`tags`。 执行上面的命令会把`go.mod`的`latest`版本换成实际的最新的版本，并且会生成一个`go.sum`记录每个依赖库的版本和哈希值。
 
 ## **创建一个新项目**
 
@@ -224,12 +224,12 @@ github.com/mattn/go-colorable v0.1.1/go.mod h1:FuOcm+DKB9mbwrcAfNl7/TZVBZ6rcncea
 
 可以使用命令 `go list -m -u all` 来检查可以升级的package，使用`go get -u need-upgrade-package` 升级后会将新的依赖版本更新到 go.mod。也可以使用 `go get -u` 升级所有依赖。go get 升级：
 
-* 运行 go get -u 将会升级到最新的次要版本或者修订版本\(x.y.z, z是修订版本号， y是次要版本号\)
+* 运行 go get -u 将会升级到最新的次要版本或者修订版本(x.y.z, z是修订版本号， y是次要版本号)
 * 运行 go get -u=patch 将会升级到最新的修订版本
 * 运行 go get package@version 将会升级到指定的版本号version
 * 运行go get如果有版本的更改，那么go.mod文件也会更改
 
-## **改造现有项目\(helloword\)**
+## **改造现有项目(helloword)**
 
 ### 现有状态
 
@@ -284,7 +284,7 @@ func HelloWorld(c echo.Context) error {
 
 使用 `go mod init ***` 初始化go.mod
 
-```text
+```
 $ go mod init helloworld
 go: creating new go.mod: module helloworld
 ```
@@ -293,7 +293,7 @@ go: creating new go.mod: module helloworld
 
 运行 `go run server.go`
 
-```text
+```
 go: finding github.com/labstack/gommon/color latest
 go: finding github.com/labstack/gommon/log latest
 go: finding golang.org/x/crypto/acme/autocert latest
@@ -304,7 +304,7 @@ build command-line-arguments: cannot find module for path _/home/gs/helloworld/a
 
 首先还是会查找并下载安装依赖，然后运行脚本 `server.go`，这里会抛出一个错误：
 
-```text
+```
 build command-line-arguments: cannot find module for path _/home/gs/helloworld/api
 ```
 
@@ -365,5 +365,4 @@ Go Module是Go依赖管理的未来。从1.11之后开始支持该功能，随�
 
 * [原文 Go Module详细使用教程，包管理不在难](https://cloud.tencent.com/developer/article/1593734), [咻咻ing](https://cloud.tencent.com/developer/user/5974198)
 * [Go Modules使用教程](https://segmentfault.com/a/1190000016703769), [andyidea](https://segmentfault.com/u/andyidea)
-* [Go包管理--GOPATH、vendor、go mod机制](https://www.mdeditor.tw/pl/ggmD) 
-
+* [Go包管理--GOPATH、vendor、go mod机制](https://www.mdeditor.tw/pl/ggmD)&#x20;

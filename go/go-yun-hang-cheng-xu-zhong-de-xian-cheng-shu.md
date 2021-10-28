@@ -13,19 +13,19 @@ Go的文档也说明了实际的Thread可能不受GOMAXPROCS限制，如下面�
 
 > The GOMAXPROCS variable limits the number of operating system threads that can execute user-level Go code simultaneously. There is no limit to the number of threads that can be blocked in system calls on behalf of Go code; those do not count against the GOMAXPROCS limit. This package's GOMAXPROCS function queries and changes the limit.
 
-如果并发的blocking的系统调用很多，Go就会创建大量的线程，但是当系统调用完成后，这些线程因为Go运行时的设计，却不会被回收掉。具体讨论见[go issue \#14592](https://github.com/golang/go/issues/14592)。这个issue已经是2016的issue了，都4年多了，从Go 1.6推到现在，依然没有人动手尝试修复或者改进它。很显然，这并不是一个很容易修复的工作。
+如果并发的blocking的系统调用很多，Go就会创建大量的线程，但是当系统调用完成后，这些线程因为Go运行时的设计，却不会被回收掉。具体讨论见[go issue #14592](https://github.com/golang/go/issues/14592)。这个issue已经是2016的issue了，都4年多了，从Go 1.6推到现在，依然没有人动手尝试修复或者改进它。很显然，这并不是一个很容易修复的工作。
 
 我重新整理一下，加深一下自己对这个知识点的理解。读者看到这篇文章后也多看看文中提到的链接，看看大家遇到的情况和解决办法。
 
 ## 什么是blocking的系统调用?
 
-那么什么是blocking的系统调用\(system call\)呢？[stackoverflow](https://stackoverflow.com/questions/19309136/what-is-meant-by-blocking-system-call/19313275)有一个问答，很好的回答了这个问题：
+那么什么是blocking的系统调用(system call)呢？[stackoverflow](https://stackoverflow.com/questions/19309136/what-is-meant-by-blocking-system-call/19313275)有一个问答，很好的回答了这个问题：
 
-> A blocking system call is one that must wait until the action can be completed. read\(\) would be a good example - if no input is ready, it'll sit there and wait until some is \(provided you haven't set it to non-blocking, of course, in which case it wouldn't be a blocking system call\). Obviously, while one thread is waiting on a blocking system call, another thread can be off doing something else.
+> A blocking system call is one that must wait until the action can be completed. read() would be a good example - if no input is ready, it'll sit there and wait until some is (provided you haven't set it to non-blocking, of course, in which case it wouldn't be a blocking system call). Obviously, while one thread is waiting on a blocking system call, another thread can be off doing something else.
 
-阻塞的系统调用就是系统调用执行时，在完成之前调用者必须等待。`read()`就是一个很好的例子，如果没有数据可读，调用者就一直等待直到一些数据可读\(在你没有将它设置为 non-blocking情况下\)。
+阻塞的系统调用就是系统调用执行时，在完成之前调用者必须等待。`read()`就是一个很好的例子，如果没有数据可读，调用者就一直等待直到一些数据可读(在你没有将它设置为 non-blocking情况下)。
 
-那么如此一来Go从网络I/O中read数据岂不是每个读取goroutine都会占用一个系统线程了么？不会的!Go使用netpoller处理[网络读写](https://morsmachine.dk/netpoller)，它使用 epoll\(linux\) 、kqueue\(BSD、Darwin\) 、IoCompletionPort\(Windows\) 的方式可以poll network I/O的状态。一旦接受了一个连接，连接的文件描述符就被设置为non-blocking，这也意味着一旦连接中没有数据，从其中read数据并不会被阻塞，而是返回一个特定的错误，因此Go标准库的网络读写不会产生大量的线程，除非你把 `GOMAXPROCS` 设置的非常大，或者把底层的网络连接文件描述符又设置回了 `blocking` 模式。
+那么如此一来Go从网络I/O中read数据岂不是每个读取goroutine都会占用一个系统线程了么？不会的!Go使用netpoller处理[网络读写](https://morsmachine.dk/netpoller)，它使用 epoll(linux) 、kqueue(BSD、Darwin) 、IoCompletionPort(Windows) 的方式可以poll network I/O的状态。一旦接受了一个连接，连接的文件描述符就被设置为non-blocking，这也意味着一旦连接中没有数据，从其中read数据并不会被阻塞，而是返回一个特定的错误，因此Go标准库的网络读写不会产生大量的线程，除非你把 `GOMAXPROCS `设置的非常大，或者把底层的网络连接文件描述符又设置回了 `blocking` 模式。
 
 但是cgo或者其它一些阻塞的系统调用可能就会导致线程大量增加并无法回收了，比如下面的例子。
 
@@ -144,5 +144,4 @@ func KillOne() {
 
 ## References
 
-* 原文 [Go 运行程序中的线程数](https://colobu.com/2020/12/20/threads-in-go-runtime/) , [鸟窝](https://colobu.com/)
-
+* 原文 [Go 运行程序中的线程数](https://colobu.com/2020/12/20/threads-in-go-runtime/) , [鸟窝](https://colobu.com)
