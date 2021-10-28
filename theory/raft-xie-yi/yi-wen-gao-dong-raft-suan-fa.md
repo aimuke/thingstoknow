@@ -83,7 +83,17 @@
 
    总共有四个节点，Node C、Node D同时成为了candidate，进入了term 4，但Node A投了NodeD一票，NodeB投了Node C一票，这就出现了平票 split vote的情况。这个时候大家都在等啊等，直到超时后重新发起选举。如果出现平票的情况，那么就延长了系统不可用的时间（没有leader是不能处理客户端写请求的），因此raft引入了randomized election timeouts来尽量避免平票情况。同时，leader-based 共识算法中，节点的数目都是奇数个，尽量保证majority的出现。
 
-#### 定时器时间 <a href="ding-shi-qi-shi-jian" id="ding-shi-qi-shi-jian"></a>
+### 投票规则
+
+其他跟随者在收到投票请求后，会根据以下规则来确定自己是否应该投出自己的选票：
+
+* 自己的任期编号是否小于需要投票的目标任期编号，如果不小于，那么它会拒绝投票；
+* 自己在目标任期编号内是否已经投过票，如果已经投过了那么它同样会拒绝投票；
+* 如果对方的日志完整性低于自己的本地日志，那么拒绝投票。
+
+当以上情况都满足的时候，它便会投出自己宝贵的一票，并增加自己的任期编号，然后拒绝此任期内的所有其他投票请求。
+
+### 定时器时间 <a href="ding-shi-qi-shi-jian" id="ding-shi-qi-shi-jian"></a>
 
 \
 定时器时间的设定实际上也会影响到算法性能甚至是正确性。试想一下这样一个场景，Leader 下线，有两个结点同时成为 Candidate，然后由于网络结构等原因，每个结点都获得了一半的投票，因此无人成为 Leader 进入了下一轮。然而在下一轮由于这两个结点同时结束，又同时成为了 Candidate，再次重复了之前的这一流程，那么算法就无法正常工作。
@@ -132,6 +142,22 @@
   在上面的流程中，leader只需要日志被复制到大多数节点即可向客户端返回，一旦向客户端返回成功消息，那么系统就必须保证log（其实是log所包含的command）在任何异常的情况下都不会发生回滚。这里有两个词：commit（committed），apply(applied)，前者是指日志被复制到了大多数节点后日志的状态；而后者则是节点将日志应用到状态机，真正影响到节点状态。
 
 > The leader decides when it is safe to apply a log entry to the state machines; such an entry is called committed. Raft guarantees that committed entries are durable and will eventually be executed by all of the available state machines. A log entry is committed once the leader that created the entry has replicated it on a majority of the servers
+
+## 日志压缩 <a href="item-6" id="item-6"></a>
+
+在实际的系统中，不能让日志无限膨胀，否则系统重启时需要花很长的时间进行恢复，从而影响可用性。Raft 采用对整个系统进行快照来解决，快照之前的日志都可以丢弃。
+
+每个副本独立的对自己的系统状态生成快照，并且只能对已经提交的日志条目生成快照。快照包含以下内容：
+
+> 日志元数据。最后一条已提交的日志条目的日志索引和 Term。这两个值在快照之后的第一条日志条目的 AppendEntries RPC 的完整性检查的时候会被用上。
+>
+> 系统当前状态。
+
+当 Leader 要发送某个日志条目，落后太多的 Follower 的日志条目会被丢弃，Leader 会将快照发给 Follower。或者新上线一台机器时，也会发送快照给它。
+
+![](<../../.gitbook/assets/image (104).png>)
+
+**生成快照的频率要适中**，频率过高会消耗大量 I/O 带宽；频率过低，一旦需要执行恢复操作，会丢失大量数据，影响可用性。推荐当日志达到某个固定的大小时生成快照。生成一次快照可能耗时过长，影响正常日志同步。可以通过使用 copy-on-write 技术避免快照过程影响正常日志同步。
 
 ## safety <a href="safety" id="safety"></a>
 
@@ -287,6 +313,12 @@ log replication约束：
   本文是在看完raft论文后自己的总结，不一定全面。个人觉得，如果只是相对raft协议有一个简单了解，看这个[动画演示](http://thesecretlivesofdata.com/raft/)就足够了，如果想深入了解，还是要看论文，论文中Figure 2对raft算法进行了概括。最后，还是找一个实现了raft算法的系统来看看更好。
 
 ## references <a href="references" id="references"></a>
+
+原文 [一文搞懂Raft算法](https://www.cnblogs.com/xybaby/p/10124083.html)
+
+[分布式一致性算法之 raft 图解](https://juejin.cn/post/6973502080350683149)
+
+[深入剖析共识性算法 Raft](https://segmentfault.com/a/1190000039847941)
 
 [回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
 
