@@ -142,7 +142,7 @@
   raft协议会保证以下属性\
 
 
-![](<../../.gitbook/assets/image (97).png>)
+![](<../../.gitbook/assets/image (99).png>)
 
 #### Election safety <a href="election-safety" id="election-safety"></a>
 
@@ -163,7 +163,9 @@
   首先，leader在某一term的任一位置只会创建一个log entry，且log entry是append-only。其次，consistency check。leader在AppendEntries中包含最新log entry之前的一个log 的term和index，如果follower在对应的term index找不到日志，那么就会告知leader不一致。
 
   在没有异常的情况下，log matching是很容易满足的，但如果出现了node crash，情况就会变得负责。比如下图\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202408734-1760694063.png)
+
+
+![](<../../.gitbook/assets/image (97).png>)
 
   **注意**：上图的a-f不是6个follower，而是某个follower可能存在的六个状态
 
@@ -207,7 +209,9 @@
 ### stale leader <a href="stale-leader" id="stale-leader"></a>
 
   raft保证Election safety，即一个任期内最多只有一个leader，但在网络分割（network partition）的情况下，**可能会出现两个leader，但两个leader所处的任期是不同的**。如下图所示\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202652306-2050900084.png)
+
+
+![](<../../.gitbook/assets/image (102).png>)
 
   系统有5个节点ABCDE组成，在term1，Node B是leader，但Node A、B和Node C、D、E之间出现了网络分割，因此Node C、D、E无法收到来自leader（Node B）的消息，在election time之后，Node C、D、E会分期选举，由于满足majority条件，Node E成为了term 2的leader。因此，在系统中貌似出现了两个leader：term 1的Node B， term 2的Node E, Node B的term更旧，但由于无法与Majority节点通信，NodeB仍然会认为自己是leader。
 
@@ -226,7 +230,9 @@
 > State Machine Safety: if a server has applied a log entry at a given index to its state machine, no other server will ever apply a different log entry for the same index.
 
   如果节点将某一位置的log entry应用到了状态机，那么其他节点在同一位置不能应用不同的日志。简单点来说，所有节点在同一位置（index in log entries）应该应用同样的日志。但是似乎有某些情况会违背这个原则：\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202438174-260853001.png)
+
+
+![](<../../.gitbook/assets/image (109).png>)
 
   上图是一个较为复杂的情况。在时刻(a), s1是leader，在term2提交的日志只赋值到了s1 s2两个节点就crash了。在时刻（b), s5成为了term 3的leader，日志只赋值到了s5，然后crash。然后在(c)时刻，s1又成为了term 4的leader，开始赋值日志，于是把term2的日志复制到了s3，此刻，可以看出term2对应的日志已经被复制到了majority，因此是committed，可以被状态机应用。不幸的是，接下来（d）时刻，s1又crash了，s5重新当选，然后将term3的日志复制到所有节点，这就出现了一种奇怪的现象：被复制到大多数节点（或者说可能已经应用）的日志被回滚。
 
@@ -244,8 +250,12 @@
 ### leader crash <a href="leader-crash" id="leader-crash"></a>
 
   follower的crash处理方式相对简单，leader只要不停的给follower发消息即可。当leader crash的时候，事情就会变得复杂。在[这篇文章](http://www.cnblogs.com/mindwind/p/5231986.html)中，作者就给出了一个更新请求的流程图。\
-![例子](https://images2015.cnblogs.com/blog/815275/201603/815275-20160301175358173-526445555.png)\
+![例子](https://images2015.cnblogs.com/blog/815275/201603/815275-20160301175358173-526445555.png)
+
+\
   我们可以分析leader在任意时刻crash的情况，有助于理解raft算法的容错性。
+
+![](<../../.gitbook/assets/image (98).png>)
 
 ## 总结 <a href="zong-jie" id="zong-jie"></a>
 
