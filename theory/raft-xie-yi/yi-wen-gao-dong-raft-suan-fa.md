@@ -83,6 +83,13 @@
 
    总共有四个节点，Node C、Node D同时成为了candidate，进入了term 4，但Node A投了NodeD一票，NodeB投了Node C一票，这就出现了平票 split vote的情况。这个时候大家都在等啊等，直到超时后重新发起选举。如果出现平票的情况，那么就延长了系统不可用的时间（没有leader是不能处理客户端写请求的），因此raft引入了randomized election timeouts来尽量避免平票情况。同时，leader-based 共识算法中，节点的数目都是奇数个，尽量保证majority的出现。
 
+#### 定时器时间 <a href="ding-shi-qi-shi-jian" id="ding-shi-qi-shi-jian"></a>
+
+\
+定时器时间的设定实际上也会影响到算法性能甚至是正确性。试想一下这样一个场景，Leader 下线，有两个结点同时成为 Candidate，然后由于网络结构等原因，每个结点都获得了一半的投票，因此无人成为 Leader 进入了下一轮。然而在下一轮由于这两个结点同时结束，又同时成为了 Candidate，再次重复了之前的这一流程，那么算法就无法正常工作。
+
+为了解决这一问题，Raft 采用了一个十分“艺术”的解决方法，随机定时器长短（例如 150-300ms）。通过这一方法避免了两个结点同时成为 Candidate，即使发生了也能快速恢复。这一长短必须长于 Leader 的心跳间隔，否则在正常情况下也会有 Candidate 出现导致算法无法正常工作。
+
 ## log replication <a href="log-replication" id="log-replication"></a>
 
    当有了leader，系统应该进入对外工作期了。客户端的一切请求来发送到leader，leader来调度这些并发请求的顺序，并且保证leader与followers状态的一致性。raft中的做法是，将这些请求以及执行顺序告知followers。leader和followers以相同的顺序来执行这些请求，保证状态一致。
