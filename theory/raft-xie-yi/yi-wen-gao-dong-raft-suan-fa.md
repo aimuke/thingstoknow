@@ -51,7 +51,7 @@
    从上面可以看出，哪个节点做leader是大家投票选举出来的，每个leader工作一段时间，然后选出新的leader继续负责。这根民主社会的选举很像，每一届新的履职期称之为一届任期，在raft协议中，也是这样的，对应的术语叫_**term**_。\
 
 
-![](<../../.gitbook/assets/image (97).png>)
+![](<../../.gitbook/assets/image (97) (1).png>)
 
    term（任期）以选举（election）开始，然后就是一段或长或短的稳定工作期（normal Operation）。从上图可以看到，任期是递增的，这就充当了逻辑时钟的作用；另外，term 3展示了一种情况，就是说没有选举出leader就结束了，然后会发起新的选举，后面会解释这种_split vote_的情况。
 
@@ -79,13 +79,11 @@
    第二种情况，比如有三个节点A B C。A B同时发起选举，而A的选举消息先到达C，C给A投了一票，当B的消息到达C时，已经不能满足上面提到的第一个约束，即C不会给B投票，而A和B显然都不会给对方投票。A胜出之后，会给B,C发心跳消息，节点B发现节点A的term不低于自己的term，知道有已经有Leader了，于是转换成follower。
 
    第三种情况，没有任何节点获得majority投票，比如下图这种情况：\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202546810-1327167758.png)
+![](<../../.gitbook/assets/image (108).png>)
 
    总共有四个节点，Node C、Node D同时成为了candidate，进入了term 4，但Node A投了NodeD一票，NodeB投了Node C一票，这就出现了平票 split vote的情况。这个时候大家都在等啊等，直到超时后重新发起选举。如果出现平票的情况，那么就延长了系统不可用的时间（没有leader是不能处理客户端写请求的），因此raft引入了randomized election timeouts来尽量避免平票情况。同时，leader-based 共识算法中，节点的数目都是奇数个，尽量保证majority的出现。
 
 ## log replication <a href="log-replication" id="log-replication"></a>
-
-[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
 
    当有了leader，系统应该进入对外工作期了。客户端的一切请求来发送到leader，leader来调度这些并发请求的顺序，并且保证leader与followers状态的一致性。raft中的做法是，将这些请求以及执行顺序告知followers。leader和followers以相同的顺序来执行这些请求，保证状态一致。
 
@@ -100,7 +98,9 @@
   因此，可以这么说，在raft中，leader将客户端请求（command）封装到一个个log entry，将这些log entries复制（replicate）到所有follower节点，然后大家按相同顺序应用（apply）log entry中的command，则状态肯定是一致的。
 
   下图形象展示了这种log-based replicated state machine\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202234422-28123572.png)
+
+
+![](<../../.gitbook/assets/image (101).png>)
 
 ### 请求完整流程 <a href="qing-qiu-wan-zheng-liu-cheng" id="qing-qiu-wan-zheng-liu-cheng"></a>
 
