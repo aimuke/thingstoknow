@@ -51,7 +51,7 @@
    从上面可以看出，哪个节点做leader是大家投票选举出来的，每个leader工作一段时间，然后选出新的leader继续负责。这根民主社会的选举很像，每一届新的履职期称之为一届任期，在raft协议中，也是这样的，对应的术语叫_**term**_。\
 
 
-![](<../../.gitbook/assets/image (97) (1).png>)
+![](<../../.gitbook/assets/image (97) (1) (1).png>)
 
    term（任期）以选举（election）开始，然后就是一段或长或短的稳定工作期（normal Operation）。从上图可以看到，任期是递增的，这就充当了逻辑时钟的作用；另外，term 3展示了一种情况，就是说没有选举出leader就结束了，然后会发起新的选举，后面会解释这种_split vote_的情况。
 
@@ -100,7 +100,7 @@
   下图形象展示了这种log-based replicated state machine\
 
 
-![](<../../.gitbook/assets/image (101).png>)
+![](<../../.gitbook/assets/image (101) (1).png>)
 
 ### 请求完整流程 <a href="qing-qiu-wan-zheng-liu-cheng" id="qing-qiu-wan-zheng-liu-cheng"></a>
 
@@ -116,7 +116,9 @@
   可以看到日志的提交过程有点类似两阶段提交(2PC)，不过与2PC的区别在于，leader只需要大多数（majority）节点的回复即可，这样只要超过一半节点处于工作状态则系统就是可用的。
 
   那么日志在每个节点上是什么样子的呢\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202309906-1698663454.png)
+
+
+![](<../../.gitbook/assets/image (101).png>)
 
   不难看到，logs由顺序编号的log entry组成 ，每个log entry除了包含command，还包含产生该log entry时的leader term。从上图可以看到，五个节点的日志并不完全一致，raft算法为了保证高可用，并不是强一致性，而是最终一致性，leader会不断尝试给follower发log entries，直到所有节点的log entries都相同。
 
@@ -138,7 +140,9 @@
   在任何系统模型下，都需要满足safety属性，即在任何情况下，系统都不能出现不可逆的错误，也不能向客户端返回错误的内容。比如，raft保证被复制到大多数节点的日志不会被回滚，那么就是safety属性。而raft最终会让所有节点状态一致，这属于liveness属性。
 
   raft协议会保证以下属性\
-![](https://img2018.cnblogs.com/blog/1089769/201812/1089769-20181216202333639-30919755.png)
+
+
+![](<../../.gitbook/assets/image (97).png>)
 
 #### Election safety <a href="election-safety" id="election-safety"></a>
 
