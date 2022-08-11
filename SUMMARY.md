@@ -36,6 +36,7 @@
   * [raft协议](theory/raft-xie-yi/README.md)
     * [寻找一种可以理解的一致性算法](theory/raft-xie-yi/xun-zhao-yi-zhong-ke-yi-li-jie-de-yi-zhi-xing-suan-fa.md)
     * [一文搞懂Raft算法](theory/raft-xie-yi/yi-wen-gao-dong-raft-suan-fa.md)
+  * [Http 请求request分析](theory/http-qing-qiu-request-fen-xi.md)
 * [service mesh](service-mesh/README.md)
   * [Pilot MCP协议介绍](service-mesh/pilot-mcp-xie-yi-jie-shao.md)
   * [istio mcp-over-xds 原理及实现](service-mesh/istio-mcpoverxds-yuan-li-ji-shi-xian.md)
