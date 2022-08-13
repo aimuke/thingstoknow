@@ -2,6 +2,7 @@
 
 * [Initial page](README.md)
 * [go](go/README.md)
+  * [\[译\] Go语言inline内联的策略与限制](go/yi-go-yu-yan-inline-nei-lian-de-ce-lve-yu-xian-zhi.md)
   * [golang 生成随机数或者字符](go/golang-sheng-cheng-sui-ji-shu-huo-zhe-zi-fu.md)
   * [实战Go内存泄露](go/shi-zhan-go-nei-cun-xie-lu.md)
   * [Go 运行程序中的线程数](go/go-yun-hang-cheng-xu-zhong-de-xian-cheng-shu.md)
