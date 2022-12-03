@@ -17,7 +17,7 @@
 * Replica Set：下一代的`Replication Controller`
 * Deployment：可以更加方便的管理`Pod`和`Replica Set`
 
-#### Replication Controller（RC） <a href="#replication-controller-rc" id="replication-controller-rc"></a>
+## Replication Controller（RC） <a href="#replication-controller-rc" id="replication-controller-rc"></a>
 
 `Replication Controller`简称`RC`，`RC`是`Kubernetes`系统中的核心概念之一，简单来说，`RC`可以保证在任意时间运行`Pod`的副本数量，能够保证`Pod`总是可用的。如果实际`Pod`数量比指定的多那就结束掉多余的，如果实际数量比指定的少就新启动一些`Pod`，当`Pod`失败、被删除或者挂掉后，`RC`都会去自动创建新的`Pod`来保证副本数量，所以即使只有一个`Pod`，我们也应该使用`RC`来管理我们的`Pod`。
 
@@ -104,7 +104,7 @@ $ kubectl rolling-update rc-demo -f rc-demo.yaml
 
 如果升级完成后出现了新的问题，想要一键回滚到上一个版本的话，使用`RC`只能用同样的方法把镜像地址替换成之前的，然后重新滚动升级。
 
-#### Replication Set（RS） <a href="#replication-set-rs" id="replication-set-rs"></a>
+## Replication Set（RS） <a href="#replication-set-rs" id="replication-set-rs"></a>
 
 `Replication Set`简称`RS`，随着`Kubernetes`的高速发展，官方已经推荐我们使用`RS`和`Deployment`来代替`RC`了，实际上`RS`和`RC`的功能基本一致，目前唯一的一个区别就是`RC`只支持基于等式的`selector`（env=dev或environment!=qa），但`RS`还支持基于集合的`selector`（version in (v1.0, v2.0)），这对复杂的运维管理就非常方便了。
 
