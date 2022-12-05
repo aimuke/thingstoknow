@@ -96,7 +96,7 @@ Use "go help mod <command>" for more information about a command.
 
 默认情况下，使用的是 -mod=readonly 模式。但在 go 1.14及以上的版本中，如果目录中出现了 vendor 目录，将默认使用 -mod=vendor 模式进行编译。 三种 go build 的 flag 如下：
 
-* **-mod=readonly **只读模式，如果待引入的 package 不在 go.mod 文件的列表中。不会修改 go.mod ，而是报错。 此外，若模块的 checksum 不在 go.sum 中也会报错。这种模式可以在编译时候避免隐式修改 go.mod。
+* **-mod=readonly** 只读模式，如果待引入的 package 不在 go.mod 文件的列表中。不会修改 go.mod ，而是报错。 此外，若模块的 checksum 不在 go.sum 中也会报错。这种模式可以在编译时候避免隐式修改 go.mod。
 * **-mod=vendor** 模式下。 将使用工程的 vendor 目录下的 package 而不是 mod cache( GOPATH/pkg/mod) 目录。该模式下编译，将不会检查 go.mod 文件下的包版本。但是会检查 vendor 目录下的 modules.txt(由 go mod vendor 生成)。在 go.1.14 及更高版本，若存在 vendor 目录，将优先使用 vendor 模式。
 * **-mod=mod** 模式下，将使用 module cache，即使存在 vendor 目录，也会使用 GOPATH/pkg/mod 下的package，若 package 不存在，将自动下载指定版本的 package。
 

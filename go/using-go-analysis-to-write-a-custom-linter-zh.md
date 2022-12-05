@@ -603,4 +603,4 @@ Registered analyzers:
 
 我希望这篇文章能为你提供一个开始使用go/analysis的介绍。还有很多事情我还没有涉及。go/analysis非常强大，有许多特性使分析go代码变得简单和高效。例如，这些特性之一就是Fact。可以通过使用analysis.Fact接口实现。当您分析某些内容时，可以为给定的分析器生成Fact（注释），然后从另一个分析器导入这些Fact, 这允许您使用多个分析器创建非常强大和有效的组合。
 
-这里写的所有代码都可以在[github.com/fatih/addlint](https://github.com/fatih/addlint) repo中找到。如果您对go/analysis有更多的问题，可以加入[gophers Slack](https://invite.slack.golangbridge.org) #tools频道，许多go开发人员在这里讨论go/analysis的问题。[Golang](https://toutiao.io/tags/Golang)\
+这里写的所有代码都可以在[github.com/fatih/addlint](https://github.com/fatih/addlint) repo中找到。如果您对go/analysis有更多的问题，可以加入[gophers Slack](https://invite.slack.golangbridge.org/) #tools频道，许多go开发人员在这里讨论go/analysis的问题。[Golang](https://toutiao.io/tags/Golang)\

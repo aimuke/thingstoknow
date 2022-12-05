@@ -25,7 +25,7 @@ Go的文档也说明了实际的Thread可能不受GOMAXPROCS限制，如下面�
 
 阻塞的系统调用就是系统调用执行时，在完成之前调用者必须等待。`read()`就是一个很好的例子，如果没有数据可读，调用者就一直等待直到一些数据可读(在你没有将它设置为 non-blocking情况下)。
 
-那么如此一来Go从网络I/O中read数据岂不是每个读取goroutine都会占用一个系统线程了么？不会的!Go使用netpoller处理[网络读写](https://morsmachine.dk/netpoller)，它使用 epoll(linux) 、kqueue(BSD、Darwin) 、IoCompletionPort(Windows) 的方式可以poll network I/O的状态。一旦接受了一个连接，连接的文件描述符就被设置为non-blocking，这也意味着一旦连接中没有数据，从其中read数据并不会被阻塞，而是返回一个特定的错误，因此Go标准库的网络读写不会产生大量的线程，除非你把 `GOMAXPROCS `设置的非常大，或者把底层的网络连接文件描述符又设置回了 `blocking` 模式。
+那么如此一来Go从网络I/O中read数据岂不是每个读取goroutine都会占用一个系统线程了么？不会的!Go使用netpoller处理[网络读写](https://morsmachine.dk/netpoller)，它使用 epoll(linux) 、kqueue(BSD、Darwin) 、IoCompletionPort(Windows) 的方式可以poll network I/O的状态。一旦接受了一个连接，连接的文件描述符就被设置为non-blocking，这也意味着一旦连接中没有数据，从其中read数据并不会被阻塞，而是返回一个特定的错误，因此Go标准库的网络读写不会产生大量的线程，除非你把 `GOMAXPROCS` 设置的非常大，或者把底层的网络连接文件描述符又设置回了 `blocking` 模式。
 
 但是cgo或者其它一些阻塞的系统调用可能就会导致线程大量增加并无法回收了，比如下面的例子。
 
@@ -144,4 +144,4 @@ func KillOne() {
 
 ## References
 
-* 原文 [Go 运行程序中的线程数](https://colobu.com/2020/12/20/threads-in-go-runtime/) , [鸟窝](https://colobu.com)
+* 原文 [Go 运行程序中的线程数](https://colobu.com/2020/12/20/threads-in-go-runtime/) , [鸟窝](https://colobu.com/)

@@ -198,7 +198,7 @@ nginx.ingress.kubernetes.io/configuration-snippet: |
 
 #### 重定向规则 <a href="#zhong-ding-xiang-gui-ze" id="zhong-ding-xiang-gui-ze"></a>
 
-在本文的示例中我们使用 `/folder` 和 `/other/directory` 等路径来重定向到不同的服务，此外我们也可以通过主机名来区分请求，比如将 [api.myurl.com](http://api.myurl.com) 和 [site.myurl.com](http://site.myurl.com) 重定向到不同的内部 ClusterIP 服务去。
+在本文的示例中我们使用 `/folder` 和 `/other/directory` 等路径来重定向到不同的服务，此外我们也可以通过主机名来区分请求，比如将 [api.myurl.com](http://api.myurl.com/) 和 [site.myurl.com](http://site.myurl.com/) 重定向到不同的内部 ClusterIP 服务去。
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1

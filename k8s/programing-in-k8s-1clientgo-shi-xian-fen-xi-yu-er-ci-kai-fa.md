@@ -113,7 +113,7 @@ for _, list := range APIResourceList {
 
 本地缓存路径：
 
-![](<../.gitbook/assets/image (12).png>)
+![](<../.gitbook/assets/image (12) (1).png>)
 
 本地存储了 `serverresources.json` 文件，感兴趣的可以打开看下，是json格式化后的资源信息。
 
@@ -164,7 +164,7 @@ func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Facto
 
 `Indexer` 是一个继承自 `Store` 的接口，`Delta_FIFO`也同样继承自 `Store`，一个 `Indexer` 对象中，可以存在多种不同的索引。
 
-首先看看 `indexer `和 `Store` 的声明：
+首先看看 `indexer` 和 `Store` 的声明：
 
 ```go
 // 文件路径： k8s.io/client-go/tools/cache/index.go
@@ -396,7 +396,7 @@ type DeltaFIFO struct {
 
 可以用一张图简单描述下 `Delta_FIFO` 里面 `items` 和 `queue` 的关系：
 
-![](<../.gitbook/assets/image (9).png>)
+![](<../.gitbook/assets/image (9) (1).png>)
 
 采用这样的结构把对象与事件的存储分离，好处就是不会因为某个对象的事件太多，而导致其他对象的事件一直得不到消费。
 
@@ -924,7 +924,7 @@ func (p *processorListener) run() {
 到此为止，`Informer`机制下，服务端与客户端的交互分层逻辑比较清晰了：
 
 1. `Reflector`通过`List&watch`机制与API Server拉取信息&#x20;
-2. 一级缓存+消息队列 `Delta_FIFO`缓存事件，分发到下游的事件处理器+二级缓存`Indexer `
+2. 一级缓存+消息队列 `Delta_FIFO`缓存事件，分发到下游的事件处理器+二级缓存`Indexer`&#x20;
 3. 二级缓存作为只读缓存，给客户端提供快速读取资源信息的能力&#x20;
 4. 客户端处理事件回调、可以从二级缓存读取感兴趣的信息、可以向API Server发送资源对象的变更请求&#x20;
 
@@ -1104,7 +1104,7 @@ func (q *Type) Done(item interface{}) {
 
 所以`dirty`的作用是？
 
-* 快速去重，避免遍历`queue `
+* 快速去重，避免遍历`queue`&#x20;
 * `queue`的辅助结构&#x20;
 
 其他的功能就类似正常的队列。不赘叙。这里的逻辑有点绕，但是最终的效果是： 在等待处理的数据中，每一个对象只能存在一份，不能重复添加。 不过这里为什么这么设计，具体的场景，需要进一步的查看别的`controller`组件了。

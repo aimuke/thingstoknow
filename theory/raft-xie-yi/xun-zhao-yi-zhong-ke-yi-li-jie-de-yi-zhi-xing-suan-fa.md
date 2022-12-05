@@ -114,7 +114,7 @@ Raft 把时间划分成如图5 所示任意长度的term。 term通过连续的�
 
 Raft服务器间的通信使用远程程序调用（RPC）， 并且一致性算法只需要两种类型的RPC。RequestVote RPC是由candidate在选举的时候发起（Session5.2）， AppendEntries RPC是由leader发起来复制日志以及提供的一种心跳的方式（session 5.3）。 服务器会重新发送RPC如果在时间限制的方式下没有收到响应， 并且为了性能RPC的发送是并行的。
 
-### 5.2 Leader election（选主） <a href="52leaderelection-xuan-zhu" id="52leaderelection-xuan-zhu"></a>
+### 5.2 Leader election（选主） <a href="#52leaderelection-xuan-zhu" id="52leaderelection-xuan-zhu"></a>
 
 Raft 使用心跳的机制来触发选主。 当服务器启动的时候， 它们首先是follower， 一个服务器只要能从leader或者candidate收到有效的RPC， 它会一直是follower。Leader给所有的follower发送周期性的心跳（没有携带日志的AppendEntries RPC）来得到leader的权限。如果一个follower在一段称为election timeout的时间内没有收到与Leader的通信， 它认为没有有效的leader， 它会发起一次新的选举来选举新的leader。
 
@@ -162,7 +162,7 @@ leader决定什么时候执行日志命令到状态机是安全的， 这样的�
 
 这种日志复制机制展示了预期的Session2 描述的一致性属性： Raft 可以接受， 复制以及回放新的日志条目只要大部分的服务器是可到达的， 在正常情况下， 一条新的日志需要一个RPC 就可以复制到大部分的集群成员， 某一个比较慢的follower不会影响性能。
 
-#### Safety （安全性） <a href="safety-an-quan-xing" id="safety-an-quan-xing"></a>
+#### Safety （安全性） <a href="#safety-an-quan-xing" id="safety-an-quan-xing"></a>
 
 在前面的章节描述了Raft如何选主和日志复制， 然而， 到目前为止， 这些机制还不足以保证每一台机器都按照相同的顺序执行相同的命令。 比如， 在leader提交一些日志的时候某个follower不可用， 然后它可能被选举为leader并且覆盖掉新的日志。 结果， 不同的状态机可能按照不同的顺序执行命令。
 
@@ -204,11 +204,11 @@ Raft在提交日志规则上遭受这个额外的复杂性是因为当leader复�
 9. Log Matching Property确保未来的leader也会包含间接提交的日志， 如图8（d）的index 2.\
    给定Leader Completness Property， 我们很容易证明图3的状态机安全属性， 并且所有的状态机按照相同的顺序执行日志（参考【29】）。
 
-#### 5.5 follower和candidate故障 <a href="55follower-he-candidate-gu-zhang" id="55follower-he-candidate-gu-zhang"></a>
+#### 5.5 follower和candidate故障 <a href="#55follower-he-candidate-gu-zhang" id="55follower-he-candidate-gu-zhang"></a>
 
 至此， 我们我们一直关注leader故障， follower和candidate故障比leader故障更容易处理， 并且它们两个采用相同的处理方式。如果一个candidate或者follower发生故障， 那么接下来的RequestVotte 和AppendEntries RPC会失败， Raft通过无限重试的方式来处理RPC失败， 如果故障的服务器重启， 那么RPC会成功的完成。 如果一个服务器在完成RPC之后但是在响应之前故障， 它会在重启之后收到同样的RPC。 Raft的RPC是幂等的， 因此重复的RPC是没有害处的。比如， 如果一个follower收到一个AppendEntries请求， 该请求包含已经存在的日志， 它忽略请求中的日志。
 
-#### 5.6 计时和可用性 <a href="56-ji-shi-he-ke-yong-xing" id="56-ji-shi-he-ke-yong-xing"></a>
+#### 5.6 计时和可用性 <a href="#56-ji-shi-he-ke-yong-xing" id="56-ji-shi-he-ke-yong-xing"></a>
 
 对于Raft其中一个需求是它的安全性不能依赖于计时：系统一定不能只是因为有些事件发生的比预期比较快或者慢而产生错误的结果。 但是， 可用性（系统以一个计时的方式响应客户端）必须不可避免的依赖于计时。 比如， 如果信息交换的时间长于通常服务器故障的时间， candidate不会一直等待， 没有一个leader， Raft不能进行下去。
 
@@ -332,5 +332,5 @@ Raft和其他我们知道的的基于一致性日志复制算法相比， 有更
 ## References
 
 * [Raft协议中文翻译（1）](https://blog.csdn.net/baijiwei/article/details/78759364)，  [baijiwei](https://blog.csdn.net/baijiwei)
-* [Raft协议中文翻译（2）](https://blog.csdn.net/baijiwei/article/details/78760308?depth\_1-utm\_source=distribute.pc\_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no\_search\_link)，  [baijiwei](https://blog.csdn.net/baijiwei)
-* [Raft协议中文翻译（3）](https://blog.csdn.net/baijiwei/article/details/78819381?spm=1001.2101.3001.4242)，  [baijiwei](https://blog.csdn.net/baijiwei)
+* [Raft协议中文翻译（2）](https://blog.csdn.net/baijiwei/article/details/78760308?utm\_medium=distribute.pc\_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no\_search\_link\&depth\_1-utm\_source=distribute.pc\_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no\_search\_link)，  [baijiwei](https://blog.csdn.net/baijiwei)
+* [Raft协议中文翻译（3）](https://blog.csdn.net/baijiwei/article/details/78819381?utm\_source=blogxgwz2\&utm\_medium=distribute.pc\_relevant.none-task-blog-2\~default\~baidujs\_title\~default-0.no\_search\_link\&spm=1001.2101.3001.4242)，  [baijiwei](https://blog.csdn.net/baijiwei)

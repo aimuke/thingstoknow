@@ -8,7 +8,7 @@
 
   本文地址：[https://www.cnblogs.com/xybaby/p/10124083.html](https://www.cnblogs.com/xybaby/p/10124083.html)
 
-## raft算法概览 <a href="raft-suan-fa-gai-lan" id="raft-suan-fa-gai-lan"></a>
+## raft算法概览 <a href="#raft-suan-fa-gai-lan" id="raft-suan-fa-gai-lan"></a>
 
   Raft算法的头号目标就是容易理解（UnderStandable），这从论文的标题就可以看出来。当然，Raft增强了可理解性，在性能、可靠性、可用性方面是不输于Paxos的。
 
@@ -27,7 +27,7 @@
 
    这就涉及到raft最新的两个子问题： leader election和log replication
 
-## leader election <a href="leader-election" id="leader-election"></a>
+## leader election <a href="#leader-election" id="leader-election"></a>
 
 
 
@@ -40,13 +40,13 @@
    给出状态转移图能很直观的直到这三个状态的区别\
 
 
-![](<../../.gitbook/assets/image (106).png>)
+<img src="../../.gitbook/assets/image (106).png" alt="" data-size="original">
 
   可以看出所有节点启动时都是follower状态；在一段时间内如果没有收到来自leader的心跳，从follower切换到candidate，发起选举；如果收到majority的造成票（含自己的一票）则切换到leader状态；如果发现其他节点比自己更新，则主动切换到follower。
 
    总之，系统中最多只有一个leader，如果在一段时间里发现没有leader，则大家通过选举-投票选出leader。leader会不停的给follower发心跳消息，表明自己的存活状态。如果leader故障，那么follower会转换成candidate，重新选出leader。
 
-### term <a href="term" id="term"></a>
+### term <a href="#term" id="term"></a>
 
    从上面可以看出，哪个节点做leader是大家投票选举出来的，每个leader工作一段时间，然后选出新的leader继续负责。这根民主社会的选举很像，每一届新的履职期称之为一届任期，在raft协议中，也是这样的，对应的术语叫_**term**_。\
 
@@ -55,7 +55,7 @@
 
    term（任期）以选举（election）开始，然后就是一段或长或短的稳定工作期（normal Operation）。从上图可以看到，任期是递增的，这就充当了逻辑时钟的作用；另外，term 3展示了一种情况，就是说没有选举出leader就结束了，然后会发起新的选举，后面会解释这种_split vote_的情况。
 
-### 选举过程详解 <a href="xuan-ju-guo-cheng-xiang-jie" id="xuan-ju-guo-cheng-xiang-jie"></a>
+### 选举过程详解 <a href="#xuan-ju-guo-cheng-xiang-jie" id="xuan-ju-guo-cheng-xiang-jie"></a>
 
    上面已经说过，如果follower在_election timeout_内没有收到来自leader的心跳，（也许此时还没有选出leader，大家都在等；也许leader挂了；也许只是leader与该follower之间网络故障），则会主动发起选举。步骤如下：
 
@@ -93,18 +93,18 @@
 
 当以上情况都满足的时候，它便会投出自己宝贵的一票，并增加自己的任期编号，然后拒绝此任期内的所有其他投票请求。
 
-### 定时器时间 <a href="ding-shi-qi-shi-jian" id="ding-shi-qi-shi-jian"></a>
+### 定时器时间 <a href="#ding-shi-qi-shi-jian" id="ding-shi-qi-shi-jian"></a>
 
 \
 定时器时间的设定实际上也会影响到算法性能甚至是正确性。试想一下这样一个场景，Leader 下线，有两个结点同时成为 Candidate，然后由于网络结构等原因，每个结点都获得了一半的投票，因此无人成为 Leader 进入了下一轮。然而在下一轮由于这两个结点同时结束，又同时成为了 Candidate，再次重复了之前的这一流程，那么算法就无法正常工作。
 
 为了解决这一问题，Raft 采用了一个十分“艺术”的解决方法，随机定时器长短（例如 150-300ms）。通过这一方法避免了两个结点同时成为 Candidate，即使发生了也能快速恢复。这一长短必须长于 Leader 的心跳间隔，否则在正常情况下也会有 Candidate 出现导致算法无法正常工作。
 
-## log replication <a href="log-replication" id="log-replication"></a>
+## log replication <a href="#log-replication" id="log-replication"></a>
 
    当有了leader，系统应该进入对外工作期了。客户端的一切请求来发送到leader，leader来调度这些并发请求的顺序，并且保证leader与followers状态的一致性。raft中的做法是，将这些请求以及执行顺序告知followers。leader和followers以相同的顺序来执行这些请求，保证状态一致。
 
-### Replicated state machines <a href="replicated-state-machines" id="replicated-state-machines"></a>
+### Replicated state machines <a href="#replicated-state-machines" id="replicated-state-machines"></a>
 
    共识算法的实现一般是基于复制状态机（Replicated state machines），何为复制状态机：
 
@@ -119,7 +119,7 @@
 
 ![](<../../.gitbook/assets/image (101) (1).png>)
 
-### 请求完整流程 <a href="qing-qiu-wan-zheng-liu-cheng" id="qing-qiu-wan-zheng-liu-cheng"></a>
+### 请求完整流程 <a href="#qing-qiu-wan-zheng-liu-cheng" id="qing-qiu-wan-zheng-liu-cheng"></a>
 
   当系统（leader）收到一个来自客户端的写请求，到返回给客户端，整个过程从leader的视角来看会经历以下步骤：
 
@@ -143,7 +143,7 @@
 
 > The leader decides when it is safe to apply a log entry to the state machines; such an entry is called committed. Raft guarantees that committed entries are durable and will eventually be executed by all of the available state machines. A log entry is committed once the leader that created the entry has replicated it on a majority of the servers
 
-## 日志压缩 <a href="item-6" id="item-6"></a>
+## 日志压缩 <a href="#item-6" id="item-6"></a>
 
 在实际的系统中，不能让日志无限膨胀，否则系统重启时需要花很长的时间进行恢复，从而影响可用性。Raft 采用对整个系统进行快照来解决，快照之前的日志都可以丢弃。
 
@@ -159,7 +159,7 @@
 
 **生成快照的频率要适中**，频率过高会消耗大量 I/O 带宽；频率过低，一旦需要执行恢复操作，会丢失大量数据，影响可用性。推荐当日志达到某个固定的大小时生成快照。生成一次快照可能耗时过长，影响正常日志同步。可以通过使用 copy-on-write 技术避免快照过程影响正常日志同步。
 
-## safety <a href="safety" id="safety"></a>
+## safety <a href="#safety" id="safety"></a>
 
 [回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
 
@@ -177,7 +177,7 @@
 
 ![](<../../.gitbook/assets/image (99).png>)
 
-#### Election safety <a href="election-safety" id="election-safety"></a>
+#### Election safety <a href="#election-safety" id="election-safety"></a>
 
   选举安全性，即任一任期内最多一个leader被选出。这一点非常重要，在一个复制集中任何时刻只能有一个leader。系统中同时有多余一个leader，被称之为脑裂（brain split），这是非常严重的问题，会导致数据的覆盖丢失。在raft中，两点保证了这个属性：
 
@@ -186,7 +186,7 @@
 
   因此，**某一任期内一定只有一个leader**。
 
-#### log matching <a href="log-matching" id="log-matching"></a>
+#### log matching <a href="#log-matching" id="log-matching"></a>
 
   很有意思，log匹配特性， 就是说如果两个节点上的某个log entry的log index相同且term相同，那么在该index之前的所有log entry应该都是相同的。如何做到的？依赖于以下两点
 
@@ -220,7 +220,7 @@
 > s4 leader收到follower的回复，如果返回值是False，则nextIndex\[x] -= 1, 跳转到s2. 否则\
 > s5 同步nextIndex\[x]后的所有log entries
 
-#### leader completeness vs elcetion restriction <a href="leader-completeness-vs-elcetion-restriction" id="leader-completeness-vs-elcetion-restriction"></a>
+#### leader completeness vs elcetion restriction <a href="#leader-completeness-vs-elcetion-restriction" id="leader-completeness-vs-elcetion-restriction"></a>
 
   leader完整性：如果一个log entry在某个任期被提交（committed），那么这条日志一定会出现在所有更高term的leader的日志里面。这个跟leader election、log replication都有关。
 
@@ -235,11 +235,11 @@
 
   raft与其他协议（Viewstamped Replication、mongodb）不同，raft始终保证leade包含最新的已提交的日志，因此leader不会从follower catchup日志，这也大大简化了系统的复杂度。
 
-## corner case <a href="corner-case" id="corner-case"></a>
+## corner case <a href="#corner-case" id="corner-case"></a>
 
 [回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
 
-### stale leader <a href="stale-leader" id="stale-leader"></a>
+### stale leader <a href="#stale-leader" id="stale-leader"></a>
 
   raft保证Election safety，即一个任期内最多只有一个leader，但在网络分割（network partition）的情况下，**可能会出现两个leader，但两个leader所处的任期是不同的**。如下图所示\
 
@@ -256,7 +256,7 @@
 
   从raft的论文中可以看到，leader转换成follower的条件是收到来自更高term的消息，如果网络分割一直持续，那么stale leader就会一直存在。而在raft的一些实现或者raft-like协议中，leader如果收不到majority节点的消息，那么可以自己step down，自行转换到follower状态。
 
-### State Machine Safety <a href="state-machine-safety" id="state-machine-safety"></a>
+### State Machine Safety <a href="#state-machine-safety" id="state-machine-safety"></a>
 
   前面在介绍safety的时候有一条属性没有详细介绍，那就是State Machine Safety：
 
@@ -280,7 +280,7 @@
 
   因此，在上图中，不会出现（C）时刻的情况，即term4任期的leader s1不会复制term2的日志到s3。而是如同(e)描述的情况，通过复制-提交 term4的日志顺便提交term2的日志。如果term4的日志提交成功，那么term2的日志也一定提交成功，此时即使s1crash，s5也不会重新当选。
 
-### leader crash <a href="leader-crash" id="leader-crash"></a>
+### leader crash <a href="#leader-crash" id="leader-crash"></a>
 
   follower的crash处理方式相对简单，leader只要不停的给follower发消息即可。当leader crash的时候，事情就会变得复杂。在[这篇文章](http://www.cnblogs.com/mindwind/p/5231986.html)中，作者就给出了一个更新请求的流程图。\
 ![例子](https://images2015.cnblogs.com/blog/815275/201603/815275-20160301175358173-526445555.png)
@@ -290,7 +290,7 @@
 
 ![](<../../.gitbook/assets/image (98).png>)
 
-## 总结 <a href="zong-jie" id="zong-jie"></a>
+## 总结 <a href="#zong-jie" id="zong-jie"></a>
 
 [回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
 
@@ -312,7 +312,7 @@ log replication约束：
 
   本文是在看完raft论文后自己的总结，不一定全面。个人觉得，如果只是相对raft协议有一个简单了解，看这个[动画演示](http://thesecretlivesofdata.com/raft/)就足够了，如果想深入了解，还是要看论文，论文中Figure 2对raft算法进行了概括。最后，还是找一个实现了raft算法的系统来看看更好。
 
-## references <a href="references" id="references"></a>
+## references <a href="#references" id="references"></a>
 
 原文 [一文搞懂Raft算法](https://www.cnblogs.com/xybaby/p/10124083.html)
 
@@ -323,7 +323,7 @@ log replication约束：
 [回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
 
 [https://web.stanford.edu/\~ouster/cgi-bin/papers/raft-atc14](https://web.stanford.edu/\~ouster/cgi-bin/papers/raft-atc14)\
-[https://raft.github.io/](https://raft.github.io)\
+[https://raft.github.io/](https://raft.github.io/)\
 [http://thesecretlivesofdata.com/raft/](http://thesecretlivesofdata.com/raft/)
 
 本文版权归作者xybaby（博文地址：http://www.cnblogs.com/xybaby/）所有，欢迎转载和商用，请在文章页面明显位置给出原文链接并保留此段声明，否则保留追究法律责任的权利，其他事项，可留言咨询。

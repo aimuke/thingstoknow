@@ -16,7 +16,7 @@ node_number = hash(key) % N # 其中 N 为节点数。
 
 下面我们来分析一下传统的哈希及其在大规模分布式系统中的局限性。
 
-这里我们分别对 **semlinker、kakuqo 和 test **3 个键进行哈希运算并取余，获得以下结果：
+这里我们分别对 **semlinker、kakuqo 和 test** 3 个键进行哈希运算并取余，获得以下结果：
 
 ```bash
 node_number=hash("semlinker") % 3 -> 1
@@ -218,7 +218,7 @@ public class ConsistentHashingWithoutVirtualNode {
 
 ## References
 
-* 原文 [图解一致性哈希算法](https://segmentfault.com/a/1190000021199728), [阿宝哥](http://www.semlinker.com)
+* 原文 [图解一致性哈希算法](https://segmentfault.com/a/1190000021199728), [阿宝哥](http://www.semlinker.com/)
 * [百度百科 - 一致性哈希](https://baike.baidu.com/item/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C)
 * [知乎 - 面试必备：什么是一致性 Hash 算法](https://zhuanlan.zhihu.com/p/34985026)
 * [Leo - 一致性Hash-Consistent-Hashing 原理剖析](https://leehao.me/%E4%B8%80%E8%87%B4%E6%80%A7Hash-Consistent-Hashing-%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90/)
