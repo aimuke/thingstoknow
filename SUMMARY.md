@@ -2,6 +2,8 @@
 
 * [Initial page](README.md)
 * [go](go/README.md)
+  * [golang 编程规范-项目目录结构](go/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou/README.md)
+    * [golang 编程规范 - 项目目录结构](go/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou.md)
   * [内联函数和编译器对Go代码的优化](go/nei-lian-han-shu-he-bian-yi-qi-dui-go-dai-ma-de-you-hua.md)
   * [\[译\] Go语言inline内联的策略与限制](go/yi-go-yu-yan-inline-nei-lian-de-ce-lve-yu-xian-zhi.md)
   * [golang 生成随机数或者字符](go/golang-sheng-cheng-sui-ji-shu-huo-zhe-zi-fu.md)
