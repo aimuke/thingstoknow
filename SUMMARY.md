@@ -3,6 +3,7 @@
 * [Initial page](README.md)
 * [go](go/README.md)
   * [golang 编程规范-项目目录结构](go/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou/README.md)
+    * [Go-项目结构和代码组织（go 开发框架）](go/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou/go-xiang-mu-jie-gou-he-dai-ma-zu-zhi-go-kai-fa-kuang-jia.md)
     * [我来告诉你Go项目标准结构如何布局](go/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou/wo-lai-gao-su-ni-go-xiang-mu-biao-zhun-jie-gou-ru-he-bu-ju.md)
     * [golang-standards/project-layout](go/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou/golang-standards-project-layout.md)
     * [Go|看看别人的项目目录结构，那叫一个舒服！](go/golang-bian-cheng-gui-fan-xiang-mu-mu-lu-jie-gou/go-kan-kan-bie-ren-de-xiang-mu-mu-lu-jie-gou-na-jiao-yi-ge-shu-fu.md)
