@@ -87,7 +87,7 @@ cookie是有生命周期的，一旦到了cookie的失效日期，客户端的co
 * **当浏览器中的cookie数量达到了限制时**，那么浏览器就会按照某种策略删除一些旧的cookie，腾出空间来创建新的cookie；&#x20;
 * **手动的人为删除cookie**
 
-****
+
 
 **References**
 

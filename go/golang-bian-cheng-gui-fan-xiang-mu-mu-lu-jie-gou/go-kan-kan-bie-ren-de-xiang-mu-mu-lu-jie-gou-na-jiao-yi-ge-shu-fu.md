@@ -22,7 +22,42 @@
 
 一个 Go 项目包含 3 大部分：Go应用 、项目管理和文档。Go应用开发过程又分为3阶段：开发、测试、部署。整体来看，我们的目录结构可以按照下图来分类：（仅供参考）
 
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bd7b248fc6864f95b191b059133b947b\~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp?)
+<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+
+
+
+```
+------------------------- go目录 ----------------------------
+/cmd：项目的可执行文件名称相符，通常有一个简短的main函数。从/internal和/pkg目录导入代码。其他没有了
+/internal： 私有应用程序和库代码
+/pkg：外部应用可以导入的库代码
+/vendor：应用程序依赖项
+-----------------服务应用程序目录 ---------------
+/api：协议文件
+/web:  静态web组件
+-----------------通用应用目录 ---------------
+/configs：项目的默认配置
+/init：system init （systemd，upstart，sysv) 配置
+/scripts：执行各种构建、安装、分析等操作的脚本
+/build：打包和持续集成
+/deployments：部署配置
+/test：测试
+-----------------其他目录 ---------------
+/docs：文档
+/tools：项目支持的工具
+/examples：应用程序和公共库实例
+/third_party：外部工具
+/githooks: - 
+/assets: 图片和其他存储的文件
+/website：-
+不应该有的目录
+/src：请不要将项目级别的src目录和工作空间的src目录混淆。
+/xxs:  在 Go 项目中，要避免使用带复数的目录或者包。建议统一使用单数。
+```
+
+
+
+##
 
 ## 四、Go目录（根目录）
 

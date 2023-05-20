@@ -21,7 +21,7 @@
 
 **如果 Client 重传完所有 SYN 之后依然没有收到 SYN\_ACK，那么这时 connect() 调用便会抛出 connection timeout 错误。如果 Client 在重传 SYN 期间，Client 的 sock timeout 时间到了，那么这时 connect() 会抛出 timeout 错误。**
 
-****
+
 
 ## **Reference**
 
