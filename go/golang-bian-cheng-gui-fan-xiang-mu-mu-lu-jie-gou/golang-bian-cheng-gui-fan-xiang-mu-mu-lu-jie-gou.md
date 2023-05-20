@@ -282,3 +282,5 @@ Git 钩子。
 ### 参考 <a href="#can-kao" id="can-kao"></a>
 
 * [https://github.com/golang-standards/project-layout](https://github.com/golang-standards/project-layout)
+
+## 原文 [https://makeoptim.com/golang/standards/project-layout/](https://makeoptim.com/golang/standards/project-layout/)
