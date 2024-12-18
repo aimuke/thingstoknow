@@ -1,6 +1,6 @@
 # 【k8s】leaderelection选举策略实现组件高可用
 
-##  一、前言
+## &#x20;一、前言
 
 分布式服务绕不开一个词：选主。今天主要来聊一下k8s中是如何通过leaderelection来实现组件的高可用的。在k8s本身的组件中，kube-scheduler和kube-manager-controller两个组件是有leader选举的，这个选举机制是k8s对于这两个组件的高可用保障。即正常情况下kube-scheduler或kube-manager-controller组件的多个副本只有一个是处于业务逻辑运行状态，其它副本则不断的尝试去获取锁，去竞争leader，直到自己成为leader。如果正在运行的leader因某种原因导致当前进程退出，或者锁丢失，则由其它副本去竞争新的leader，获取leader继而执行业务逻辑。
 
@@ -8,7 +8,7 @@
 
 ## 二、leaderelection使用demo
 
-###  1. demo代码
+### &#x20;1. demo代码
 
 ```go
 
@@ -161,7 +161,7 @@ func main() {
 
 ### 2. 启动进程1
 
-```text
+```
 go run main.go -kubeconfig=/tangqing2/.kube/config -logtostderr=true -lease-lock-name=example -lease-lock-namespace=default -id=1 -v=4
 I0215 14:56:37.049658   48045 leaderelection.go:242] attempting to acquire leader lease  default/example...
 I0215 14:56:37.080368   48045 leaderelection.go:252] successfully acquired lease default/example
@@ -189,13 +189,13 @@ I0215 20:01:41.489300   48791 leaderelection.go:252] successfully acquired lease
 I0215 20:01:41.489577   48791 main.go:87] Controller loop...
 ```
 
-## 三、深入理解\(源码分析\)
+## 三、深入理解(源码分析)
 
- 第二章的demo基本原理其实就是利用通过Kubernetes中 configmap ， endpoints 或者 lease 资源实现一个分布式锁，抢\(acqure\)到锁的节点成为leader，并且定期更新（renew）。其他进程也在不断的尝试进行抢占，抢占不到则继续等待下次循环。当leader节点挂掉之后，租约到期，其他节点就成为新的leader。
+&#x20;第二章的demo基本原理其实就是利用通过Kubernetes中 configmap ， endpoints 或者 lease 资源实现一个分布式锁，抢(acqure)到锁的节点成为leader，并且定期更新（renew）。其他进程也在不断的尝试进行抢占，抢占不到则继续等待下次循环。当leader节点挂掉之后，租约到期，其他节点就成为新的leader。
 
 代码路径在client-go/tools/leaderelection下.逻辑结构如下图：
 
-![](../.gitbook/assets/image%20%2851%29.png)
+![](<../.gitbook/assets/image (109).png>)
 
 ### Interface接口
 
@@ -356,7 +356,7 @@ type LeaderElector struct {
 }
 ```
 
-这里着重要关注以下几个属性: 
+这里着重要关注以下几个属性:&#x20;
 
 * config: 该LeaderElectionConfig对象配置了当前应用的客户端, 以及此客户端的唯一id等等.
 * observedRecord: 该LeaderElectionRecord就是保存着从api-server中获得的leader的信息
@@ -400,13 +400,13 @@ func (le *LeaderElector) Run(ctx context.Context) {
 
 ```
 
-1. 该client\(也就是le这个实例\)首先会调用acquire方法一直尝试去竞争leadership. \(如果竞争失败, 继续竞争, 不会进入2。 竞争成功, 进入2；
-2. 异步启动用户自己的逻辑程序\(OnStartedLeading\). 进入3
+1. 该client(也就是le这个实例)首先会调用acquire方法一直尝试去竞争leadership. (如果竞争失败, 继续竞争, 不会进入2。 竞争成功, 进入2；
+2. 异步启动用户自己的逻辑程序(OnStartedLeading). 进入3
 3. 通过调用renew方法续约自己的leadership. 续约成功, 继续续约. 续约失败, 整个Run就结束了.
 
 ### 4.acquire
 
-```text
+```
 func (le *LeaderElector) maybeReportTransition() {
     // 如果没有变化 则不需要更新
     if le.observedRecord.HolderIdentity == le.reportedLeader {
@@ -450,7 +450,7 @@ func (le *LeaderElector) acquire(ctx context.Context) bool {
 }
 ```
 
- **acquire** 的作用如下: 
+&#x20;**acquire** 的作用如下:&#x20;
 
 1. 一旦获得leadership, 立马返回true. 否则会隔RetryPeriod时间尝试一次
 2. 一旦有ctx signals done, 会返回false
@@ -513,7 +513,7 @@ func (le *LeaderElector) renew(ctx context.Context) {
 
 > 这里来说一下RenewDeadline和RetryPeriod的作用.
 >
->  **每隔RetryPeriod时间会通过tryAcquireOrRenew续约, 如果续约失败, 还会进行再次尝试. 一直到尝试的总时间超过RenewDeadline后该client就会失去leadership.**
+> &#x20;**每隔RetryPeriod时间会通过tryAcquireOrRenew续约, 如果续约失败, 还会进行再次尝试. 一直到尝试的总时间超过RenewDeadline后该client就会失去leadership.**
 
 ### 6. tryAcquireOrRenew
 
@@ -597,20 +597,19 @@ func (le *LeaderElector) tryAcquireOrRenew() bool {
 
 这里需要注意的是当前client不是leader的时候, 如何去判断一个leader是否已经expired了?
 
-* le.observedTime.Add\(le.config.LeaseDuration\).After\(now.Time\) 
-* **le.observedTime**: 代表的是获得leader\(截止当前时间为止的最后一次renew\)对象的时间.
-* **le.config.LeaseDuration**: 自己\(当前client\)获得leadership需要的等待时间.
-* **le.observedTime.Add\(le.config.LeaseDuration\)**: 就是自己\(当前client\)被允许获得leadership的时间.
+* le.observedTime.Add(le.config.LeaseDuration).After(now.Time)&#x20;
+* **le.observedTime**: 代表的是获得leader(截止当前时间为止的最后一次renew)对象的时间.
+* **le.config.LeaseDuration**: 自己(当前client)获得leadership需要的等待时间.
+* **le.observedTime.Add(le.config.LeaseDuration)**: 就是自己(当前client)被允许获得leadership的时间.
 
-如果le.observedTime.Add\(le.config.LeaseDuration\).before\(now.Time\)为true的话, 就表明leader过期了. 白话文的意思就是从leader上次续约完, 已经超过le.config.LeaseDuration的时间没有续约了, 所以被认为该leader过期了. 把before换成after就是表明没有过期.
+如果le.observedTime.Add(le.config.LeaseDuration).before(now.Time)为true的话, 就表明leader过期了. 白话文的意思就是从leader上次续约完, 已经超过le.config.LeaseDuration的时间没有续约了, 所以被认为该leader过期了. 把before换成after就是表明没有过期.
 
 ## 四、结语
 
- leaderelection 主要是利用了k8s API操作的原子性实现了一个分布式锁，在不断的竞争中进行选举。选中为leader的进行才会执行具体的业务代码，这在k8s中非常的常见，而且我们很方便的利用这个包完成组件的编写，从而实现组件的高可用，比如部署为一个多副本的Deployment，当leader的pod退出后会重新启动，可能锁就被其他pod获取继续执行。
+&#x20;leaderelection 主要是利用了k8s API操作的原子性实现了一个分布式锁，在不断的竞争中进行选举。选中为leader的进行才会执行具体的业务代码，这在k8s中非常的常见，而且我们很方便的利用这个包完成组件的编写，从而实现组件的高可用，比如部署为一个多副本的Deployment，当leader的pod退出后会重新启动，可能锁就被其他pod获取继续执行。
 
 ## References
 
 * 原文 [【k8s】——leaderelection选举策略实现组件高可用](https://blog.csdn.net/weixin_40449300/article/details/110729620)
-* [\[k8s源码分析\]\[client-go\] k8s选举leaderelection \(分布式资源锁实现\)](https://www.jianshu.com/p/6e6f1d97d635)
+* [\[k8s源码分析\]\[client-go\] k8s选举leaderelection (分布式资源锁实现)](https://www.jianshu.com/p/6e6f1d97d635)
 * [利用 Kubernetes 中的 leaderelection 实现组件高可用](https://www.jianshu.com/p/6e6f1d97d635)
-

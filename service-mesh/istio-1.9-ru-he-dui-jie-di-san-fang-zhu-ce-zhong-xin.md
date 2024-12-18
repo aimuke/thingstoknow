@@ -4,7 +4,7 @@
 
 Istio 控制面组件 pilot-discovery 主要接受两类输入数据，然后按照一定逻辑输出一类数据。
 
-![](../.gitbook/assets/image%20%2869%29.png)
+![](<../.gitbook/assets/image (7).png>)
 
 #### 输入数据
 
@@ -24,7 +24,7 @@ Istio 1.9 在对接第三方注册中心方面，有两个需要注意的地方�
 * [**istio 1.8 不再 in-tree 支持 consul 作为外部注册中心**](https://link.zhihu.com/?target=https%3A//github.com/istio/istio/pull/25521) ：加上之前版本移除了对于euraka的支持。截止1.8，所有通过 in-tree 方式支持外部注册中心的代码彻底被移除。
 * **istio1.9 不再支持MCP的方式对接外部注册中心，改为 MCP-over-XDS的方式**：新的方式虽然叫mcp over xds，但本质上没有使用之前的mcp协议。这意味着istio 1.9 中不能使用之前社区开源的一些 mcp 实现。
 
-> 移除 in-tree 方式的支持是每一个大型项目的必经之路，比如k8s通过CSI，CRI两大接口，逐步移除了对于存储和运行时的in-tree支持。  
+> 移除 in-tree 方式的支持是每一个大型项目的必经之路，比如k8s通过CSI，CRI两大接口，逐步移除了对于存储和运行时的in-tree支持。\
 > 大家可以仔细阅读 istio repo 中 诸多关于consul 的 issue。大多是不同版本consul的差异带来的bug，以及功能支持有限。这样的好处是可以解耦所有扩展组件的代码。
 
 ## 两种方式对接第三方注册中心
@@ -41,11 +41,11 @@ MCP-over-XDS server 读取 consul 中的数据，并转换为ServiceEntry，然�
 
 pilot接受到数据后，会对比内存中的数据，保证数据一致。
 
-![](../.gitbook/assets/image%20%2870%29.png)
+![](<../.gitbook/assets/image (19).png>)
 
 由于istio的流行，nacos 已经原生支持 mcp over xds，具体见 [PR](https://link.zhihu.com/?target=https%3A//github.com/alibaba/nacos/pull/5124)。因为流量规则也是可以通过 mcp over xds 传输，nacos 又可以用作配置中心，所以基于nacos的服务网格也是一个方向。这样可以实现和kubernetes 平台解耦。大致示意图如下：
 
-![](../.gitbook/assets/image%20%2868%29.png)
+![](<../.gitbook/assets/image (72).png>)
 
 > 该方式有一点需要注意：当consul等第三方注册中心，规模比较大，也就是服务和实例比较多，需要关注效率和性能。因为mcp over xds 是一种全量的 push。任何一个变更，都需要一次全量push。
 
@@ -59,7 +59,7 @@ pilot watch了 ServiceEntry 和 WorkloadEntry，那么对应的controller 就会
 
 该方式，对于consul 的话，已经有 [consul2istio](https://link.zhihu.com/?target=https%3A//github.com/aeraki-framework/consul2istio) 项目。
 
-![](../.gitbook/assets/image%20%2871%29.png)
+![](<../.gitbook/assets/image (25).png>)
 
 ## 总结
 
@@ -72,4 +72,3 @@ istio 演进比较快，每个版本都有很多变化。我们在落地的时�
 ## References
 
 * 原文 [Istio 1.9 如何对接第三方注册中心](https://zhuanlan.zhihu.com/p/371085990)
-

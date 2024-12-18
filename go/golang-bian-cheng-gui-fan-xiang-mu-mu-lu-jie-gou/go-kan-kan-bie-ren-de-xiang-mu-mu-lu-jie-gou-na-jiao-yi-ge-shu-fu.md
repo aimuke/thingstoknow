@@ -22,7 +22,7 @@
 
 一个 Go 项目包含 3 大部分：Go应用 、项目管理和文档。Go应用开发过程又分为3阶段：开发、测试、部署。整体来看，我们的目录结构可以按照下图来分类：（仅供参考）
 
-<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (83).png" alt=""><figcaption></figcaption></figure>
 
 
 

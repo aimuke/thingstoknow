@@ -30,7 +30,7 @@ Neutron LoadBalancer的基本使用步骤是：
 
 首先我们来看下我们在创建pool、member、healthmonitor和vip的时候，代码都做了哪些事情。
 
-![](../.gitbook/assets/image%20%2846%29.png)
+![](<../.gitbook/assets/image (93).png>)
 
 图1  LoadBalance整体流程框架
 
@@ -68,9 +68,9 @@ Neutron LoadBalancer的基本使用步骤是：
 
 ## driver create\_pool
 
-其中driver.create\_pool\(context,p\)是关键方法
+其中driver.create\_pool(context,p)是关键方法
 
-driver =self.drivers\[provider\_name\]，可知：根据配置文件中的provider设置，调用相应的driver。
+driver =self.drivers\[provider\_name]，可知：根据配置文件中的provider设置，调用相应的driver。
 
 在neutron.conf中可以看到默认的设置为：service\_provider=LOADBALANCER:Haproxy:neutron.services.loadbalancer.drivers.haproxy.plugin\_driver.HaproxyOnHostPluginDriver:default
 
@@ -146,7 +146,7 @@ device_driver = namespace_driver.DRIVER_NAME
 
 ## agent\_manager 接收到请求
 
-所以根据device\_driver选择的agent是Haproxy的namespace\_driver，通过agent将创建pool的请求转发给device\_driver\(HaproxyNSDriver\)这个过程并不是直接就一步到位的，其中agent发送RPC异步请求，此时agent\_manager接收到请求
+所以根据device\_driver选择的agent是Haproxy的namespace\_driver，通过agent将创建pool的请求转发给device\_driver(HaproxyNSDriver)这个过程并不是直接就一步到位的，其中agent发送RPC异步请求，此时agent\_manager接收到请求
 
 ```python
 def create_pool(self, context, pool, driver_name):
@@ -187,4 +187,3 @@ def create_pool(self, pool):
 ## References
 
 * 原文 [OpenStack Neutron LoadBalance源码解析（一）](https://www.biecuoliao.com/pa/4pOEvK3.html)
-

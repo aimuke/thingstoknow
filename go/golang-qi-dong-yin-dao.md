@@ -122,7 +122,7 @@ TEXT runtime·rt0_go(SB),NOSPLIT,$0
 	(...)
 ```
 
-#### 运行时类型检查 <a id="&#x8FD0;&#x884C;&#x65F6;&#x7C7B;&#x578B;&#x68C0;&#x67E5;"></a>
+#### 运行时类型检查 <a href="#yun-hang-shi-lei-xing-jian-cha" id="yun-hang-shi-lei-xing-jian-cha"></a>
 
 ```go
 // runtime/runtime1.go
@@ -141,7 +141,7 @@ func check() {
 }
 ```
 
-#### 系统参数、处理器与内存常量 <a id="&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x5904;&#x7406;&#x5668;&#x4E0E;&#x5185;&#x5B58;&#x5E38;&#x91CF;"></a>
+#### 系统参数、处理器与内存常量 <a href="#xi-tong-can-shu-chu-li-qi-yu-nei-cun-chang-liang" id="xi-tong-can-shu-chu-li-qi-yu-nei-cun-chang-liang"></a>
 
 argc, argv 作为来自操作系统的参数传递给 args 处理程序参数的相关事宜。
 
@@ -156,13 +156,13 @@ func args(c int32, v **byte) {
 
 
 
-![](../.gitbook/assets/image%20%2828%29.png)
+![](<../.gitbook/assets/image (104).png>)
 
 args 函数将参数指针保存到了 argc 和 argv 这两个全局变量中，供其他初始化函数使用，而后调用了平台特定的 sysargs。对于 Darwin 系统而言，只负责获取程序的 executable\_path：
 
 这个参数用于设置 os 包中的 executablePath 变量。
 
-而在 Linux 平台中，这个过程就变得复杂起来了。与 Darwin 使用 mach-o 不同，Linux 使用 ELF 格式 \[Matz et al. 2014\]。ELF 除了 argc, argv, envp 之外，会携带辅助向量（auxiliary vector）将某些内核级的信息传递给用户进程，例如内存物理页大小。具体结构如图 5.1 所示。
+而在 Linux 平台中，这个过程就变得复杂起来了。与 Darwin 使用 mach-o 不同，Linux 使用 ELF 格式 \[Matz et al. 2014]。ELF 除了 argc, argv, envp 之外，会携带辅助向量（auxiliary vector）将某些内核级的信息传递给用户进程，例如内存物理页大小。具体结构如图 5.1 所示。
 
 对照图 5.1 的词表，我们能够很容易的看明白 sysargs 在 Linux amd64 下作的事情：
 
@@ -232,13 +232,13 @@ func osinit() {
 
 
 
-Darwin 从操作系统发展来看，是从 NeXTSTEP 和 FreeBSD 2.x 发展而来的后代，macOS 系统调用的特殊之处在于它提供了两套调用接口，一个是 Mach 调用，另一个则是 POSIX 调用。 Mach 是 NeXTSTEP 遗留下来的产物，其 BSD 层本质上是对 Mach 内核的一层封装。 尽管用户态进程可以直接访问 Mach 调用，但出于通用性的考虑，物理页大小获取的方式是通过 POSIX sysctl 这个系统调用进行获取 \[Bacon, 2007\]。
+Darwin 从操作系统发展来看，是从 NeXTSTEP 和 FreeBSD 2.x 发展而来的后代，macOS 系统调用的特殊之处在于它提供了两套调用接口，一个是 Mach 调用，另一个则是 POSIX 调用。 Mach 是 NeXTSTEP 遗留下来的产物，其 BSD 层本质上是对 Mach 内核的一层封装。 尽管用户态进程可以直接访问 Mach 调用，但出于通用性的考虑，物理页大小获取的方式是通过 POSIX sysctl 这个系统调用进行获取 \[Bacon, 2007]。
 
 事实上 Linux 与 Darwin 下的系统调用如何参与到 Go 程序中去稍有不同，我们暂时不做深入讨论，留到以后再统一分析。
 
 可以看出，对运行时最为重要的两个系统级参数：CPU 核心数与内存物理页大小。
 
-#### 运行时组件核心 <a id="&#x8FD0;&#x884C;&#x65F6;&#x7EC4;&#x4EF6;&#x6838;&#x5FC3;"></a>
+#### 运行时组件核心 <a href="#yun-hang-shi-zu-jian-he-xin" id="yun-hang-shi-zu-jian-he-xin"></a>
 
 万事俱备只欠东风，对于 Go 运行时而言，最后的这三个函数及其后续调用关系完整实现了整个程序的全部运行时机制的准备工作：
 
@@ -306,17 +306,17 @@ func schedinit() {
 
 我们最感兴趣的三大运行时组件在如下函数签名中进行大量初始化工作：
 
-* stackinit\(\) goroutine 执行栈初始化
-* mallocinit\(\) 内存分配器初始化
-* mcommoninit\(\) 系统线程的部分初始化工作
-* gcinit\(\) 垃圾回收器初始化
-* procresize\(\) 根据 CPU 核心数，初始化系统线程的本地缓存
+* stackinit() goroutine 执行栈初始化
+* mallocinit() 内存分配器初始化
+* mcommoninit() 系统线程的部分初始化工作
+* gcinit() 垃圾回收器初始化
+* procresize() 根据 CPU 核心数，初始化系统线程的本地缓存
 
 ## 小结
 
 我们通过一个简化的调用关系图来对本节中我们观察到的程序启动流程。
 
-![](../.gitbook/assets/image%20%2827%29.png)
+![](<../.gitbook/assets/image (120).png>)
 
 据分析我们可以看到，Go 程序既不是从 `main.main` 直接启动，也不是从 `runtime.main` 直接启动。相反，其实际的入口位于 `runtime._rt0_amd64_*`。随后会转到 `runtime.rt0_go` 调用。在这个调用中，除了进行运行时类型检查外，还确定了两个很重要的运行时常量，即处理器核心数以及内存物理页大小。
 
@@ -327,4 +327,3 @@ func schedinit() {
 ## References
 
 * [原文 Golang 启动引导](https://loulan.me/post/golang-boot/) ,楼兰
-

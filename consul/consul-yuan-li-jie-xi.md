@@ -9,7 +9,7 @@
 
 下面是consul官方给出的一张架构图，我们先来理解一下
 
-![](<../.gitbook/assets/image (77).png>)
+![](<../.gitbook/assets/image (87).png>)
 
 首先，从架构上，图片被两个datacenter分成了上下两部分；但这两部分又并不是完全隔离的，他们之间通过WAN GOSSIP在Internet上交互报文。因此，我们了解到consul是可以支持多个数据中心之间基于WAN来做同步的。
 
@@ -226,7 +226,7 @@ bootstrap_expect > 0: expecting 3 servers
 
 先来看Consul内部是如何做服务注册与发现的流程，下图是consul客户端向agent注册以及发现目标服务的时序图
 
-![](<../.gitbook/assets/image (79).png>)
+![](<../.gitbook/assets/image (39).png>)
 
 通过上图，我们大概知道了在consul agent中，功能分为了consul server和consul agent（client）。在前面[架构介绍](http://ljchen.net/2019/01/04/consul%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/#%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D)中我们已经阐述了server和client各自的职责。
 
@@ -234,7 +234,7 @@ consul源码中，server和client都是在一套代码中，通过指定启动�
 
 ### Consul Client架 <a href="#consulclient-jia-gou" id="consulclient-jia-gou"></a>
 
-![](<../.gitbook/assets/image (78).png>)
+![](<../.gitbook/assets/image (37).png>)
 
 上图简要描述了consul client中的各重要服务，以及它们之间的关系。
 
@@ -253,7 +253,7 @@ consul源码中，server和client都是在一套代码中，通过指定启动�
 
 基于前面一节的介绍，我们大概能够猜测到服务注册大概都需要些什么样的流程，接下来我们就将以下这块的逻辑
 
-![](<../.gitbook/assets/image (76).png>)
+![](<../.gitbook/assets/image (125).png>)
 
 上图是其服务注册API的controller中函数调用的一个简化流程。
 

@@ -18,7 +18,7 @@
 
 ### 2.1 架构
 
-![](<../.gitbook/assets/image (43).png>)
+![](<../.gitbook/assets/image (36).png>)
 
 ### 2.2 LBaaS V1和V2区别
 
@@ -135,11 +135,11 @@ To control incoming traffic on the VIP address as well as traffic for a specific
 
 For HTTP and HTTPS protocols, since several HTTP requests can be multiplexed on the same TCP connection, the connection limit value is interpreted as the maximum number of requests allowed.
 
-![](<../.gitbook/assets/image (40).png>)
+![](<../.gitbook/assets/image (1).png>)
 
 #### 2.2.4 LBaaS V2概念
 
-![](<../.gitbook/assets/image (41).png>)
+![](<../.gitbook/assets/image (94).png>)
 
 负载均衡器 :负载均衡器占用Neutron网络端口，并具有从子网分配的IP地址。 \
 侦听器 :负载平衡器可以侦听多个端口上的请求。 这些端口中的每一个都由侦听器指定。 \

@@ -4,7 +4,7 @@
 
 ### 模块示意图
 
-![](<../.gitbook/assets/image (42).png>)
+![](<../.gitbook/assets/image (21).png>)
 
 ![](https://img-blog.csdn.net/20160914235148865)\
 这里参考的是lbaasv2的driver，neutron\_lbaas.conf中的service\_provider即为lbaasv2的driver：\
@@ -508,4 +508,4 @@ $ neutron lbaas-healthmonitor-create \
 
 ## References
 
-原文 [LBaas之（五） Liberty版本Neutron LBaas实现分析](https://blog.csdn.net/hejin\_some/article/details/72812062), [何进哥哥](https://blog.csdn.net/hejin\_some)
+原文 [LBaas之（五） Liberty版本Neutron LBaas实现分析](https://blog.csdn.net/hejin_some/article/details/72812062), [何进哥哥](https://blog.csdn.net/hejin_some)

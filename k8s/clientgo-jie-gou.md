@@ -1,6 +1,6 @@
 # Client-go 结构
 
-![](../.gitbook/assets/image%20%285%29.png)
+![](<../.gitbook/assets/image (48).png>)
 
 ## RESTClient
 
@@ -38,7 +38,7 @@ for _, d := range result.Items {
 
 ## ClientSet
 
-`ClientSet` 是使用最多的客户端，它继承自 `RESTClient`，使用K8s的代码生成机制\(client-gen机制\)，在编译过程中，会根据目前K8s内置的资源信息，自动生成他们的客户端代码\(前提是需要添加适当的注解\)，使用者可以通过builder pattern进行初始化，得到自己在意的目标资源类型的客户端。`ClientSet` 如同它的名字一样，代表的是一组内置资源的客户端。例如：
+`ClientSet` 是使用最多的客户端，它继承自 `RESTClient`，使用K8s的代码生成机制(client-gen机制)，在编译过程中，会根据目前K8s内置的资源信息，自动生成他们的客户端代码(前提是需要添加适当的注解)，使用者可以通过builder pattern进行初始化，得到自己在意的目标资源类型的客户端。`ClientSet` 如同它的名字一样，代表的是一组内置资源的客户端。例如：
 
 ```go
 clientset, err := kubernetes.NewForConfig(config) // 根据config对象创建clientSet对象
@@ -100,7 +100,7 @@ for _, list := range APIResourceList {
 
 本地缓存路径：
 
-![](../.gitbook/assets/image%20%286%29.png)
+![](<../.gitbook/assets/image (119).png>)
 
 本地存储了`serverresources.json`文件，感兴趣的可以打开看下，是json格式化后的资源信息。
 
@@ -130,14 +130,13 @@ func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Facto
 
 ## 总结
 
-| 客户端名称 | 源码目录 | 简单描述 |
-| :--- | :--- | :--- |
-| RESTClient | client-go/rest/ | 基础客户端，对HTTP Request封装 |
-| ClientSet | client-go/kubernetes/ | 在RESTClient基础上封装了对Resource和Version，也就是说我们使用ClientSet的话是必须要知道Resource和Version， 例如AppsV1\(\).Deployments或者CoreV1.Pods，缺点是不能访问CRD自定义资源 |
-| DynamicClient | client-go/dynamic/ | 包含一组动态的客户端，可以对任意的K8S API对象执行通用操作，包括CRD自定义资源   |
-| DiscoveryClient  | client-go/discovery/ | ClientSet必须要知道Resource和Version, 但使用者通常很难记住所有的GVR信息，这个DiscoveryClient是提供一个发现客户端，发现API Server支持的资源组，资源版本和资源信息 |
+| 客户端名称            | 源码目录                  | 简单描述                                                                                                                              |
+| ---------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| RESTClient       | client-go/rest/       | 基础客户端，对HTTP Request封装                                                                                                             |
+| ClientSet        | client-go/kubernetes/ | 在RESTClient基础上封装了对Resource和Version，也就是说我们使用ClientSet的话是必须要知道Resource和Version， 例如AppsV1().Deployments或者CoreV1.Pods，缺点是不能访问CRD自定义资源 |
+| DynamicClient    | client-go/dynamic/    | 包含一组动态的客户端，可以对任意的K8S API对象执行通用操作，包括CRD自定义资源                                                                                       |
+| DiscoveryClient  | client-go/discovery/  | ClientSet必须要知道Resource和Version, 但使用者通常很难记住所有的GVR信息，这个DiscoveryClient是提供一个发现客户端，发现API Server支持的资源组，资源版本和资源信息                       |
 
 ## References
 
 * [Programing In K8s 1：Client-go 实现分析与二次开发](https://blog.csdn.net/King_DJF/article/details/108307735)
-

@@ -4,7 +4,7 @@
 
 模块示意图
 
-![](<../.gitbook/assets/image (48).png>)
+![](<../.gitbook/assets/image (57).png>)
 
 \
 这里参考的是 lbaasv2 的 driver，neutron\_lbaas.conf 中的 service\_provider 即为 lbaasv2 的 driver：

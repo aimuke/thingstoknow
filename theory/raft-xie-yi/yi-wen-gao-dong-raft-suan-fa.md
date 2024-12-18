@@ -4,7 +4,7 @@
 
    raft是一个共识算法（consensus algorithm），所谓共识，就是多个节点对某个事情达成一致的看法，即使是在部分节点故障、网络延时、网络分割的情况下。这些年最为火热的加密货币（比特币、区块链）就需要共识算法，而在分布式系统中，共识算法更多用于提高系统的容错性，比如分布式存储中的复制集（replication），在[带着问题学习分布式系统之中心化复制集](https://www.cnblogs.com/xybaby/p/7153755.html)一文中介绍了中心化复制集的相关知识。raft协议就是一种leader-based的共识算法，与之相应的是leaderless的共识算法。
 
-  本文基于论文[In Search of an Understandable Consensus Algorithm](https://web.stanford.edu/\~ouster/cgi-bin/papers/raft-atc14)对raft协议进行分析，当然，还是建议读者直接看论文。
+  本文基于论文[In Search of an Understandable Consensus Algorithm](https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14)对raft协议进行分析，当然，还是建议读者直接看论文。
 
   本文地址：[https://www.cnblogs.com/xybaby/p/10124083.html](https://www.cnblogs.com/xybaby/p/10124083.html)
 
@@ -40,7 +40,7 @@
    给出状态转移图能很直观的直到这三个状态的区别\
 
 
-<img src="../../.gitbook/assets/image (106).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (33).png" alt="" data-size="original">
 
   可以看出所有节点启动时都是follower状态；在一段时间内如果没有收到来自leader的心跳，从follower切换到candidate，发起选举；如果收到majority的造成票（含自己的一票）则切换到leader状态；如果发现其他节点比自己更新，则主动切换到follower。
 
@@ -48,16 +48,16 @@
 
 ### term <a href="#term" id="term"></a>
 
-   从上面可以看出，哪个节点做leader是大家投票选举出来的，每个leader工作一段时间，然后选出新的leader继续负责。这根民主社会的选举很像，每一届新的履职期称之为一届任期，在raft协议中，也是这样的，对应的术语叫_**term**_。\
+   从上面可以看出，哪个节点做leader是大家投票选举出来的，每个leader工作一段时间，然后选出新的leader继续负责。这根民主社会的选举很像，每一届新的履职期称之为一届任期，在raft协议中，也是这样的，对应的术语&#x53EB;_**term**_。\
 
 
-![](<../../.gitbook/assets/image (97) (1) (1).png>)
+![](<../../.gitbook/assets/image (16).png>)
 
-   term（任期）以选举（election）开始，然后就是一段或长或短的稳定工作期（normal Operation）。从上图可以看到，任期是递增的，这就充当了逻辑时钟的作用；另外，term 3展示了一种情况，就是说没有选举出leader就结束了，然后会发起新的选举，后面会解释这种_split vote_的情况。
+   term（任期）以选举（election）开始，然后就是一段或长或短的稳定工作期（normal Operation）。从上图可以看到，任期是递增的，这就充当了逻辑时钟的作用；另外，term 3展示了一种情况，就是说没有选举出leader就结束了，然后会发起新的选举，后面会解释这&#x79CD;_&#x73;plit vot&#x65;_&#x7684;情况。
 
 ### 选举过程详解 <a href="#xuan-ju-guo-cheng-xiang-jie" id="xuan-ju-guo-cheng-xiang-jie"></a>
 
-   上面已经说过，如果follower在_election timeout_内没有收到来自leader的心跳，（也许此时还没有选出leader，大家都在等；也许leader挂了；也许只是leader与该follower之间网络故障），则会主动发起选举。步骤如下：
+   上面已经说过，如果follower&#x5728;_&#x65;lection timeou&#x74;_&#x5185;没有收到来自leader的心跳，（也许此时还没有选出leader，大家都在等；也许leader挂了；也许只是leader与该follower之间网络故障），则会主动发起选举。步骤如下：
 
 * 增加节点本地的 _current term_ ，切换到candidate状态
 * 投自己一票
@@ -79,7 +79,7 @@
    第二种情况，比如有三个节点A B C。A B同时发起选举，而A的选举消息先到达C，C给A投了一票，当B的消息到达C时，已经不能满足上面提到的第一个约束，即C不会给B投票，而A和B显然都不会给对方投票。A胜出之后，会给B,C发心跳消息，节点B发现节点A的term不低于自己的term，知道有已经有Leader了，于是转换成follower。
 
    第三种情况，没有任何节点获得majority投票，比如下图这种情况：\
-![](<../../.gitbook/assets/image (108).png>)
+![](<../../.gitbook/assets/image (60).png>)
 
    总共有四个节点，Node C、Node D同时成为了candidate，进入了term 4，但Node A投了NodeD一票，NodeB投了Node C一票，这就出现了平票 split vote的情况。这个时候大家都在等啊等，直到超时后重新发起选举。如果出现平票的情况，那么就延长了系统不可用的时间（没有leader是不能处理客户端写请求的），因此raft引入了randomized election timeouts来尽量避免平票情况。同时，leader-based 共识算法中，节点的数目都是奇数个，尽量保证majority的出现。
 
@@ -117,7 +117,7 @@
   下图形象展示了这种log-based replicated state machine\
 
 
-![](<../../.gitbook/assets/image (101) (1).png>)
+![](<../../.gitbook/assets/image (84).png>)
 
 ### 请求完整流程 <a href="#qing-qiu-wan-zheng-liu-cheng" id="qing-qiu-wan-zheng-liu-cheng"></a>
 
@@ -135,7 +135,7 @@
   那么日志在每个节点上是什么样子的呢\
 
 
-![](<../../.gitbook/assets/image (101).png>)
+![](<../../.gitbook/assets/image (46).png>)
 
   不难看到，logs由顺序编号的log entry组成 ，每个log entry除了包含command，还包含产生该log entry时的leader term。从上图可以看到，五个节点的日志并不完全一致，raft算法为了保证高可用，并不是强一致性，而是最终一致性，leader会不断尝试给follower发log entries，直到所有节点的log entries都相同。
 
@@ -155,13 +155,13 @@
 
 当 Leader 要发送某个日志条目，落后太多的 Follower 的日志条目会被丢弃，Leader 会将快照发给 Follower。或者新上线一台机器时，也会发送快照给它。
 
-![](<../../.gitbook/assets/image (104).png>)
+![](<../../.gitbook/assets/image (52).png>)
 
 **生成快照的频率要适中**，频率过高会消耗大量 I/O 带宽；频率过低，一旦需要执行恢复操作，会丢失大量数据，影响可用性。推荐当日志达到某个固定的大小时生成快照。生成一次快照可能耗时过长，影响正常日志同步。可以通过使用 copy-on-write 技术避免快照过程影响正常日志同步。
 
 ## safety <a href="#safety" id="safety"></a>
 
-[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
+[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#_labelTop)
 
   在上面提到只要日志被复制到majority节点，就能保证不会被回滚，即使在各种异常情况下，这根leader election提到的选举约束有关。在这一部分，主要讨论raft协议在各种各样的异常情况下如何工作的。
 
@@ -175,7 +175,7 @@
   raft协议会保证以下属性\
 
 
-![](<../../.gitbook/assets/image (99).png>)
+![](<../../.gitbook/assets/image (80).png>)
 
 #### Election safety <a href="#election-safety" id="election-safety"></a>
 
@@ -198,7 +198,7 @@
   在没有异常的情况下，log matching是很容易满足的，但如果出现了node crash，情况就会变得负责。比如下图\
 
 
-![](<../../.gitbook/assets/image (97).png>)
+![](<../../.gitbook/assets/image (76).png>)
 
   **注意**：上图的a-f不是6个follower，而是某个follower可能存在的六个状态
 
@@ -237,7 +237,7 @@
 
 ## corner case <a href="#corner-case" id="corner-case"></a>
 
-[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
+[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#_labelTop)
 
 ### stale leader <a href="#stale-leader" id="stale-leader"></a>
 
@@ -265,7 +265,7 @@
   如果节点将某一位置的log entry应用到了状态机，那么其他节点在同一位置不能应用不同的日志。简单点来说，所有节点在同一位置（index in log entries）应该应用同样的日志。但是似乎有某些情况会违背这个原则：\
 
 
-![](<../../.gitbook/assets/image (109).png>)
+![](<../../.gitbook/assets/image (78).png>)
 
   上图是一个较为复杂的情况。在时刻(a), s1是leader，在term2提交的日志只赋值到了s1 s2两个节点就crash了。在时刻（b), s5成为了term 3的leader，日志只赋值到了s5，然后crash。然后在(c)时刻，s1又成为了term 4的leader，开始赋值日志，于是把term2的日志复制到了s3，此刻，可以看出term2对应的日志已经被复制到了majority，因此是committed，可以被状态机应用。不幸的是，接下来（d）时刻，s1又crash了，s5重新当选，然后将term3的日志复制到所有节点，这就出现了一种奇怪的现象：被复制到大多数节点（或者说可能已经应用）的日志被回滚。
 
@@ -288,11 +288,11 @@
 \
   我们可以分析leader在任意时刻crash的情况，有助于理解raft算法的容错性。
 
-![](<../../.gitbook/assets/image (98).png>)
+![](<../../.gitbook/assets/image (70).png>)
 
 ## 总结 <a href="#zong-jie" id="zong-jie"></a>
 
-[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
+[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#_labelTop)
 
   raft将共识问题分解成两个相对独立的问题，leader election，log replication。流程是先选举出leader，然后leader负责复制、提交log（log中包含command）
 
@@ -320,9 +320,9 @@ log replication约束：
 
 [深入剖析共识性算法 Raft](https://segmentfault.com/a/1190000039847941)
 
-[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#\_labelTop)
+[回到顶部](https://www.cnblogs.com/xybaby/p/10124083.html#_labelTop)
 
-[https://web.stanford.edu/\~ouster/cgi-bin/papers/raft-atc14](https://web.stanford.edu/\~ouster/cgi-bin/papers/raft-atc14)\
+[https://web.stanford.edu/\~ouster/cgi-bin/papers/raft-atc14](https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14)\
 [https://raft.github.io/](https://raft.github.io/)\
 [http://thesecretlivesofdata.com/raft/](http://thesecretlivesofdata.com/raft/)
 

@@ -14,7 +14,7 @@ github地址： [https://github.com/kubernetes/client-go](https://github.com/kub
 
 ## 2. Client-go 结构
 
-![](<../.gitbook/assets/image (20).png>)
+![](<../.gitbook/assets/image (18).png>)
 
 ### RESTClient
 
@@ -113,7 +113,7 @@ for _, list := range APIResourceList {
 
 本地缓存路径：
 
-![](<../.gitbook/assets/image (12) (1).png>)
+![](<../.gitbook/assets/image (12).png>)
 
 本地存储了 `serverresources.json` 文件，感兴趣的可以打开看下，是json格式化后的资源信息。
 
@@ -154,7 +154,7 @@ func (o *APIResourceOptions) RunAPIResources(cmd *cobra.Command, f cmdutil.Facto
 
 官方的client-go架构图如下，可以看到 `Informer` 机制是里面的核心模块。`Informer` 顾名思义就是消息通知器。是连接本地客户端与API Server的关键。
 
-![](<../.gitbook/assets/image (15).png>)
+![](<../.gitbook/assets/image (122).png>)
 
 针对 `Informer` 中的组件，我们自下而上的分析。
 
@@ -219,9 +219,9 @@ type Index map[string]sets.String
 
 只看说明有一些绕(中文里索引一词，一会儿是动词，一会儿是名词)，这里我画了两个图解释一下：
 
-![](<../.gitbook/assets/image (11).png>)
+![](<../.gitbook/assets/image (114).png>)
 
-![](<../.gitbook/assets/image (7).png>)
+![](<../.gitbook/assets/image (110).png>)
 
 不难发现，其实可以类比MySql里面索引的实现， `Items` 里面存储的是聚簇索引， `Index` 里面存储的是没有数据信息的二级索引，即使在二级索引里找到了对象键，要想找到原始的 `object`，还需要回 `Items` 里面查找。
 
@@ -332,7 +332,7 @@ func indexByPodNodeName(obj interface{}) ([]string, error) {
 
 `DeltaFIFO` 其实是两个词：`Delta + FIFO`，`Delta` 代表变化，`FIFO` 则是先入先出的队列。
 
-![](<../.gitbook/assets/image (19).png>)
+![](<../.gitbook/assets/image (85).png>)
 
 `DeltaFIFO` 将接受来的资源 `event`,转化为特定的变化类型，存储在队列中，周期性的 `POP` 出去，分发到事件处理器，并更新 `Indexer` 中的本地缓存。
 
@@ -396,7 +396,7 @@ type DeltaFIFO struct {
 
 可以用一张图简单描述下 `Delta_FIFO` 里面 `items` 和 `queue` 的关系：
 
-![](<../.gitbook/assets/image (9) (1).png>)
+![](<../.gitbook/assets/image (8).png>)
 
 采用这样的结构把对象与事件的存储分离，好处就是不会因为某个对象的事件太多，而导致其他对象的事件一直得不到消费。
 
@@ -481,7 +481,7 @@ K8s的设计是事件驱动的、充分微服务化的，我们可以从事件�
 
 组件之间互相看作是事件的生产者、消费者，API Server看作是一个只用内存存储事件的 `Broker` ,我们可以从消息队列的角度取理解一下，如下图展示的：
 
-![](<../.gitbook/assets/image (23).png>)
+![](<../.gitbook/assets/image (24).png>)
 
 k8s服务端通过读取 `etcd` 的资源变更信息，向所有客户端发布资源变更事件。k8s中，组件之间通过HTTP协议进行通信，在不额外引入其他中间件的情况下，保证消息传递的实时性、可靠性、顺序性不是一个容易的事情。K8s内部所有的组件都是通过 `Informer` 机制实现与API Server的通信的。`Informer` 直译就是消息通知者的意思。
 
@@ -1230,11 +1230,11 @@ func (q *delayingType) waitingLoop() {
 
 延迟队列的添加过程如下所示，通过`AddAfter`方法，将对象数据与期望添加的时间包装成`WaitFor`对象传递到`waitingForAddCh`这个`channel`中，然后另一个协程中运行的`waitingLoop`中会捕获该数据，放入优先队列：
 
-![](<../.gitbook/assets/image (16).png>)
+![](<../.gitbook/assets/image (27).png>)
 
 然后同样在`waitingLoop`中，会轮询的检测优先队列的`top`元素是否到达既定的时间，如果到了，则`pop`元素并添加到`FIFO`中：
 
-![](<../.gitbook/assets/image (10).png>)
+![](<../.gitbook/assets/image (111).png>)
 
 所以可以看出来延迟队列的关键在于：
 
@@ -1327,7 +1327,7 @@ type RateLimiter interface {
 
 网上找了一个令牌桶算法的原理图
 
-![](<../.gitbook/assets/image (13).png>)
+![](<../.gitbook/assets/image (97).png>)
 
 **2、排队指数算法 ItemExponentialFailureRateLimiter**
 
@@ -1525,7 +1525,7 @@ func main() {
 
 `go run main.go`，提取的Event信息：
 
-![](<../.gitbook/assets/image (8).png>)
+![](<../.gitbook/assets/image (28).png>)
 
 ### 4.2 解决第二个小问题 指定node上的pod数监控&#x20;
 
@@ -1574,11 +1574,11 @@ func main() {
 
 运行效果：每隔一秒会周期性的打印出目前10.157.6.25上面的pod数量
 
-![](<../.gitbook/assets/image (17).png>)
+![](<../.gitbook/assets/image (55).png>)
 
 综上所述，就是client-go中大部分组件的分析；以及二次开发的demo。
 
 ## References
 
-* [Programing In K8s 1：Client-go 实现分析与二次开发](https://blog.csdn.net/King\_DJF/article/details/108307735)
+* [Programing In K8s 1：Client-go 实现分析与二次开发](https://blog.csdn.net/King_DJF/article/details/108307735)
 * [英文 Programing In K8s 1: Client-go implementation analysis and secondary development](https://www.programmersought.com/article/48907085150/)&#x20;

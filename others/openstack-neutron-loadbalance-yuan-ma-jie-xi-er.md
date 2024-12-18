@@ -187,7 +187,7 @@ Neutron又实现了一层叫做“服务”的插件结构，即现在有两层�
 
 所以LBaaS服务不需要运行在网络节点上，但网络节点上专门为它准备的port和实际运行haproxy的节点应该通，这个port和网关也应该通，即所谓的Floating/In-Path模式。所以才有了以上的操作与配置。
 
-![](../.gitbook/assets/image%20%2845%29.png)
+![](<../.gitbook/assets/image (82).png>)
 
 到这里\_plug操作已经完成了，然后还有一个坑没填，就是\_spawn方法中执行了哪些操作呢？
 
@@ -222,4 +222,3 @@ def _spawn(self, logical_config, extra_cmd_args=()):
 ## References
 
 * 原文 [OpenStack Neutron LoadBalance源码解析（二）](https://www.biecuoliao.com/pa/0e99Eg0.html)
-

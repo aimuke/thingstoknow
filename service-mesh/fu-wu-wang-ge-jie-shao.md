@@ -48,7 +48,7 @@ Service Mesh 定义 Service Mesh 一词最早由开发 Linkerd 的 Buoyant 公�
 
 控制平面和数据平面的结合提供了两方面的优势，即策略可以集中定义和管理，同时，同样的政策可以以分散的方式，在 Kubernetes 集群的每个 pod 中本地执行。这些策略可以与安全、路由、断路器或监控有关。
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (40).png" alt=""><figcaption></figcaption></figure>
 
 * **Pilot**：负责 Istio 数据平面的 xDS 配置管理，具体包括服务发现、配置规则发现、xDS 配置下发。
 * **Citadel**：负责安全证书的管理和发放，实现授权和认证等操作。
@@ -59,7 +59,7 @@ Service Mesh 定义 Service Mesh 一词最早由开发 Linkerd 的 Buoyant 公�
 \
 
 
-<figure><img src="../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (69).png" alt=""><figcaption></figcaption></figure>
 
 * **抽象模型（Abstract model）**：为了实现对不同服务注册中心 （如，Kubernetes、Consul） 的支持，完成对不同输入来源数据的抽象，形成统一的存储格式。
 * **平台适配器 （Platform adapters）**：借助平台适配器 Pilot 实现服务注册中心数据到抽象模型之间的数据转换。
@@ -72,7 +72,7 @@ Service Mesh 定义 Service Mesh 一词最早由开发 Linkerd 的 Buoyant 公�
 \
 
 
-<figure><img src="../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
 
 ## 提供的功能
 
@@ -148,5 +148,5 @@ Istio 下发 xDS 使用的是全量下发策略，也就是网格里的所有 si
 
 [全方位解读服务网格（Service Mesh）的背景和概念](https://developer.aliyun.com/article/867274)
 
-[行至2022，我们该如何看待服务网格？ ](https://www.sohu.com/a/516755841\_355140)
+[行至2022，我们该如何看待服务网格？ ](https://www.sohu.com/a/516755841_355140)
 

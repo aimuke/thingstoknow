@@ -41,13 +41,13 @@ ENTRYPOINT ["/pause"]
 
 在运行的Kubernetes node上运行`docker ps`，能发现这些`pause container`：
 
-![](../.gitbook/assets/image%20%2821%29.png)
+![](<../.gitbook/assets/image (116).png>)
 
 ## 功能
 
 `pause container`作为`pod`里其他所有`container`的`parent container`，主要有两个职责：
 
-* 是`pod`里其他容器共享`Linux namespace`的基础 
+* 是`pod`里其他容器共享`Linux namespace`的基础&#x20;
 * 扮演`PID 1`的角色，负责处理僵尸进程
 
 这两点我会逐一细说。
@@ -58,7 +58,7 @@ ENTRYPOINT ["/pause"]
 
 在Linux里，父进程`fork`的子进程会继承父进程的命名空间。与这种行为相反的一个系统命令就是`unshare`：
 
-![](../.gitbook/assets/image%20%2826%29.png)
+![](<../.gitbook/assets/image (31).png>)
 
 ### 处理僵尸进程
 
@@ -133,21 +133,20 @@ COLOPHON         top
 
 一旦收到`SIGCHLD`信号，`pause`进程就执行注册的`sigreap`函数。
 
-![](../.gitbook/assets/image%20%2825%29.png)
+![](<../.gitbook/assets/image (105).png>)
 
 看下`SIGCHLD`信号的帮助：
 
-![](../.gitbook/assets/image%20%2824%29.png)
+![](<../.gitbook/assets/image (62).png>)
 
 `SIGCHLD`，在一个进程正常终止或者停止时，将`SIGCHLD`信号发送给其父进程，按系统默认将忽略此信号，如果父进程希望被告知其子系统的这种状态，则应捕捉此信号。
 
 pause进程注册的信号处理函数`sigreap`里，调用另一个系统调用`waitpid`来获得子进程终止的原因。
 
-![](../.gitbook/assets/image%20%2822%29.png)
+![](<../.gitbook/assets/image (2).png>)
 
 希望这篇文章对大家理解Kubernetes里的pause容器有所帮助。感谢阅读。
 
 ## References
 
 * [原文 Kubernetes pod里一个特殊的容器：pause-amd64](https://blog.csdn.net/i042416/article/details/85160895) ,  [汪子熙](https://jerry.blog.csdn.net/)
-

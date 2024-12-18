@@ -8,17 +8,17 @@
 
 程序刚刚启动的时候，`0` 是标准输入，`1` 是标准输出，`2` 是标准错误。如果此时去打开一个新的文件，它的文件描述符会是 `3` 。
 
-**POSIX标准要求每次打开文件时（含socket）必须使用当前进程中最小可用的文件描述符号码 。**因此，在网络通信过程中稍不注意就有可能造成串话。标准文件描述符图如下：
+**POSIX标准要求每次打开文件时（含socket）必须使用当前进程中最小可用的文件描述符号码 。**&#x56E0;此，在网络通信过程中稍不注意就有可能造成串话。标准文件描述符图如下：
 
-![](<../.gitbook/assets/image (1) (1).png>)
+![](<../.gitbook/assets/image (5).png>)
 
 文件描述与打开的文件对应模型如下图：
 
-![](<../.gitbook/assets/image (2).png>)
+![](<../.gitbook/assets/image (11).png>)
 
 ## 文件描述限制
 
-在编写文件操作的或者网络通信的软件时，初学者一般可能会遇到 “**Too many open files**” 的问题。这主要是因为文件描述符是系统的一个重要资源。虽然说系统内存有多少就可以打开多少的文件描述符，但是在实际实现过程中内核是会做相应的处理的，一般最大打开文件数会是系统内存的10%（以KB来计算）（称之为**系统级限制**），查看系统级别的最大打开文件数可以使用 `sysctl -a | grep fs.file-max` 命令查看。与此同时，内核为了不让某一个进程消耗掉所有的文件资源，其也会对单个进程最大打开文件数做默认值处理（称之为 **用户级限制**），默认值一般是`1024`，使用 `ulimit -n` 命令可以查看。在Web服务器中，通过更改系统默认值文件描述符的最大值来优化服务器是最常见的方式之一，具体优化方式请查看[http://blog.csdn.net/kumu\_linux/article/details/7877770。](http://blog.csdn.net/kumu\_linux/article/details/7877770%E3%80%82)
+在编写文件操作的或者网络通信的软件时，初学者一般可能会遇到 “**Too many open files**” 的问题。这主要是因为文件描述符是系统的一个重要资源。虽然说系统内存有多少就可以打开多少的文件描述符，但是在实际实现过程中内核是会做相应的处理的，一般最大打开文件数会是系统内存的10%（以KB来计算）（称之为**系统级限制**），查看系统级别的最大打开文件数可以使用 `sysctl -a | grep fs.file-max` 命令查看。与此同时，内核为了不让某一个进程消耗掉所有的文件资源，其也会对单个进程最大打开文件数做默认值处理（称之为 **用户级限制**），默认值一般是`1024`，使用 `ulimit -n` 命令可以查看。在Web服务器中，通过更改系统默认值文件描述符的最大值来优化服务器是最常见的方式之一，具体优化方式请查看[http://blog.csdn.net/kumu\_linux/article/details/7877770。](http://blog.csdn.net/kumu_linux/article/details/7877770%E3%80%82)
 
 ## 文件描述符合打开文件之间的关系
 
@@ -46,7 +46,7 @@
 
 下图展示了文件描述符、打开的文件句柄以及i-node之间的关系，图中，两个进程拥有诸多打开的文件描述符。
 
-![](<../.gitbook/assets/image (4) (1).png>)
+![](<../.gitbook/assets/image (107).png>)
 
 ### 文件描述符复制
 
@@ -84,9 +84,9 @@
 
 ## References
 
-* [文件描述符](https://linux.fasionchan.com/zh\_CN/latest/system-programming/file-io/file-descriptor.html)
+* [文件描述符](https://linux.fasionchan.com/zh_CN/latest/system-programming/file-io/file-descriptor.html)
 * [每天进步一点点——Linux中的文件描述符与打开文件之间的关系](https://blog.csdn.net/cywosp/article/details/38965239) ,  [cywosp](https://blog.csdn.net/cywosp)
 * [http://blog.chinaunix.net/uid-20633888-id-2747146.html](http://blog.chinaunix.net/uid-20633888-id-2747146.html)&#x20;
 * [http://www.cppblog.com/guojingjia2006/archive/2012/11/21/195450.html](http://www.cppblog.com/guojingjia2006/archive/2012/11/21/195450.html)&#x20;
-* [http://blog.csdn.net/kumu\_linux/article/details/7877770](http://blog.csdn.net/kumu\_linux/article/details/7877770)
+* [http://blog.csdn.net/kumu\_linux/article/details/7877770](http://blog.csdn.net/kumu_linux/article/details/7877770)
 * 《Linux/UNIX系统编程手册》

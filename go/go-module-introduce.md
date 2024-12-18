@@ -100,7 +100,7 @@ Use "go help mod <command>" for more information about a command.
 * **-mod=vendor** 模式下。 将使用工程的 vendor 目录下的 package 而不是 mod cache( GOPATH/pkg/mod) 目录。该模式下编译，将不会检查 go.mod 文件下的包版本。但是会检查 vendor 目录下的 modules.txt(由 go mod vendor 生成)。在 go.1.14 及更高版本，若存在 vendor 目录，将优先使用 vendor 模式。
 * **-mod=mod** 模式下，将使用 module cache，即使存在 vendor 目录，也会使用 GOPATH/pkg/mod 下的package，若 package 不存在，将自动下载指定版本的 package。
 
-![](../.gitbook/assets/image.png)
+![](<../.gitbook/assets/image (71).png>)
 
 ### 新项目
 
