@@ -21,6 +21,7 @@
   * [使用 Go 语言实现优雅的服务器重启](go/shi-yong-go-yu-yan-shi-xian-you-ya-de-fu-wu-qi-zhong-qi.md)
   * [Golang 启动引导](go/golang-qi-dong-yin-dao.md)
 * [k8s](k8s/README.md)
+  * [K8S中为什么需要Unstructured对象](k8s/k8s-zhong-wei-shen-me-xu-yao-unstructured-dui-xiang.md)
   * [Deployment的使用](k8s/deployment-de-shi-yong.md)
   * [使用Replication Controller、Replica Set 管理Pod](k8s/shi-yong-replication-controllerreplica-set-guan-li-pod.md)
   * [【k8s】leaderelection选举策略实现组件高可用](k8s/k8sleaderelection-xuan-ju-ce-lve-shi-xian-zu-jian-gao-ke-yong.md)
