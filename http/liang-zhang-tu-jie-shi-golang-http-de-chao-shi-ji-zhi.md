@@ -69,7 +69,7 @@ c := &http.Client{
 
 这些Timeout各自的作用时间见：
 
-[![Client timeout](https://www.ichenfu.com/images/go_http_timeout_client.png)](https://www.ichenfu.com/images/go_http_timeout_client.png)
+<figure><img src="https://www.ichenfu.com/images/go_http_timeout_client.png" alt=""><figcaption></figcaption></figure>
 
 ## 问题定位 <a href="#wen-ti-ding-wei" id="wen-ti-ding-wei"></a>
 
