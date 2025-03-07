@@ -298,7 +298,7 @@ echo $time"\tmemory(Byte)\t"$prog_mem >>~/record/prog_mem.log
 
 脚本输出的内容保存在`prog_mem.log`，只要大体浏览一下就可以发现内存的增长情况，判断是否存在内存泄露。如果需要可视化，可以直接黏贴`prog_mem.log`内容到Excel等表格工具，绘制内存占用图。
 
-![](../.gitbook/assets/image.png)
+![](<../.gitbook/assets/image (17).png>)
 
 ### go pprof发现存在内存问题 <a href="#gopprof-fa-xian-cun-zai-nei-cun-wen-ti" id="gopprof-fa-xian-cun-zai-nei-cun-wen-ti"></a>
 
@@ -308,7 +308,7 @@ echo $time"\tmemory(Byte)\t"$prog_mem >>~/record/prog_mem.log
 
 后来读了Dave的[《High Performance Go Workshop》](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#using_more_than_one_cpu)，刷新了对heap的认识，内存pprof的简要内容如下：
 
-![](<../.gitbook/assets/image (17).png>)
+![](<../.gitbook/assets/image (17) (1).png>)
 
 Dave讲了以下几点：
 
@@ -434,7 +434,7 @@ heap能显示内存的分配情况，以及哪行代码占用了多少内存，�
 
 **第2种情况，就是goroutine泄露，这是通过heap无法发现的，所以heap在定位内存泄露这件事上，发挥的作用不大**。
 
-![](<../.gitbook/assets/image (14).png>)
+![](<../.gitbook/assets/image (14) (1).png>)
 
 ## goroutine泄露怎么导致内存泄露 <a href="#goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou" id="goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou"></a>
 

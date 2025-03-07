@@ -42,7 +42,7 @@ Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架�
 
 ### 数据更新
 
-![](<../.gitbook/assets/image (15).png>)
+![](<../.gitbook/assets/image (15) (1).png>)
 
 在MCP协议中，定义了两个身份：Sink和Source。Sink指代的是数据的接收端，Source指代的是数据的发送端即数据源。MCP协议基于gRPC双向流协议进行定义，Sink端和Source端都可以随时往对端发送数据，相互不会阻塞。从上图的协议交互也可以看出，Sink端可以主动发送RequestResources请求来向Source端要求数据，同时Source端也可以主动将Resources数据发送给Sink端。Sink端在收到数据后会返回一个ACK确认。在RequestResources请求和ACK响应中，主要有两个字段：
 
@@ -57,7 +57,7 @@ Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架�
 
 ### 数据更新错误流程
 
-![](<../.gitbook/assets/image (6).png>)
+![](<../.gitbook/assets/image (6) (1).png>)
 
 &#x20;The sink should only NACK in _exceptional_ cases. For example, if a set of resources was invalid, malformed, or could not be decoded. NACK'd updates should raise an alarm for subsequent investigation by a human. The source should not resend the same set of resources that were previously NACK'd. Canary pushes to dedicated sinks may also be used to verify correctness (non-NACK) before pushing to a larger fleet of resource sinks
 

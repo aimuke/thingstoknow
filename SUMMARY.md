@@ -50,6 +50,7 @@
   * [Http 请求request分析](theory/http-qing-qiu-request-fen-xi.md)
   * [深入分析 CVE-2023-44487 HTTP/2 快速重置攻击对 Nginx 的影响](theory/shen-ru-fen-xi-cve202344487-http2-kuai-su-zhong-zhi-gong-ji-dui-nginx-de-ying-xiang.md)
   * [Connection refused 错误分析](theory/connection-refused-cuo-wu-fen-xi.md)
+  * [探索软件系统架构的4+1视图](theory/tan-suo-ruan-jian-xi-tong-jia-gou-de-4+1-shi-tu.md)
 * [service mesh](service-mesh/README.md)
   * [istio 中功能配置](service-mesh/istio-zhong-gong-neng-pei-zhi.md)
   * [服务网格介绍](service-mesh/fu-wu-wang-ge-jie-shao.md)
