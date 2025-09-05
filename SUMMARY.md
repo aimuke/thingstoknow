@@ -69,6 +69,7 @@
   * [两张图解释Golang http的超时机制](http/liang-zhang-tu-jie-shi-golang-http-de-chao-shi-ji-zhi.md)
   * [浅谈之-http的状态码以及使用场景](http/qian-tan-zhi-http-de-zhuang-tai-ma-yi-ji-shi-yong-chang-jing.md)
   * [cookie](http/cookie.md)
+* [HTTPS](https.md)
 * [AI](ai/README.md)
   * [术语](ai/shu-yu.md)
   * [APISIX 的 AI Gateway 功能一览：LLM 代理、Token 限流、安全防护](ai/apisix-de-ai-gateway-gong-neng-yi-lan-llm-dai-li-token-xian-liu-an-quan-fang-hu.md)
