@@ -1,0 +1,81 @@
+# What is a Digital Signature?
+
+***
+
+原文 [https://www.youdzone.com/signature.html](https://www.youdzone.com/signature.html)
+
+An introduction to Digital Signatures, by David Youd
+
+
+
+## Encrpty
+
+***
+
+| ![](https://www.youdzone.com/images/sig/trans_half_inch.gif) | <p><img src="https://www.youdzone.com/images/sig/greenkey.GIF" alt=""><br>(Bob's public key)</p><p><img src="https://www.youdzone.com/images/sig/redkey.GIF" alt=""><br>(Bob's private key)</p> | <p><img src="https://www.youdzone.com/images/sig/face4.gif" alt=""><br>Bob</p> |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------: |
+
+Bob has been given two keys. One of Bob's keys is called a Public Key, the other is called a Private Key.
+
+| Bob's Co-workers:                                  |                                                    |                                                    |                                                              |                                                                                                                                                         |
+| -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![](https://www.youdzone.com/images/sig/face1.gif) | ![](https://www.youdzone.com/images/sig/face2.gif) | ![](https://www.youdzone.com/images/sig/face3.gif) | ![](https://www.youdzone.com/images/sig/trans_half_inch.gif) | <p><img src="https://www.youdzone.com/images/sig/greenkey.GIF" alt=""><br>Anyone can get Bob's Public Key, but Bob keeps his Private Key to himself</p> |
+| Pat                                                | Doug                                               | Susan                                              |                                                              |                                                                                                                                                         |
+
+Bob's Public key is available to anyone who needs it, but he keeps his Private Key to himself. Keys are used to encrypt information. Encrypting information means "scrambling it up", so that only a person with the appropriate key can make it readable again. Either one of Bob's two keys can encrypt data, and the other key can decrypt that data.
+
+Susan (shown below) can encrypt a message using Bob's Public Key. Bob uses his Private Key to decrypt the message. Any of Bob's coworkers might have access to the message Susan encrypted, but without Bob's Private Key, the data is worthless.
+
+| ![](https://www.youdzone.com/images/sig/face3.gif) | ![](https://www.youdzone.com/images/sig/trans_half_inch.gif) | "Hey Bob, how about lunch at Taco Bell. I hear they have free refills!"     | ![](https://www.youdzone.com/images/sig/Encrypt_with_pub.gif) | HNFmsEm6Un BejhhyCGKOK JUxhiygSBCEiC 0QYIh/Hn3xgiK BcyLK1UcYiY lxx2lCFHDC/A |
+| -------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| ![](https://www.youdzone.com/images/sig/face4.gif) |                                                              | HNFmsEm6Un BejhhyCGKOK JUxhiygSBCEiC 0QYIh/Hn3xgiK BcyLK1UcYiY lxx2lCFHDC/A | ![](https://www.youdzone.com/images/sig/Decrypt_with_pri.gif) | "Hey Bob, how about lunch at Taco Bell. I hear they have free refills!"     |
+
+With his private key and the right software, Bob can put digital signatures on documents and other data. A digital signature is a "stamp" Bob places on the data which is unique to Bob, and is very difficult to forge. In addition, the signature assures that any changes made to the data that has been signed can not go undetected.
+
+
+
+## Signature
+
+| ![](https://www.youdzone.com/images/sig/text.GIF) | ![](https://www.youdzone.com/images/sig/hash.gif) | ![](https://www.youdzone.com/images/sig/Message_digest.gif) |
+| ------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------- |
+
+To sign a document, Bob's software will crunch down the data into just a few lines by a process called "hashing". These few lines are called a message digest. (It is not possible to change a message digest back into the original data from which it was created.)
+
+| ![](https://www.youdzone.com/images/sig/Message_digest.gif) | ![](https://www.youdzone.com/images/sig/Encrypt_with_pri.gif) | ![](https://www.youdzone.com/images/sig/signature.gif) |
+| :---------------------------------------------------------: | :-----------------------------------------------------------: | :----------------------------------------------------: |
+
+Bob's software then encrypts the message digest with his private key. The result is the digital signature.
+
+| ![](https://www.youdzone.com/images/sig/signature.gif) | ![](https://www.youdzone.com/images/sig/Append.gif) | ![](https://www.youdzone.com/images/sig/signed_text.GIF) |
+| :----------------------------------------------------: | :-------------------------------------------------: | :------------------------------------------------------: |
+
+Finally, Bob's software appends the digital signature to document. All of the data that was hashed has been signed.
+
+| ![](https://www.youdzone.com/images/sig/signed_text.GIF) |                           ![](https://www.youdzone.com/images/sig/hash.gif)                          | ![](https://www.youdzone.com/images/sig/Message_digest.gif) |
+| :------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :---------------------------------------------------------: |
+|                                                          | <div><figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure></div> | ![](https://www.youdzone.com/images/sig/Message_digest.gif) |
+
+Bob now passes the document on to Pat.
+
+
+
+First, Pat's software decrypts the signature (using Bob's public key) changing it back into a message digest. If this worked, then it proves that Bob signed the document, because only Bob has his private key. Pat's software then hashes the document data into a message digest. If the message digest is the same as the message digest created when the signature was decrypted, then Pat knows that the signed data has not been changed.
+
+
+
+## Plot complication
+
+Doug (our disgruntled employee) wishes to deceive Pat. Doug makes sure that Pat receives a signed message and a public key that appears to belong to Bob. Unbeknownst to Pat, Doug deceitfully sent a key pair he created using Bob's name. Short of receiving Bob's public key from him in person, how can Pat be sure that Bob's public key is authentic?
+
+It just so happens that Susan works at the company's certificate authority center. Susan can create a digital certificate for Bob simply by signing Bob's public key as well as some information about Bob.
+
+<table data-header-hidden><thead><tr><th width="283"></th><th></th><th></th><th></th><th></th></tr></thead><tbody><tr><td><table data-header-hidden><thead><tr><th></th></tr></thead><tbody><tr><td><p>Bob Info:<br>    Name<br>    Department<br>    Cubical Number</p><p>Certificate Info:<br>    Expiration Date<br>    Serial Number</p><p>Bob's Public Key:<br>    <img src="https://www.youdzone.com/images/sig/greenkey.GIF" alt=""></p></td></tr></tbody></table></td><td><img src="https://www.youdzone.com/images/sig/trans_half_inch.gif" alt=""></td><td><img src="https://www.youdzone.com/images/sig/sign_data.gif" alt=""><br><img src="https://www.youdzone.com/images/sig/face3.gif" alt=""></td><td><img src="https://www.youdzone.com/images/sig/trans_half_inch.gif" alt=""></td><td><img src="https://www.youdzone.com/images/sig/certificate.gif" alt=""></td></tr></tbody></table>
+
+Now Bob's co-workers can check Bob's trusted certificate to make sure that his public key truly belongs to him. In fact, no one at Bob's company accepts a signature for which there does not exist a certificate generated by Susan. This gives Susan the power to revoke signatures if private keys are compromised, or no longer needed. There are even more widely accepted certificate authorities that certify Susan.
+
+Let's say that Bob sends a signed document to Pat. To verify the signature on the document, Pat's software first uses Susan's (the certificate authority's) public key to check the signature on Bob's certificate. Successful de-encryption of the certificate proves that Susan created it. After the certificate is de-encrypted, Pat's software can check if Bob is in good standing with the certificate authority and that all of the certificate information concerning Bob's identity has not been altered.
+
+Pat's software then takes Bob's public key from the certificate and uses it to check Bob's signature. If Bob's public key de-encrypts the signature successfully, then Pat is assured that the signature was created using Bob's private key, for Susan has certified the matching public key. And of course, if the signature is valid, then we know that Doug didn't try to change the signed content.
+
+Although these steps may sound complicated, they are all handled behind the scenes by Pat's user-friendly software. To verify a signature, Pat need only click on it.
+

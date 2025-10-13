@@ -1,4 +1,4 @@
-# 深入浅出HTTPS工作原理(转)
+# 深入浅出HTTPS工作原理
 
 原文 [https://ivanzz1001.github.io/records/post/http/2018/04/03/https-protocol](https://ivanzz1001.github.io/records/post/http/2018/04/03/https-protocol)
 
@@ -120,7 +120,7 @@ HTTP因为存在以上三大安全风险，所以才有了HTTPS的出现。HTTPS
 \
 
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### 3.1 客户端发送 ClientHello <a href="#id-31-ke-hu-duan-fa-song-clienthello" id="id-31-ke-hu-duan-fa-song-clienthello"></a>
 
@@ -158,7 +158,7 @@ _延伸阅读_
 
 客户端收到ServerHello后，会对收到的证书进行验证。下面我们来看一下数字证书的生成及校验：
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 1） CA签发证书的过程
 
@@ -233,5 +233,8 @@ _延伸阅读_
 1. [深入浅出HTTPS工作原理](https://blog.csdn.net/wangtaomtk/article/details/80917081)
 2. [HTTPS 的工作原理](https://blog.csdn.net/kevinxxw/article/details/105931263)
 3. [客户端证书、证书链验证](https://www.jianshu.com/p/2227ed9c4afa)
+4. [https://www.cnblogs.com/xishuai/p/https-ca.html](https://www.cnblogs.com/xishuai/p/https-ca.html)
+5. [https://www.youdzone.com/signature.html](https://www.youdzone.com/signature.html)
+6. [数字签名是什么？](https://www.ruanyifeng.com/blog/2011/08/what_is_a_digital_signature.html)
 
 \
