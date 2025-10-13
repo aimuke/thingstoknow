@@ -12,19 +12,17 @@ An introduction to Digital Signatures, by David Youd
 
 ***
 
-| ![](https://www.youdzone.com/images/sig/trans_half_inch.gif) | <p><img src="https://www.youdzone.com/images/sig/greenkey.GIF" alt=""><br>(Bob's public key)</p><p><img src="https://www.youdzone.com/images/sig/redkey.GIF" alt=""><br>(Bob's private key)</p> | <p><img src="https://www.youdzone.com/images/sig/face4.gif" alt=""><br>Bob</p> |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------: |
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 Bob has been given two keys. One of Bob's keys is called a Public Key, the other is called a Private Key.
 
-| Bob's Co-workers:                                  |                                                    |                                                    |                                                              |                                                                                                                                                         |
-| -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![](https://www.youdzone.com/images/sig/face1.gif) | ![](https://www.youdzone.com/images/sig/face2.gif) | ![](https://www.youdzone.com/images/sig/face3.gif) | ![](https://www.youdzone.com/images/sig/trans_half_inch.gif) | <p><img src="https://www.youdzone.com/images/sig/greenkey.GIF" alt=""><br>Anyone can get Bob's Public Key, but Bob keeps his Private Key to himself</p> |
-| Pat                                                | Doug                                               | Susan                                              |                                                              |                                                                                                                                                         |
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 Bob's Public key is available to anyone who needs it, but he keeps his Private Key to himself. Keys are used to encrypt information. Encrypting information means "scrambling it up", so that only a person with the appropriate key can make it readable again. Either one of Bob's two keys can encrypt data, and the other key can decrypt that data.
 
 Susan (shown below) can encrypt a message using Bob's Public Key. Bob uses his Private Key to decrypt the message. Any of Bob's coworkers might have access to the message Susan encrypted, but without Bob's Private Key, the data is worthless.
+
+<figure><img src="../.gitbook/assets/image (130).png" alt=""><figcaption></figcaption></figure>
 
 | ![](https://www.youdzone.com/images/sig/face3.gif) | ![](https://www.youdzone.com/images/sig/trans_half_inch.gif) | "Hey Bob, how about lunch at Taco Bell. I hear they have free refills!"     | ![](https://www.youdzone.com/images/sig/Encrypt_with_pub.gif) | HNFmsEm6Un BejhhyCGKOK JUxhiygSBCEiC 0QYIh/Hn3xgiK BcyLK1UcYiY lxx2lCFHDC/A |
 | -------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -51,9 +49,9 @@ Bob's software then encrypts the message digest with his private key. The result
 
 Finally, Bob's software appends the digital signature to document. All of the data that was hashed has been signed.
 
-| ![](https://www.youdzone.com/images/sig/signed_text.GIF) |                           ![](https://www.youdzone.com/images/sig/hash.gif)                          | ![](https://www.youdzone.com/images/sig/Message_digest.gif) |
-| :------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :---------------------------------------------------------: |
-|                                                          | <div><figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure></div> | ![](https://www.youdzone.com/images/sig/Message_digest.gif) |
+| ![](https://www.youdzone.com/images/sig/signed_text.GIF) |                             ![](https://www.youdzone.com/images/sig/hash.gif)                            | ![](https://www.youdzone.com/images/sig/Message_digest.gif) |
+| :------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------: |
+|                                                          | <div><figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure></div> | ![](https://www.youdzone.com/images/sig/Message_digest.gif) |
 
 Bob now passes the document on to Pat.
 
