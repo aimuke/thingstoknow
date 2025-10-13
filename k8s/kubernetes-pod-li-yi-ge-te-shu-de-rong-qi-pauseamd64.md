@@ -143,7 +143,7 @@ COLOPHON         top
 
 pause进程注册的信号处理函数`sigreap`里，调用另一个系统调用`waitpid`来获得子进程终止的原因。
 
-![](<../.gitbook/assets/image (2) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1).png>)
 
 希望这篇文章对大家理解Kubernetes里的pause容器有所帮助。感谢阅读。
 
