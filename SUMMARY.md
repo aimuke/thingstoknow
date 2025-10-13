@@ -74,6 +74,7 @@
   * [tls 握手过程中的一些概念](https/tls-wo-shou-guo-cheng-zhong-de-yi-xie-gai-nian.md)
   * [深入浅出HTTPS工作原理](https/shen-ru-qian-chu-https-gong-zuo-yuan-li.md)
   * [What is a Digital Signature?](https/what-is-a-digital-signature.md)
+  * [数字签名是什么？](https/shu-zi-qian-ming-shi-shen-me.md)
 * [AI](ai/README.md)
   * [术语](ai/shu-yu.md)
   * [APISIX 的 AI Gateway 功能一览：LLM 代理、Token 限流、安全防护](ai/apisix-de-ai-gateway-gong-neng-yi-lan-llm-dai-li-token-xian-liu-an-quan-fang-hu.md)
