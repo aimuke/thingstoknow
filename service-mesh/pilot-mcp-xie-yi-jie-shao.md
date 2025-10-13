@@ -57,7 +57,7 @@ Istio在Pilot重构设计文档中，展示了基于MCP协议的内部组件架�
 
 ### 数据更新错误流程
 
-![](<../.gitbook/assets/image (6) (1).png>)
+![](<../.gitbook/assets/image (6) (1) (1).png>)
 
 &#x20;The sink should only NACK in _exceptional_ cases. For example, if a set of resources was invalid, malformed, or could not be decoded. NACK'd updates should raise an alarm for subsequent investigation by a human. The source should not resend the same set of resources that were previously NACK'd. Canary pushes to dedicated sinks may also be used to verify correctness (non-NACK) before pushing to a larger fleet of resource sinks
 

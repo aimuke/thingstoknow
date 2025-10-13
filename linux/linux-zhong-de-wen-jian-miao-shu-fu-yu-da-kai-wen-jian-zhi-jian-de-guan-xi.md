@@ -10,11 +10,11 @@
 
 **POSIX标准要求每次打开文件时（含socket）必须使用当前进程中最小可用的文件描述符号码 。**&#x56E0;此，在网络通信过程中稍不注意就有可能造成串话。标准文件描述符图如下：
 
-![](<../.gitbook/assets/image (5) (1).png>)
+![](<../.gitbook/assets/image (5) (1) (1).png>)
 
 文件描述与打开的文件对应模型如下图：
 
-![](<../.gitbook/assets/image (11) (1).png>)
+![](<../.gitbook/assets/image (11) (1) (1).png>)
 
 ## 文件描述限制
 

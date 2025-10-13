@@ -113,7 +113,7 @@ for _, list := range APIResourceList {
 
 本地缓存路径：
 
-![](<../.gitbook/assets/image (12) (1).png>)
+![](<../.gitbook/assets/image (12) (1) (1).png>)
 
 本地存储了 `serverresources.json` 文件，感兴趣的可以打开看下，是json格式化后的资源信息。
 
@@ -396,7 +396,7 @@ type DeltaFIFO struct {
 
 可以用一张图简单描述下 `Delta_FIFO` 里面 `items` 和 `queue` 的关系：
 
-![](<../.gitbook/assets/image (8) (1).png>)
+![](<../.gitbook/assets/image (8) (1) (1).png>)
 
 采用这样的结构把对象与事件的存储分离，好处就是不会因为某个对象的事件太多，而导致其他对象的事件一直得不到消费。
 

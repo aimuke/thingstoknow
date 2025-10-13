@@ -434,7 +434,7 @@ heap能显示内存的分配情况，以及哪行代码占用了多少内存，�
 
 **第2种情况，就是goroutine泄露，这是通过heap无法发现的，所以heap在定位内存泄露这件事上，发挥的作用不大**。
 
-![](<../.gitbook/assets/image (14) (1).png>)
+![](<../.gitbook/assets/image (14) (1) (1).png>)
 
 ## goroutine泄露怎么导致内存泄露 <a href="#goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou" id="goroutine-xie-lou-zen-mo-dao-zhi-nei-cun-xie-lou"></a>
 
