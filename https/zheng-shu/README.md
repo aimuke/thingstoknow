@@ -29,7 +29,7 @@ SSL证书保护远程连接的身份，确保在线交互是私密的，确保�
 
 证书的格式和验证方法普遍遵循[X.509](https://www.wikiwand.com/zh-hans/X.509) 国际标准。
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -93,7 +93,7 @@ SSL证书使用加密算法来混淆传输中的数据。这确保了浏览器�
 
 以下是整个流程：
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 1. 客户端得到服务端返回的证书，通过读取得到 **服务端证书的发布机构（Issuer）**
 2. 客户端去操作系统查找这个发布机构的的证书，如果是不是根证书就继续递归下去 **直到拿到根证书**。
