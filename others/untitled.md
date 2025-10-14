@@ -135,7 +135,7 @@ To control incoming traffic on the VIP address as well as traffic for a specific
 
 For HTTP and HTTPS protocols, since several HTTP requests can be multiplexed on the same TCP connection, the connection limit value is interpreted as the maximum number of requests allowed.
 
-![](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 #### 2.2.4 LBaaS V2概念
 
