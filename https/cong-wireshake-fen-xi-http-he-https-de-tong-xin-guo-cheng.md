@@ -42,7 +42,7 @@
 
 还可以看到我们的公钥信息!.
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 客户端使用证书来验证公钥和签名. 这些工作浏览器会帮助我们进行处理.
 

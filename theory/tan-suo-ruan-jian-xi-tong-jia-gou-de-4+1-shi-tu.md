@@ -14,7 +14,7 @@
 
 后来，Philippe Kruchten加入Rational，他的4+1视图方法演变为著名的、为许多架构师所熟知的“RUP 4+1视图方法”。这种结构已成为软件开发过程中不可缺少的概念，所谓“4+1”视图指的是“逻辑视图（`Logical View`）”、“实现视图（`Implementation View`）”、“进程视图（`Process VIew`）”、“部署视图（`Deplopment View`）”和 "场景视图"（`scenarios`）“用例视图（`Use-Case View`）”。
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * 逻辑视图（`Logical View`）：以面向对象的概念来表达软件设计的结果。逻辑视图（`Logical View`）主要描述实现系统内部功能性工作的细部设计，这些设计包括静态结构和动态的行为。
 * 实现视图(`Implementation View`)：以模块（`Module`）或组建（`Component`）来表现出按照逻辑设计的对象（`Object`）是在哪一个模块或组建中实现。
