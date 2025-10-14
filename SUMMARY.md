@@ -70,7 +70,6 @@
   * [浅谈之-http的状态码以及使用场景](http/qian-tan-zhi-http-de-zhuang-tai-ma-yi-ji-shi-yong-chang-jing.md)
   * [cookie](http/cookie.md)
 * [HTTPS](https/README.md)
-  * [从wireshake分析http和https的通信过程](https/cong-wireshake-fen-xi-http-he-https-de-tong-xin-guo-cheng.md)
   * [深入浅出HTTPS工作原理](https/shen-ru-qian-chu-https-gong-zuo-yuan-li.md)
   * [SSL/TLS协议详解](https/ssltls-xie-yi-xiang-jie.md)
   * [SSL/TLS协议详解(下)——TLS握手协议](https/ssltls-xie-yi-xiang-jie-xia-tls-wo-shou-xie-yi.md)
