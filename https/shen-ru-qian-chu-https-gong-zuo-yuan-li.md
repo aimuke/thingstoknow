@@ -72,7 +72,7 @@ HTTP因为存在以上三大安全风险，所以才有了HTTPS的出现。HTTPS
 \
 
 
-<figure><img src="../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 1\) 浏览器向服务器的443端口发起请求，请求携带了浏览器支持的`加密算法`和`哈希算法`
 
@@ -120,7 +120,7 @@ HTTP因为存在以上三大安全风险，所以才有了HTTPS的出现。HTTPS
 \
 
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### 3.1 客户端发送 ClientHello <a href="#id-31-ke-hu-duan-fa-song-clienthello" id="id-31-ke-hu-duan-fa-song-clienthello"></a>
 
@@ -158,7 +158,7 @@ _延伸阅读_
 
 客户端收到ServerHello后，会对收到的证书进行验证。下面我们来看一下数字证书的生成及校验：
 
-<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 1） CA签发证书的过程
 

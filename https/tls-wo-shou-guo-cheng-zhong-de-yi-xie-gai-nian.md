@@ -2,6 +2,10 @@
 
 原文 [https://segmentfault.com/a/1190000021559557](https://segmentfault.com/a/1190000021559557)
 
+
+
+
+
 ## 数字证书 (digital certificate)
 
 在非对称加密通信过程中，服务器需要将公钥发送给客户端，在这一过程中，公钥很可能会被第三方拦截并替换，然后这个第三方就可以冒充服务器与客户端进行通信，这就是传说中的“中间人攻击”(man in the middle attack)。解决此问题的方法是通过受信任的第三方交换公钥，具体做法就是服务器不直接向客户端发送公钥，而是要求受信任的第三方，也就是证书认证机构 (Certificate Authority, 简称 CA)将公钥合并到数字证书中，然后服务器会把公钥连同证书一起发送给客户端，私钥则由服务器自己保存以确保安全。数字证书一般包含以下内容：
@@ -27,11 +31,15 @@
 3. 客户端用公钥解密数字签名，得到摘要信息
 4. 客户端用相同的信息摘要算法重新计算证书摘要信息，然后对这两个摘要信息进行比对，如果相同，则说明证书未被篡改，否则证书验证失败
 
+<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+
 ## **证书链 (certificate chain)**
 
 证书链，也称为证书路径，是用于认证实体合法身份的证书列表，具体到 HTTPS 通信中，就是为了验证服务器的合法身份。之所以使用证书链，是为了保证根证书 (root CA certificate)的安全，中间层可以看做根证书的代理，起到了缓冲的作用，如下图所示，这里还以 B 站证书为例：
 
-<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 证书链从根证书开始，并且证书链中的每一级证书所标识的实体都要为其下一级证书签名，而根证书自身则由证书颁发机构签名。客户端在验证证书链时，必须对链中所有证书的数字签名进行验证，直到达到根证书为止。
 
@@ -42,3 +50,11 @@
 1. 握手期间所使用的的密钥交换和认证算法 (最常用的是 RSA 算法)
 2. 加密算法 (用于握手完成后的对称加密，常用的有 AES、3DES等)
 3. 信息摘要算法 (常用的有 SHA-256、SHA-1 和 MD5 等)
+
+
+
+## References
+
+{% embed url="https://www.51cto.com/article/772513.html" %}
+
+{% embed url="https://segmentfault.com/a/1190000021559557" %}
