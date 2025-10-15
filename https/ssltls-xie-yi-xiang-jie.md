@@ -1,6 +1,8 @@
 # SSL/TLS协议详解
 
-原文 [https://cshihong.github.io/2019/05/09/SSL%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/](https://cshihong.github.io/2019/05/09/SSL%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/)
+原文
+
+{% embed url="https://cshihong.github.io/2019/05/09/SSL%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/" %}
 
 ## SSL简介 <a href="#ssl-jian-jie" id="ssl-jian-jie"></a>
 
@@ -238,7 +240,7 @@ ServerHello中涉及到的具体参数：
 
 根据之前从服务器端收到的随机数，按照不同的密钥交换算法，算出一个pre-master，发送给服务器，服务器端收到pre-master算出main master。而客户端当然也能自己通过pre-master算出main master。如此以来双方就算出了对称密钥。
 
-如果是RSA算法，会生成一个48字节的随机数，然后用server的公钥加密后再放入报文中。如果是DH算法，这是发送的就是客户端的DH参数，之后服务器和客户端根据DH算法，各自计算出相同的pre-master secret.
+如果是RSA算法，会生成一个48字节的随机数，然后用server的公钥加密后再放入报文中。如果是DH算法，这是发送的就是客户端的DH参数，之后服务器和客户端根据DH算法，各自计算出相同的pre-master secret.<mark style="color:orange;">参见后面premaster secret 的生成方式</mark>
 
 ![ClientKeyExchange](https://cshihong.github.io/2019/05/09/SSL%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/ClientKeyExchange.png)
 
@@ -300,6 +302,59 @@ PreMaster Secret是在客户端使用RSA或者Diffie-Hellman等加密算法生�
 PreMaster secret前两个字节是TLS的版本号，这是一个比较重要的用来核对握手数据的版本号，因为在Client Hello阶段，客户端会发送一份加密套件列表和当前支持的SSL/TLS的版本号给服务端，而且是使用明文传送的，如果握手的数据包被破解之后，攻击者很有可能串改数据包，选择一个安全性较低的加密套件和版本给服务端，从而对数据进行破解。所以，服务端需要对密文中解密出来对的PreMaster版本号跟之前Client Hello阶段的版本号进行对比，如果版本号变低，则说明被串改，则立即停止发送任何消息。
 
 关于PreMaster Secret(Key)的计算请参考 Https SSL/TLS PreMaster/Master Secret(Key)计算。
+
+
+
+**Pre-Master Secret 并不是“计算”出来的，而是由客户端生成并选择密钥交换机制，然后安全地传递给服务器。**
+
+
+
+`Pre-Master Secret` 的生成和传递方式，取决于在 TLS 握手初期协商的 **密钥交换算法**。最常见的两种方式是：
+
+1. **RSA 密钥交换**
+2. **(EC)DHE 密钥交换**（目前的主流和推荐方式）
+
+下面我们分别详细说明。
+
+***
+
+#### 方式一：RSA 密钥交换（传统方式，现在已不推荐）
+
+这种方式比较简单，但缺乏前向安全性。
+
+1. **客户端生成**：在 TLS 握手开始后，客户端（如浏览器）自己**随机生成**一个 48 字节的 `Pre-Master Secret`。
+2. **客户端加密**：客户端从服务器证书中获取服务器的 RSA 公钥。
+3. **客户端发送**：客户端用这个 RSA 公钥加密刚刚生成的 `Pre-Master Secret`，然后将加密后的数据作为 **Client Key Exchange** 消息发送给服务器。
+4. **服务器解密**：服务器用自己的 RSA 私钥解密这个消息，得到原始的 `Pre-Master Secret`。
+
+至此，双方都拥有了相同的 `Pre-Master Secret`。
+
+**为什么不推荐？**\
+因为如果有人截获了所有的通信数据并存下来，未来某天如果他成功窃取了服务器的 RSA 私钥，他就可以用这个私钥解密之前截获的所有通信的 `Pre-Master Secret`，从而解密所有过去的会话。这被称为 **缺乏前向安全性**。
+
+***
+
+#### 方式二：(EC)DHE 密钥交换（现代方式，推荐使用）
+
+这种方式利用了 **迪菲-赫尔曼密钥交换**Diffie-Hellman 算法，即使在不安全的信道中，双方也能协商出一个共享秘密。它提供了前向安全性。
+
+**DHE** 基于离散对数问题，**ECDHE** 基于椭圆曲线离散对数问题（更高效、更安全）。它们的原理类似，我们以 ECDHE 为例：
+
+1. **服务器提供参数**：在 **Server Key Exchange** 消息中，服务器会发送：
+   * **所选椭圆曲线参数**
+   * 服务器的临时椭圆曲线公钥 `server_params.pub_key`
+   * 对这个参数的**数字签名**（用证书私钥签名），以供客户端验证。
+2. **客户端提供参数**：在 **Client Key Exchange** 消息中，客户端会生成自己的临时椭圆曲线密钥对，并发送自己的临时公钥 `client_params.pub_key` 给服务器。
+3. **各自计算共享秘密**：
+   * **客户端计算**：客户端用<mark style="color:orange;">**自己的**</mark>临时私钥和<mark style="color:orange;">**服务器的**</mark>临时公钥，通过 ECDH 算法进行计算，得到共享秘密 `Z`。
+   * **服务器计算**：服务器用<mark style="color:orange;">**自己的**</mark>临时私钥和<mark style="color:orange;">**客户端的**</mark>临时公钥，通过 ECDH 算法进行计算，得到**同一个共享秘密 `Z`**。
+4.  **生成 Pre-Master Secret**：\
+    这个计算出的共享秘密 `Z` 是一个字节串。TLS 协议规定，**`Pre-Master Secret` 就是这个 `Z` 值本身**。
+
+    `Pre-Master Secret = Z`
+
+**为什么这种方式更安全？**\
+因为双方使用的都是**临时** 密钥对。每次 TLS 握手都会生成全新的临时密钥。即使某一次会话的临时私钥被泄露，也只会影响那一次会话，无法解密之前或之后的其他任何会话。这就是 **前向安全性**。
 
 ### **Master secret**
 
