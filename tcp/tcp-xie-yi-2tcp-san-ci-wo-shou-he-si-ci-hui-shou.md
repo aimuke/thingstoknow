@@ -8,7 +8,7 @@ TCP有6种标示:SYN(建立联机) ACK(确认) PSH(传送) FIN(结束) RST(重�
 
 ## 一、TCP三次握手                          <a href="#blogtitle0" id="blogtitle0"></a>
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 ### &#x20; **第一次握手**
 
